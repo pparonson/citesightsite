@@ -36,7 +36,7 @@ export default {
       }
     });
 
-    const npub = 'npub1pfe322ykxu0dz4x20vut3cwuu0n6aqlh3tzknypdxrq40ru569yqnes7z6';
+    const npub = '';
     const settings = { npub, kinds: [1] };
 
     fetchEvents(settings).catch(error => {

@@ -1,0 +1,54 @@
+.DS_Store
+node_modules
+/dist
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Other
+package-lock.json
+config/
+
+#client specific
+client/.next
+client/.nuxt
+client/dist
+client/.vuepress/dist
+client/.serverless
+client/.idea
+client/sw.*
+client/static/sw.*
+client/static/sw.js
+client/bower_components
+client/lib-cov
+client/coverage
+client/.grunt
+client/.lock-wscript
+client/build/Release
+client/.nyc_output
+client/jspm_packages/
+client/typings/
+client/.npm
+client/.eslintcache
+client/.node_repl_history
+client/*.tgz
+client/.yarn-integrity
+client/.env
+client/.cache
+client/static/sw.*
