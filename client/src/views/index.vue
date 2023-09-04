@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue';
+import { ref, computed, getCurrentInstance } from 'vue';
 import MenuBar from '@/components/MenuBar.vue';
 import NoteEventList from '@/components/NoteEventList.vue';
 import useNostrState from '@/composables/nostr';
@@ -36,7 +36,7 @@ export default {
       }
     });
 
-    const npub = '';
+    const npub = getCurrentInstance().appContext?.config?.globalProperties?.user?.npub;
     const settings = { npub, kinds: [1] };
 
     fetchEvents(settings).catch(error => {

@@ -3,12 +3,13 @@
     <router-link :to="menuTarget" class="text-xl">
       <font-awesome-icon icon="bars" aria-label="Menu"></font-awesome-icon>
     </router-link>
+
     <input
       v-model="searchQuery"
       @input="onInput"
       type="text"
       placeholder="Search"
-      class="w-11/12 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:border-blue-300"
+      class="w-11/12 h-10 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:border-blue-300"
     />
   </div>
 </template>
@@ -33,7 +34,7 @@ export default {
 
     return {
       searchQuery,
-      onInput,
+      onInput
     };
   },
 };

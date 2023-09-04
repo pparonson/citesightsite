@@ -1,4 +1,3 @@
-// import { ref } from 'vue';
 import { ref,  getCurrentInstance } from 'vue';
 import useNDK from '@/composables/useNDK';
 
