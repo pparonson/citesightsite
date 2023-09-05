@@ -1,8 +1,10 @@
 <template>
   <div class="p-4">
-    <div class="mt-4">
+    <div class="mt-4 mb-4">
         <router-link to="/">
-            <font-awesome-icon :icon="['fas', 'arrow-left']"></font-awesome-icon>Back
+            <button class="btn btn-primary h-10">
+                <font-awesome-icon :icon="['fas', 'angles-left']" />
+            </button>
         </router-link>
     </div>
     <p class="mb-4">{{ noteEventDetail.content }}</p>

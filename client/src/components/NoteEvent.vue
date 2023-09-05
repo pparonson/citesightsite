@@ -1,7 +1,12 @@
 <template>
   <div class="p-4 bg-gray-200 my-2 rounded-md">
-    <p class="mt-4">{{ noteEvent.content }}</p>
-    <div v-if="noteEvent.tags && noteEvent.tags.length > 0" class="mt-2">
+      <p v-if="noteEvent?.content && noteEvent.content?.length > 500" class="mt-4">
+        {{ noteEvent.content.substring(0, 500) }}... 
+      </p>
+      <p v-else class="mt-4">
+        {{ noteEvent?.content }}
+      </p>
+    <div v-if="noteEvent?.tags && noteEvent?.tags?.length > 0" class="mt-2">
       <span
         v-for="tag in noteEvent.tags"
         :key="tag"

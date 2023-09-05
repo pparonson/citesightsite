@@ -4,7 +4,7 @@ import NDK, { NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
 import { library, config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faArrowLeft, faBars } from '@fortawesome/free-solid-svg-icons';
+import { faAnglesLeft, faBars, faPlus } from '@fortawesome/free-solid-svg-icons';
 import App from './App.vue'
 import router from './router'
 import './assets/main.css'
@@ -31,8 +31,8 @@ async function init() {
     throw error;
   }
 
-  config.autoAddCss = false
-  library.add(faArrowLeft, faBars);
+  config.autoAddCss = false // this setting provides more control the imported css
+  library.add(faAnglesLeft, faBars, faPlus);
 
   const app = createApp(App);
   app.config.globalProperties.ndk = ndk;
