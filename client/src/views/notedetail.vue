@@ -7,14 +7,7 @@
             </button>
         </router-link>
     </div>
-    <p class="mb-4">{{ noteEventDetail.content }}</p>
-    <div class="flex flex-wrap">
-        <span 
-            v-for="tag in noteEventDetail.tags" 
-            :key="tag" 
-            class="bg-gray-200 px-2 py-1 text-sm text-gray-700 mr-2 rounded-md"> {{ tag }}
-        </span>
-    </div>
+    <div><NoteEventDetail :initialNote="existingNote" /></div>
   </div>
 </template>
 
@@ -22,11 +15,15 @@
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import useNostrState from '@/composables/nostr';
+import NoteEventDetail from '@/components/NoteEventDetail.vue';
 
 export default {
+  components: {
+    NoteEventDetail
+  },
   setup() {
     const router = useRouter();
-    const { getNoteEventFromState, fetchNoteEventById, noteEventDetail } = useNostrState();
+    const { getNoteEventFromState, fetchNoteEventById, note } = useNostrState();
     const eventId = router.currentRoute.value.params.id;
 
     onMounted(async () => {
@@ -42,7 +39,7 @@ export default {
     });
 
     return {
-      noteEventDetail,
+      existingNote: note,
     };
   },
 };

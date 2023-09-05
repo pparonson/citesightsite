@@ -6,7 +6,7 @@ export default function useNostrState() {
   // const ndk = useNDK();
   const user = ref(null);
   const noteEvents = ref([]);
-  const noteEventDetail = ref({});
+  const note = ref({});
 
   async function fetchUser(npub) {
     try {
@@ -86,7 +86,7 @@ export default function useNostrState() {
   function getNoteEventFromState(id) {
     const event = noteEvents.value.find(e => e.id === id);
     if (event) {
-      noteEventDetail.value = event;
+      note.value = event;
     }
   }
 
@@ -102,7 +102,7 @@ export default function useNostrState() {
         return;
       }
 
-      noteEventDetail.value = {
+      note.value = {
         id: event.id,
         content: event.content,
         kind: event.kind,
@@ -120,7 +120,7 @@ export default function useNostrState() {
   return {
     user,
     noteEvents,
-    noteEventDetail,
+    note,
     fetchUser,
     fetchEvents,
     subscribeToEvents,
