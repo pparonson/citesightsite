@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-col h-[90vh] overflow-hidden p-2 space-y-2">
+  <div class="flex flex-col h-[85vh] overflow-hidden p-2 space-y-2">
     <form class="flex flex-col flex-1" @submit.prevent="saveNote">
-      <textarea class="textarea textarea-ghost flex-1 overflow-auto mb-4 resize-none h-[77vh] max-h-[77vh]" id="note.id" v-model="note.content"></textarea>
+      <tiptap v-model="note.content" />
       <div class="flex flex-wrap mb-4">
         <span 
             v-for="tag in note.tags" 
@@ -16,6 +16,8 @@
 
 <script>
 import { ref, watch } from 'vue';
+import Tiptap from '@/components/Tiptap.vue';
+
 export default {
   props: {
     initialNote: {
@@ -26,9 +28,14 @@ export default {
       })
     }
   },
+  components: {
+    Tiptap
+  },
   setup(props) {
     const note = ref({ ...props.initialNote });
-
+    components: {
+      Tiptap
+    }
     watch(
         () => props.initialNote,
         (newVal) => {
@@ -54,5 +61,4 @@ export default {
 </script>
 
 <style>
-/* Custom styles for the NoteEvent component */
 </style>

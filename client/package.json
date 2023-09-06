@@ -12,6 +12,9 @@
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/vue-fontawesome": "^3.0.3",
     "@nostr-dev-kit/ndk": "^0.8.23",
+    "@tiptap/pm": "^2.1.8",
+    "@tiptap/starter-kit": "^2.1.8",
+    "@tiptap/vue-3": "^2.1.8",
     "lodash": "^4.17.21",
     "vue": "^3.3.4",
     "vue-router": "^4.2.4"
