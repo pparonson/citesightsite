@@ -1,8 +1,8 @@
 <template>
-  <div class="p-4">
-    <div class="mt-4 mb-4">
+  <div class="px-4">
+    <div class="mt-2 mb-2">
         <router-link to="/">
-            <button class="btn btn-primary h-10">
+            <button class="btn btn-primary h-10 mx-2">
                 <font-awesome-icon :icon="['fas', 'angles-left']" />
             </button>
         </router-link>

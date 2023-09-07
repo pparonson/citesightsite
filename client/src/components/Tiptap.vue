@@ -63,3 +63,8 @@ export default {
   },
 }
 </script>
+<style>
+  div > div.tiptap.ProseMirror {
+    padding: 0.5rem 0.75rem 0.5rem 0.75rem;
+  }
+</style>

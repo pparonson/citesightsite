@@ -24,7 +24,8 @@ export default {
       type: Object,
       default: () => ({
         id: '',
-        content: ''
+        content: '',
+        tags: []
       })
     }
   },
@@ -45,7 +46,7 @@ export default {
     );
 
     const saveNote = () => {
-      if (props.initialNote) {
+      if (props?.initialNote?.id) {
         // Code to update an existing note
       } else {
         // Code to create a new note
@@ -61,4 +62,5 @@ export default {
 </script>
 
 <style>
+  /* Your styles here */
 </style>

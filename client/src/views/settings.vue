@@ -1,8 +1,8 @@
 <template>
-  <div class="my-4 mx-4">
+  <div class="my-2 mx-4">
     <MenuBar :menuTarget="'/'" />
-    <div class="mt-8">
-      <div class="mt-4">
+    <div class="mt-2">
+      <div class="mt-2">
         <TagColumn :tags="tags" />
         <!-- Other settings content goes here -->
       </div>

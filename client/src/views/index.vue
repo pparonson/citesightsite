@@ -1,5 +1,5 @@
 <template>
-  <div class="my-4 mx-4">
+  <div class="my-2 mx-4">
     <MenuBar :menuTarget="'/settings'" @search="filterNotes" />
     <NoteEventList :noteEvents="filteredNoteEvents" />
   </div>
