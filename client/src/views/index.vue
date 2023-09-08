@@ -6,10 +6,10 @@
 </template>
 
 <script>
-import { ref, computed, getCurrentInstance } from 'vue';
+import { ref, computed, watch } from 'vue';
 import MenuBar from '@/components/MenuBar.vue';
 import NoteEventList from '@/components/NoteEventList.vue';
-import useNostrState from '@/composables/nostr';
+import { useNostrStore } from '@/store/nostr';
 
 export default {
   components: {
@@ -17,7 +17,7 @@ export default {
     NoteEventList,
   },
   setup() {
-    const { fetchEvents, subscribeToEvents, noteEvents } = useNostrState();
+    const { npub, user, fetchEvents, subscribeToEvents, noteEvents } = useNostrStore();
     const searchTerm = ref('');
     
     const filterNotes = (term) => {
@@ -26,17 +26,24 @@ export default {
 
     const filteredNoteEvents = computed(() => {
       if (searchTerm.value) {
-        return noteEvents.value.filter(
+        return noteEvents.filter(
           (noteEvent) =>
             noteEvent.content.includes(searchTerm.value) ||
             (noteEvent.tags && noteEvent.tags.includes(searchTerm.value))
         );
       } else {
-        return noteEvents.value;
+        return noteEvents;
       }
     });
 
-    const npub = getCurrentInstance().appContext?.config?.globalProperties?.user?.npub;
+    watch(
+      () => filteredNoteEvents,
+      (newVal) => {
+        console.log("Filtered events:", newVal);
+      },
+      { deep: true }
+    );
+
     const settings = { npub, kinds: [1] };
 
     fetchEvents(settings).catch(error => {

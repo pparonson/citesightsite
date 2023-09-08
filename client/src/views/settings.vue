@@ -11,10 +11,10 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, getCurrentInstance } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import MenuBar from '@/components/MenuBar.vue';
 import TagColumn from "@/components/TagColumn.vue";
-import useNostrState from '@/composables/nostr';
+import { useNostrStore } from '@/store/nostr';
 
 export default {
   components: {
@@ -22,11 +22,11 @@ export default {
     TagColumn,
   },
   setup() {
-    const { fetchUser, fetchEvents, subscribeToEvents, noteEvents } = useNostrState();
+    const { npub, fetchUser, fetchEvents, subscribeToEvents, noteEvents } = useNostrStore();
     
     const tags = computed(() => {
       const tagsSet = new Set();
-      noteEvents.value.forEach(noteEvent => {
+      noteEvents.forEach(noteEvent => {
         if (noteEvent.tags) {
           noteEvent.tags.forEach(tag => tagsSet.add(tag));
         }
@@ -35,7 +35,6 @@ export default {
     });
 
     onMounted(async () => {
-      const npub = getCurrentInstance().appContext?.config?.globalProperties?.user?.npub;
       const settings = { npub, kinds: [1] };
 
       try {
