@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col h-[85vh] overflow-hidden p-2 space-y-2">
     <form class="flex flex-col flex-1" @submit.prevent="saveNote">
-      <tiptap v-model="note.content" />
+      <tiptap v-model="localNote.content" />
       <div class="flex flex-wrap mb-4">
         <span 
             v-for="tag in note.tags" 
@@ -15,46 +15,78 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
+import { useNostrStore } from '@/store/nostr';
 import Tiptap from '@/components/Tiptap.vue';
 
 export default {
   props: {
-    initialNote: {
-      type: Object,
-      default: () => ({
-        id: '',
-        content: '',
-        tags: []
-      })
-    }
+    id: String
   },
   components: {
     Tiptap
   },
   setup(props) {
-    const note = ref({ ...props.initialNote });
-    components: {
-      Tiptap
-    }
+    const localNote = ref({});
+    const { getNoteEventFromState, fetchNoteEventById, publishEvent, note } = useNostrStore();
+
     watch(
-        () => props.initialNote,
-        (newVal) => {
-            note.value = { ...newVal };
+        () => props.id,
+        async (newId) => {
+            await getNoteEventFromState(newId);
+            localNote.value.content = note.content;
+            localNote.value.tags = [...note.tags];
         },
-        { deep: true }
+        { immediate: true }
     );
 
-    const saveNote = () => {
-      if (props?.initialNote?.id) {
-        // Code to update an existing note
+    onMounted(async () => {
+      // Phase 1: Get the event from store
+      // getNoteEventFromState(eventId);
+
+      // Phase 2: Asynchronously update the event detail from NDK API
+      try {
+          if (props.id) {
+            await fetchNoteEventById(props.id);
+            localNote.value.content = note.content;
+            localNote.value.tags = [...note.tags];
+          }
+      } catch (error) {
+        console.error(`Error fetching note event detail: ${error}`);
+      }
+    });
+
+    const saveNote = async () => {
+      const noteToSave = {
+        ...localNote.value,
+        kind: 1 // set the kind here instead of mutating localNote
+      };
+
+      if (localNote.value?.id) {
+          // Update existing note
+          
+          // Step 1: Retrieve the latest existing event to make sure we're not overwriting new data
+          // const latestEvent = await fetchNoteEventById(eventId);
+          // Proceed only if the note hasn't been updated elsewhere
+          try {
+              await publishEvent(noteToSave);
+          } catch (error) {
+              console.error(`Error publishing note event detail: ${error}`);
+          }
+
+          // Emit an event or update the UI to reflect the changes
+          // ...
+
       } else {
-        // Code to create a new note
+        // Create a new note
+        await publishEvent(noteToSave);
+        // Emit an event or update the UI to reflect the changes
+        // ...
       }
     };
 
     return {
-      note,
+      localNote,
       saveNote
     };
   }

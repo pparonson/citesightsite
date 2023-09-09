@@ -12,9 +12,11 @@
       class="w-11/12 h-10 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:border-blue-300"
     />
 
-    <button @click="createNewNote" class="btn btn-primary h-10">
-      <font-awesome-icon icon="plus" aria-label="Add new note" />
-    </button>
+    <router-link :to="'/note/new'">
+      <button @click="createNewNote" class="btn btn-primary h-10">
+        <font-awesome-icon icon="plus" aria-label="Add new note" />
+      </button>
+    </router-link>
   </div>
 </template>
 

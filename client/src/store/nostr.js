@@ -135,6 +135,16 @@ export const useNostrStore = defineStore('nostr', {
                 throw error; // Throw the error to be caught by the caller
             }
         },
+
+        async publishEvent(note) {
+          const event = {
+            kind: note.value.kind, 
+            content: note.value.content,
+            tags: note.value.tags,
+          };
+      
+          await ndk.publish(event);
+        }
     },
     getters: {
         npubGetter: state => state.npub,
