@@ -4,7 +4,7 @@
       <tiptap v-model="localNote.content" />
       <div class="flex flex-wrap mb-4">
         <span 
-            v-for="tag in note.tags" 
+            v-for="tag in (note ? note.tags : [])" 
             :key="tag" 
             class="bg-gray-200 px-2 py-1 text-sm text-gray-700 mr-2 rounded-md"> {{ tag }}
         </span>
@@ -33,9 +33,19 @@ export default {
     watch(
         () => props.id,
         async (newId) => {
-            await getNoteEventFromState(newId);
-            localNote.value.content = note.content;
-            localNote.value.tags = [...note.tags];
+            if (newId) {
+                await getNoteEventFromState(newId);
+                if (note && Array.isArray(note.tags)) {
+                    localNote.value.content = note.content;
+                    localNote.value.tags = [...note.tags];
+                } else {
+                    localNote.value.content = '';
+                    localNote.value.tags = [];
+                }
+            } else {
+                localNote.value.content = '';
+                localNote.value.tags = [];
+            }
         },
         { immediate: true }
     );
@@ -48,8 +58,10 @@ export default {
       try {
           if (props.id) {
             await fetchNoteEventById(props.id);
-            localNote.value.content = note.content;
-            localNote.value.tags = [...note.tags];
+            if (note && Array.isArray(note.tags)) {
+                localNote.value.content = note.content;
+                localNote.value.tags = [...note.tags];
+            }
           }
       } catch (error) {
         console.error(`Error fetching note event detail: ${error}`);
@@ -87,6 +99,7 @@ export default {
 
     return {
       localNote,
+      note,
       saveNote
     };
   }
