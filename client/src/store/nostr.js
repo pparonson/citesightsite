@@ -11,6 +11,7 @@ export const useNostrStore = defineStore('nostr', {
             note: {}
         };
     },
+
     actions: {
         async initializeNDK() {
             const nip07signer = new NDKNip07Signer();
@@ -107,7 +108,7 @@ export const useNostrStore = defineStore('nostr', {
         getNoteEventFromState(id) {
             const event = this.noteEvents.find((e) => e.id === id);
             if (event) {
-                this.note = event;
+                this.note = {...event};
             }
         },
 
@@ -129,7 +130,13 @@ export const useNostrStore = defineStore('nostr', {
                     tags: event.tags.flat(),
                 };
 
-                this.note = mappedEvent;
+                console.log("Before update:", this.note);
+                // In your store's action
+                this.note = {...mappedEvent};
+                this.note = {...mappedEvent};
+
+                console.log("After update:", this.note);
+
             } catch (error) {
                 console.error("Error fetching event detail:", error);
                 throw error; // Throw the error to be caught by the caller

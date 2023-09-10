@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col h-[85vh] overflow-hidden p-2 space-y-2">
     <form class="flex flex-col flex-1" @submit.prevent="saveNote">
-      <tiptap v-model="localNote.content" />
+      <tiptap v-model="note.content" />
       <div class="flex flex-wrap mb-4">
         <span 
             v-for="tag in (note ? note.tags : [])" 
@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { ref, watch, onMounted } from 'vue';
+import { ref, reactive, watch, onMounted, watchEffect } from 'vue';
 import { useNostrStore } from '@/store/nostr';
 import Tiptap from '@/components/Tiptap.vue';
 
@@ -27,54 +27,37 @@ export default {
     Tiptap
   },
   setup(props) {
-    const localNote = ref({});
     const { getNoteEventFromState, fetchNoteEventById, publishEvent, note } = useNostrStore();
 
+watch(() => useNostrStore().note, (newNote) => {
+    // localNote = {...newNote};
+    console.log("Watched note:", note);
+}, { deep: true });
+
     watch(
-        () => props.id,
-        async (newId) => {
-            if (newId) {
-                await getNoteEventFromState(newId);
-                if (note && Array.isArray(note.tags)) {
-                    localNote.value.content = note.content;
-                    localNote.value.tags = [...note.tags];
-                } else {
-                    localNote.value.content = '';
-                    localNote.value.tags = [];
-                }
-            } else {
-                localNote.value.content = '';
-                localNote.value.tags = [];
-            }
-        },
-        { immediate: true }
-    );
+  () => props.id,
+  async (newId) => {
+    if (newId) {
+      console.log("Before Fetch:", note);
+      await fetchNoteEventById(newId);
+      await fetchNoteEventById(newId);
+      // console.log("Note after fetch: ", useNostrStore().note);  // Add this line
+      // localNote = {...note};
 
-    onMounted(async () => {
-      // Phase 1: Get the event from store
-      // getNoteEventFromState(eventId);
-
-      // Phase 2: Asynchronously update the event detail from NDK API
-      try {
-          if (props.id) {
-            await fetchNoteEventById(props.id);
-            if (note && Array.isArray(note.tags)) {
-                localNote.value.content = note.content;
-                localNote.value.tags = [...note.tags];
-            }
-          }
-      } catch (error) {
-        console.error(`Error fetching note event detail: ${error}`);
-      }
-    });
+      console.log("After fetch 1: ", useNostrStore().note);  // Add this line
+      console.log("After fetch 2:", note);
+    }
+  },
+  { immediate: true, deep: true }
+);
 
     const saveNote = async () => {
       const noteToSave = {
-        ...localNote.value,
+        ...note,
         kind: 1 // set the kind here instead of mutating localNote
       };
 
-      if (localNote.value?.id) {
+      if (note?.id) {
           // Update existing note
           
           // Step 1: Retrieve the latest existing event to make sure we're not overwriting new data
@@ -98,7 +81,6 @@ export default {
     };
 
     return {
-      localNote,
       note,
       saveNote
     };
