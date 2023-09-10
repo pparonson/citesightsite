@@ -29,27 +29,29 @@ export default {
   setup(props) {
     const { getNoteEventFromState, fetchNoteEventById, publishEvent, note } = useNostrStore();
 
-watch(() => useNostrStore().note, (newNote) => {
-    // localNote = {...newNote};
-    console.log("Watched note:", note);
-}, { deep: true });
+    watch(
+        () => useNostrStore().note, 
+        async (newNote) => {
+          // localNote = {...newNote};
+          if (props?.id) {
+              // await fetchNoteEventById(props.id);
+              console.log("Watched note:", JSON.stringify(note));
+          }
+        },
+        { deep: true }
+    );
 
     watch(
-  () => props.id,
-  async (newId) => {
-    if (newId) {
-      console.log("Before Fetch:", note);
-      await fetchNoteEventById(newId);
-      await fetchNoteEventById(newId);
-      // console.log("Note after fetch: ", useNostrStore().note);  // Add this line
-      // localNote = {...note};
-
-      console.log("After fetch 1: ", useNostrStore().note);  // Add this line
-      console.log("After fetch 2:", note);
-    }
-  },
-  { immediate: true, deep: true }
-);
+        () => props.id,
+        async (newId) => {
+            if (newId) {
+                console.log("Before Fetch:", note);
+                await fetchNoteEventById(newId);
+                console.log("After fetch:", JSON.stringify(note));
+            }
+        },
+        { immediate: true, deep: true }
+    );
 
     const saveNote = async () => {
       const noteToSave = {

@@ -130,11 +130,8 @@ export const useNostrStore = defineStore('nostr', {
                     tags: event.tags.flat(),
                 };
 
-                console.log("Before update:", this.note);
                 // In your store's action
                 this.note = {...mappedEvent};
-                this.note = {...mappedEvent};
-
                 console.log("After update:", this.note);
 
             } catch (error) {
