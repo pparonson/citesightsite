@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { ref, reactive, watch, onMounted, watchEffect } from 'vue';
+import { watch, onMounted } from 'vue';
 import { useNostrStore } from '@/store/nostr';
 import Tiptap from '@/components/Tiptap.vue';
 
@@ -28,31 +28,25 @@ export default {
   },
   setup(props) {
     const { getNoteEventFromState, fetchNoteEventById, publishEvent, note } = useNostrStore();
-
     watch(
         () => useNostrStore().note, 
         async (newNote) => {
-          // localNote = {...newNote};
-          if (props?.id) {
-              // await fetchNoteEventById(props.id);
-              console.log("Watched note:", JSON.stringify(note));
-          }
+            // await fetchNoteEventById(props.id);
+            console.log("Watched note:", JSON.stringify(note));
         },
         { deep: true }
     );
-
-    watch(
-        () => props.id,
-        async (newId) => {
-            if (newId) {
-                console.log("Before Fetch:", note);
-                await fetchNoteEventById(newId);
-                console.log("After fetch:", JSON.stringify(note));
+    onMounted(
+        async () => {
+            if (props?.id) {
+                await getNoteEventFromState(props.id);
+                // await fetchNoteEventById(props.id);
+                console.log("Mounted note:", JSON.stringify(note));
+            } else {
+               note = {content: '', tags: []}
             }
-        },
-        { immediate: true, deep: true }
+        }
     );
-
     const saveNote = async () => {
       const noteToSave = {
         ...note,

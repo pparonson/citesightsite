@@ -108,7 +108,9 @@ export const useNostrStore = defineStore('nostr', {
         getNoteEventFromState(id) {
             const event = this.noteEvents.find((e) => e.id === id);
             if (event) {
-                this.note = {...event};
+                // this.note = {...event};
+                this.note = JSON.parse(JSON.stringify(event));
+                console.log("After update from getNoteEventFromState:", JSON.stringify(this.note));
             }
         },
 
@@ -131,8 +133,9 @@ export const useNostrStore = defineStore('nostr', {
                 };
 
                 // In your store's action
-                this.note = {...mappedEvent};
-                console.log("After update:", this.note);
+                // this.note = {...mappedEvent};
+                this.note = JSON.parse(JSON.stringify(mappedEvent));
+                console.log("After update from fetchNoteEventById:", JSON.stringify(this.note));
 
             } catch (error) {
                 console.error("Error fetching event detail:", error);
