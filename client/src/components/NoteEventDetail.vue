@@ -16,6 +16,7 @@
 
 <script>
 import { watch, onMounted } from 'vue';
+import { storeToRefs } from 'pinia'
 import { useNostrStore } from '@/store/nostr';
 import Tiptap from '@/components/Tiptap.vue';
 
@@ -27,30 +28,25 @@ export default {
     Tiptap
   },
   setup(props) {
-    const { getNoteEventFromState, fetchNoteEventById, publishEvent, note } = useNostrStore();
-    watch(
-        () => useNostrStore().note, 
-        async (newNote) => {
-            // await fetchNoteEventById(props.id);
-            console.log("Watched note:", JSON.stringify(note));
-        },
-        { deep: true }
-    );
+    const { getNoteEventFromState, fetchNoteEventById, publishEvent } = useNostrStore();
+    const { note } = storeToRefs( useNostrStore() );
+
     onMounted(
         async () => {
             if (props?.id) {
                 await getNoteEventFromState(props.id);
-                // await fetchNoteEventById(props.id);
+                await fetchNoteEventById(props.id);
                 console.log("Mounted note:", JSON.stringify(note));
             } else {
                note = {content: '', tags: []}
             }
         }
     );
+
     const saveNote = async () => {
       const noteToSave = {
         ...note,
-        kind: 1 // set the kind here instead of mutating localNote
+        kind: 1
       };
 
       if (note?.id) {
