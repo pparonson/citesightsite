@@ -145,9 +145,9 @@ export const useNostrStore = defineStore('nostr', {
 
         async publishEvent(note) {
           const event = {
-            kind: note.value.kind, 
-            content: note.value.content,
-            tags: note.value.tags,
+            kind: note.kind, 
+            content: note.content,
+            tags: note.tags,
           };
       
           await ndk.publish(event);
