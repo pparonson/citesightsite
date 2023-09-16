@@ -17,7 +17,7 @@ export default {
     NoteEventList,
   },
   setup() {
-    const { npub, user, fetchEvents, subscribeToEvents, noteEvents } = useNostrStore();
+    const { user, fetchEvents, subscribeToEvents, noteEvents } = useNostrStore();
     const searchTerm = ref('');
     
     const filterNotes = (term) => {
@@ -44,7 +44,8 @@ export default {
       { deep: true }
     );
 
-    const settings = { npub, kinds: [1] };
+    console.log(`User: ${JSON.stringify(user, null, 2)}`);
+    const settings = { npub: user?.npub, kinds: [1] };
 
     fetchEvents(settings).catch(error => {
       console.error("Error fetching events:", error);

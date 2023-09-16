@@ -5,7 +5,6 @@ let ndk;
 export const useNostrStore = defineStore('nostr', {
     state: () => {
         return {
-            npub: null,
             user: null,
             noteEvents: [],
             note: {}
@@ -27,7 +26,9 @@ export const useNostrStore = defineStore('nostr', {
                const user = await nip07signer.user();
                if (user?.npub) {
                    console.log("Permission granted to read their public key:", user.npub);
-                   this.npub = user.npub;
+                   // this.npub = user.npub;
+                   this.user = user;
+                   await this.fetchUser(user.npub);
                }
            } catch (error) {
                console.error('Error connecting to NDK:', error);
@@ -50,7 +51,7 @@ export const useNostrStore = defineStore('nostr', {
         async fetchEvents(settings) {
             try {
                 const user = ndk.getUser({ npub: settings?.npub });
-                const filter = { kinds: [...settings?.kinds], authors: [user.hexpubkey()] };
+                const filter = { kinds: [...settings?.kinds], authors: [user.hexpubkey] };
 
                 let events = await ndk.fetchEvents(filter);
                 this.noteEvents = Array.from(events).map((e) => {
@@ -76,7 +77,7 @@ export const useNostrStore = defineStore('nostr', {
         async subscribeToEvents(settings) {
             try {
                 const user = ndk.getUser({ npub: settings?.npub });
-                const filter = { kinds: [...settings?.kinds], authors: [user.hexpubkey()] };
+                const filter = { kinds: [...settings?.kinds], authors: [user.hexpubkey] };
                 const subscription = await ndk.subscribe(filter);
                 let mappedEvent;
                 subscription.on("event", async (e) => {
@@ -151,14 +152,7 @@ export const useNostrStore = defineStore('nostr', {
           };
       
           await ndk.publish(event);
+          // await this.user?.publish(event);
         }
-    },
-    getters: {
-        npubGetter: state => state.npub,
-        userGetter: state => state.user,
-        noteEventsGetter: state => state.noteEvents,
-        noteGetter: state => state.note
-
-        // your computed properties if you have any
     },
 });

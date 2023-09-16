@@ -29,8 +29,8 @@ export default {
   },
   setup(props) {
     const { getNoteEventFromState, fetchNoteEventById, publishEvent } = useNostrStore();
-    const { note } = storeToRefs( useNostrStore() );
-    const localNote = ref({});
+    let { note } = storeToRefs( useNostrStore() );
+    let localNote = ref({});
     watch(() => useNostrStore().note, (newNote) => {
         localNote.value = JSON.parse(JSON.stringify(newNote));
     }, { deep: true });
@@ -40,11 +40,9 @@ export default {
                 await getNoteEventFromState(props.id);
                 await fetchNoteEventById(props.id);
                 console.log("Mounted note:", JSON.stringify(note));
-                // localNote.value = JSON.parse(JSON.stringify(note));
                 console.log("Mounted localNote:", JSON.stringify(localNote.value));
             } else {
-               note = {content: '', tags: []}
-               // localNote.value = JSON.parse(JSON.stringify(note));
+               localNote.value = {content: '', tags: ['client']}
             }
         }
     );

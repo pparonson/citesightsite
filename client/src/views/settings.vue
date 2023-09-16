@@ -22,7 +22,7 @@ export default {
     TagColumn,
   },
   setup() {
-    const { npub, fetchUser, fetchEvents, subscribeToEvents, noteEvents } = useNostrStore();
+    const { user, fetchUser, fetchEvents, subscribeToEvents, noteEvents } = useNostrStore();
     
     const tags = computed(() => {
       const tagsSet = new Set();
@@ -35,10 +35,10 @@ export default {
     });
 
     onMounted(async () => {
-      const settings = { npub, kinds: [1] };
+      // const settings = { user?.npub, kinds: [1] };
 
       try {
-        await fetchUser(npub);
+        // await fetchUser(npub);
       } catch (error) {
         console.error("Error fetching user:", error);
       }
