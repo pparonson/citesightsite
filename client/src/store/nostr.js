@@ -26,7 +26,6 @@ export const useNostrStore = defineStore('nostr', {
                const user = await nip07signer.user();
                if (user?.npub) {
                    console.log("Permission granted to read their public key:", user.npub);
-                   // this.npub = user.npub;
                    this.user = user;
                    await this.fetchUser(user.npub);
                }
@@ -38,7 +37,6 @@ export const useNostrStore = defineStore('nostr', {
         async fetchUser(npub) {
             try {
                 const user = ndk.getUser({ npub });
-
                 await user.fetchProfile();
                 this.user = user;
                 // return user; // Return the fetched user profile
@@ -50,8 +48,7 @@ export const useNostrStore = defineStore('nostr', {
 
         async fetchEvents(settings) {
             try {
-                const user = ndk.getUser({ npub: settings?.npub });
-                const filter = { kinds: [...settings?.kinds], authors: [user.hexpubkey] };
+                const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
 
                 let events = await ndk.fetchEvents(filter);
                 this.noteEvents = Array.from(events).map((e) => {
@@ -76,8 +73,7 @@ export const useNostrStore = defineStore('nostr', {
 
         async subscribeToEvents(settings) {
             try {
-                const user = ndk.getUser({ npub: settings?.npub });
-                const filter = { kinds: [...settings?.kinds], authors: [user.hexpubkey] };
+                const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
                 const subscription = await ndk.subscribe(filter);
                 let mappedEvent;
                 subscription.on("event", async (e) => {
@@ -145,12 +141,17 @@ export const useNostrStore = defineStore('nostr', {
         },
 
         async publishEvent(note) {
-          const event = {
-            kind: note.kind, 
-            content: note.content,
-            tags: note.tags,
-          };
-      
+          let event = new NDKEvent(ndk);
+          // event = {
+          //   ...event,
+          //   kind: note.kind, 
+          //   content: note.content,
+          //   tags: note.tags,
+          // };
+
+          event.kind = note?.kind || 1;
+          event.content = note?.content;
+
           await ndk.publish(event);
           // await this.user?.publish(event);
         }
