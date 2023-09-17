@@ -140,20 +140,22 @@ export const useNostrStore = defineStore('nostr', {
             }
         },
 
-        async publishEvent(note) {
+        async publishEvent(note, parentId) {
           let event = new NDKEvent(ndk);
-          // event = {
-          //   ...event,
-          //   kind: note.kind, 
-          //   content: note.content,
-          //   tags: note.tags,
-          // };
 
           event.kind = note?.kind || 1;
           event.content = note?.content;
+          // event.tags = note.tags;
+          // event.parentId = parentId || "";
+          // event.history = [
+          //     ...(note.id ? [note.id] : []),
+          //     ...(note.history || [])
+          // ];
+          // event.isTrashed = false;
+          // event.isDeleted = false;
 
-          await ndk.publish(event);
-          // await this.user?.publish(event);
+          let published = await ndk.publish(event);
+          console.log(`Published: ${published, null, 2}`);
         }
     },
 });
