@@ -45,7 +45,7 @@ export default {
     );
 
     console.log(`User: ${JSON.stringify(user, null, 2)}`);
-    const settings = { npub: user?.npub, kinds: [1] };
+    const settings = { npub: user?.npub, kinds: [1, 30023] };
 
     fetchEvents(settings).catch(error => {
       console.error("Error fetching events:", error);

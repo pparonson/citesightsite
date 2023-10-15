@@ -142,17 +142,39 @@ export const useNostrStore = defineStore('nostr', {
 
         async publishEvent(note, parentId) {
           let event = new NDKEvent(ndk);
-
-          event.kind = note?.kind || 1;
+          let id;
+      
+          event.kind = note.kind || 1;
           event.content = note?.content;
-          // event.tags = note.tags;
-          // event.parentId = parentId || "";
-          // event.history = [
-          //     ...(note.id ? [note.id] : []),
-          //     ...(note.history || [])
-          // ];
-          // event.isTrashed = false;
-          // event.isDeleted = false;
+
+          event.tags = [
+              ["d", "lorem-ipsum"],
+              ["title", "Lorem Ipsum"],
+              ["t", "placeholder", "client", "note"],
+              ["parentId", ""],
+              [
+                  "history", 
+                  "67729dcd451a81bf36667de75ea71db3e65ca4c18bfe37a3c76afeb7eea8ffb3",
+                  "695414cc893ee0b9f0d9dc67106f8717683d1658b0efc48e34f7732ad91a699d"
+              ],
+              ["isTrashed", "false"],
+              ["isDeleted", "false"]
+          ];
+
+          
+          if (note.id) {
+              id = note.id; 
+
+              // Find the index of the sub-array with "history" as the first element
+              const historyIndex = event.tags.findIndex((tag) => tag[0] === "history");
+
+              // If found, insert the new item at the second position in the "history" sub-array
+              if (historyIndex !== -1) {
+                  event.tags[historyIndex].splice(1, 0, id);
+              }
+          }
+
+          console.log(event.tags);
 
           let published = await ndk.publish(event);
           console.log(`Published: ${published, null, 2}`);
