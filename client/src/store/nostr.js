@@ -2,12 +2,12 @@ import { defineStore } from "pinia";
 import NDK, { NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
 
 let ndk;
-export const useNostrStore = defineStore('nostr', {
+export const useNostrStore = defineStore("nostr", {
     state: () => {
         return {
             user: null,
             noteEvents: [],
-            note: {}
+            note: {},
         };
     },
 
@@ -16,23 +16,23 @@ export const useNostrStore = defineStore('nostr', {
             const nip07signer = new NDKNip07Signer();
             ndk = new NDK({
                 signer: nip07signer,
-                explicitRelayUrls: ['wss://relay.nostr.band', 'wss://relay.damus.io', 'wss://purplepag.es']
+                explicitRelayUrls: ["wss://relay.nostr.band", "wss://relay.damus.io", "wss://purplepag.es"],
             });
 
-           try {
-               await ndk.connect();
-               console.log('NDK Connected..');
+            try {
+                await ndk.connect();
+                console.log("NDK Connected..");
 
-               const user = await nip07signer.user();
-               if (user?.npub) {
-                   console.log("Permission granted to read their public key:", user.npub);
-                   this.user = user;
-                   await this.fetchUser(user.npub);
-               }
-           } catch (error) {
-               console.error('Error connecting to NDK:', error);
-               throw error;
-           }
+                const user = await nip07signer.user();
+                if (user?.npub) {
+                    console.log("Permission granted to read their public key:", user.npub);
+                    this.user = user;
+                    await this.fetchUser(user.npub);
+                }
+            } catch (error) {
+                console.error("Error connecting to NDK:", error);
+                throw error;
+            }
         },
         async fetchUser(npub) {
             try {
@@ -133,7 +133,6 @@ export const useNostrStore = defineStore('nostr', {
                 // this.note = {...mappedEvent};
                 this.note = JSON.parse(JSON.stringify(mappedEvent));
                 console.log("After update from fetchNoteEventById:", JSON.stringify(this.note));
-
             } catch (error) {
                 console.error("Error fetching event detail:", error);
                 throw error; // Throw the error to be caught by the caller
@@ -141,43 +140,42 @@ export const useNostrStore = defineStore('nostr', {
         },
 
         async publishEvent(note, parentId) {
-          let event = new NDKEvent(ndk);
-          let id;
-      
-          event.kind = note.kind || 1;
-          event.content = note?.content;
+            let event = new NDKEvent(ndk);
+            let id;
 
-          event.tags = [
-              ["d", "lorem-ipsum"],
-              ["title", "Lorem Ipsum"],
-              ["t", "placeholder", "client", "note"],
-              ["parentId", ""],
-              [
-                  "history", 
-                  "67729dcd451a81bf36667de75ea71db3e65ca4c18bfe37a3c76afeb7eea8ffb3",
-                  "695414cc893ee0b9f0d9dc67106f8717683d1658b0efc48e34f7732ad91a699d"
-              ],
-              ["isTrashed", "false"],
-              ["isDeleted", "false"]
-          ];
+            event.kind = note.kind || 1;
+            event.content = note?.content;
 
-          
-          if (note.id) {
-              id = note.id; 
+            event.tags = [
+                ["d", "lorem-ipsum"],
+                ["title", "Lorem Ipsum"],
+                ["t", "placeholder", "client", "note"],
+                ["parentId", ""],
+                [
+                    "history",
+                    "67729dcd451a81bf36667de75ea71db3e65ca4c18bfe37a3c76afeb7eea8ffb3",
+                    "695414cc893ee0b9f0d9dc67106f8717683d1658b0efc48e34f7732ad91a699d",
+                ],
+                ["isTrashed", "false"],
+                ["isDeleted", "false"],
+            ];
 
-              // Find the index of the sub-array with "history" as the first element
-              const historyIndex = event.tags.findIndex((tag) => tag[0] === "history");
+            if (note.id) {
+                id = note.id;
 
-              // If found, insert the new item at the second position in the "history" sub-array
-              if (historyIndex !== -1) {
-                  event.tags[historyIndex].splice(1, 0, id);
-              }
-          }
+                // Find the index of the sub-array with "history" as the first element
+                const historyIndex = event.tags.findIndex((tag) => tag[0] === "history");
 
-          console.log(event.tags);
+                // If found, insert the new item at the second position in the "history" sub-array
+                if (historyIndex !== -1) {
+                    event.tags[historyIndex].splice(1, 0, id);
+                }
+            }
 
-          let published = await ndk.publish(event);
-          console.log(`Published: ${published, null, 2}`);
-        }
+            console.log(event.tags);
+
+            let published = await ndk.publish(event);
+            console.log(`Published: ${(published, null, 2)}`);
+        },
     },
 });
