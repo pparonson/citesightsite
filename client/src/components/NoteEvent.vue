@@ -1,11 +1,9 @@
 <template>
   <div class="p-4 bg-gray-200 my-2 rounded-md">
-      <p v-if="noteEvent?.content && noteEvent.content?.length > 500" class="mt-4">
-        {{ noteEvent.content.substring(0, 500) }}... 
-      </p>
-      <p v-else class="mt-4">
-        {{ noteEvent?.content }}
-      </p>
+    <div v-if="noteEvent?.content && noteEvent.content?.length > 500" 
+         v-html="`${renderedContent}...`">
+    </div>
+    <div v-else v-html="renderedContent"></div>
     <div v-if="noteEvent?.tags && noteEvent?.tags?.length > 0" class="mt-2">
       <span
         v-for="tag in noteEvent.tags"
@@ -20,6 +18,10 @@
 </template>
 
 <script>
+import { ref, computed } from 'vue';
+import MarkdownIt from 'markdown-it';
+import DOMPurify from 'dompurify';
+
 export default {
   props: {
     noteEvent: {
@@ -27,7 +29,20 @@ export default {
       required: true,
     },
   },
-}
+  setup(props) {
+    const md = new MarkdownIt();
+
+    const renderedContent = computed(() => {
+      const content = props.noteEvent?.content || '';
+      const html = md.render(content.length > 500 ? content.substring(0, 500) : content);
+      return DOMPurify.sanitize(html);
+    });
+
+    return {
+      renderedContent,
+    };
+  },
+};
 </script>
 
 <style>

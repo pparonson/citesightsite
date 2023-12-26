@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col h-[85vh] overflow-hidden p-2 space-y-2">
     <form class="flex flex-col flex-1" @submit.prevent="saveNote">
-      <tiptap v-model="localNote.content" />
+      <textarea v-model="localNote.content" class="flex-1 overflow-auto mb-4 p-2 border border-gray-300 resize-none h-[70vh] max-h-[70vh]"></textarea>
       <div class="flex flex-wrap mb-4">
         <span 
             v-for="tag in (localNote ? localNote.tags : [])" 
@@ -18,14 +18,10 @@
 import { ref, onMounted, watch } from 'vue';
 import { storeToRefs } from 'pinia'
 import { useNostrStore } from '@/store/nostr';
-import Tiptap from '@/components/Tiptap.vue';
 
 export default {
   props: {
     id: String
-  },
-  components: {
-    Tiptap
   },
   setup(props) {
     const { getNoteEventFromState, fetchNoteEventById, publishEvent } = useNostrStore();
@@ -50,7 +46,7 @@ export default {
     const saveNote = async () => {
       const noteToSave = {
         ...localNote.value,
-        content: removeHtmlTags(localNote.value?.content),
+        content: localNote.value?.content,
         kind: localNote.value.kind || 1
       };
 
@@ -76,11 +72,6 @@ export default {
         // ...
       }
     };
-
-    function removeHtmlTags(content) {
-        return content?.replace(/^<p>/, '').replace(/<\/p>$/, '');
-    }
-
 
     return {
       localNote,

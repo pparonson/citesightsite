@@ -14,10 +14,9 @@
         "@fortawesome/free-solid-svg-icons": "^6.5.1",
         "@fortawesome/vue-fontawesome": "^3.0.5",
         "@nostr-dev-kit/ndk": "^2.3.1",
-        "@tiptap/pm": "^2.1.13",
-        "@tiptap/starter-kit": "^2.1.13",
-        "@tiptap/vue-3": "^2.1.13",
+        "dompurify": "^3.0.6",
         "lodash": "^4.17.21",
+        "markdown-it": "^14.0.0",
         "pinia": "^2.1.7",
         "vue": "^3.3.13",
         "vue-router": "^4.2.5"
