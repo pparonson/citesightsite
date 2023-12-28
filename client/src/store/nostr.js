@@ -2,6 +2,15 @@ import { defineStore } from "pinia";
 import NDK, { NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
 
 let ndk;
+function getCurrentDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0"); // January is 0
+    const day = String(now.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
 export const useNostrStore = defineStore("nostr", {
     state: () => {
         return {
@@ -54,12 +63,14 @@ export const useNostrStore = defineStore("nostr", {
                 this.noteEvents = Array.from(events).map((e) => {
                     let mappedEvent = {
                         id: e.id,
+                        created_at: e.created_at,
                         content: e.content,
                         kind: e.kind,
                         pubkey: e.pubkey,
                         url: e.relay?.url,
                         sig: e.sig,
-                        tags: e.tags.flat(),
+                        tags: e.tags,
+                        // tags: e.tags.flat(),
                     };
 
                     return mappedEvent;
@@ -78,13 +89,16 @@ export const useNostrStore = defineStore("nostr", {
                 let mappedEvent;
                 subscription.on("event", async (e) => {
                     mappedEvent = {
+                        ...e,
                         id: e.id,
+                        created_at: e.created_at,
                         content: e.content,
                         kind: e.kind,
                         pubkey: e.pubkey,
                         url: e.relay?.url,
                         sig: e.sig,
-                        tags: e.tags.flat(),
+                        tags: e.tags,
+                        // tags: e.tags.flat(),
                     };
 
                     this.noteEvents.push(mappedEvent);
@@ -105,9 +119,7 @@ export const useNostrStore = defineStore("nostr", {
         getNoteEventFromState(id) {
             const event = this.noteEvents.find((e) => e.id === id);
             if (event) {
-                // this.note = {...event};
                 this.note = JSON.parse(JSON.stringify(event));
-                console.log("After update from getNoteEventFromState:", JSON.stringify(this.note));
             }
         },
 
@@ -126,56 +138,87 @@ export const useNostrStore = defineStore("nostr", {
                     pubkey: event.pubkey,
                     url: event.relay?.url,
                     sig: event.sig,
-                    tags: event.tags.flat(),
+                    tags: event.tags,
+                    // tags: event.tags.flat(),
                 };
 
-                // In your store's action
-                // this.note = {...mappedEvent};
                 this.note = JSON.parse(JSON.stringify(mappedEvent));
-                console.log("After update from fetchNoteEventById:", JSON.stringify(this.note));
+                return this.note;
             } catch (error) {
                 console.error("Error fetching event detail:", error);
-                throw error; // Throw the error to be caught by the caller
+                throw error;
             }
         },
 
-        async publishEvent(note, parentId) {
-            let event = new NDKEvent(ndk);
-            let id;
+        async publishEvent(note) {
+            let isUpdate = note.id ? true : false;
+            const eventProperties = await this.handleCreateUpdate(note, isUpdate);
+            let event = new NDKEvent(ndk, eventProperties);
 
-            event.kind = note.kind || 1;
-            event.content = note?.content;
+            try {
+                // Publish the event and update local state
+                const published = await ndk.publish(event);
+                console.log(`Published: ${JSON.stringify(published, null, 2)}`);
 
-            event.tags = [
-                ["d", "lorem-ipsum"],
-                ["title", "Lorem Ipsum"],
-                ["t", "placeholder", "client", "note"],
-                ["parentId", ""],
-                [
-                    "history",
-                    "67729dcd451a81bf36667de75ea71db3e65ca4c18bfe37a3c76afeb7eea8ffb3",
-                    "695414cc893ee0b9f0d9dc67106f8717683d1658b0efc48e34f7732ad91a699d",
-                ],
-                ["isTrashed", "false"],
-                ["isDeleted", "false"],
+                // method to update the notes array
+                this.updateNoteEvents(note, published.id, isUpdate);
+            } catch (error) {
+                console.error("Error publishing event:", error);
+                throw error;
+            }
+        },
+        async handleCreateUpdate(note, isUpdate) {
+            // const title = isUpdate ? note.title : getCurrentDate();
+            const title = getCurrentDate();
+
+            const baseTags = [
+                ["title", title],
+                ["t", "note"],
+                ["t", "test"],
+                ["t", "example"],
+                ["t", "sample_tag"],
+                ["d", title],
             ];
+            let version = "1";
+            let eventId = null;
 
-            if (note.id) {
-                id = note.id;
-
-                // Find the index of the sub-array with "history" as the first element
-                const historyIndex = event.tags.findIndex((tag) => tag[0] === "history");
-
-                // If found, insert the new item at the second position in the "history" sub-array
-                if (historyIndex !== -1) {
-                    event.tags[historyIndex].splice(1, 0, id);
+            // If it's an update, fetch the previous event
+            if (isUpdate && note.id) {
+                const prevNote = await this.fetchNoteEventById(note.id);
+                if (prevNote) {
+                    const versionTag = prevNote.tags.find((tag) => tag[0] === "v");
+                    version = versionTag ? String(Number(versionTag[1]) + 1) : "2";
+                    eventId = prevNote.id;
                 }
             }
 
-            console.log(event.tags);
+            // Tags specific to updates or new notes
+            const specificTags = [
+                ["v", version],
+                ["isUpdated", isUpdate ? "true" : "false"],
+            ];
 
-            let published = await ndk.publish(event);
-            console.log(`Published: ${(published, null, 2)}`);
+            if (eventId) {
+                specificTags.push(["e", eventId]);
+            }
+
+            return {
+                kind: note.kind || 1,
+                content: note.content,
+                tags: [...baseTags, ...specificTags],
+            };
+        },
+        updateNoteEvents(note, newId, isUpdate) {
+            const updatedNote = { ...note, id: newId };
+
+            if (isUpdate) {
+                const index = this.noteEvents.findIndex((e) => e.id === note.id);
+                if (index !== -1) {
+                    this.noteEvents[index] = updatedNote;
+                }
+            } else {
+                this.noteEvents.push(updatedNote);
+            }
         },
     },
 });
