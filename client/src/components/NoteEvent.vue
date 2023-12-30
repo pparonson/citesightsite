@@ -3,21 +3,20 @@
         <div>{{ noteTitle }}</div>
         <div v-if="noteEvent?.content && noteEvent.content?.length > 500" v-html="`${renderedContent}...`"></div>
         <div v-else v-html="renderedContent"></div>
-        <div v-if="keywordTags && keywordTags.length > 0" class="mt-2">
-            <span v-for="tag in keywordTags" :key="tag" class="bg-blue-500 text-white px-2 py-1 mr-2 rounded-md">
-                {{ tag }}
-            </span>
-        </div>
+        <TagColumn :tags="noteEvent?.tags" />
         <p class="text-base">ID: {{ noteEvent.id }}</p>
     </div>
 </template>
 
 <script>
-    import { ref, computed } from "vue";
     import MarkdownIt from "markdown-it";
     import DOMPurify from "dompurify";
-
+    import TagColumn from '@/components/TagColumn.vue';
+    import { ref, computed } from "vue";
     export default {
+        components: {
+            TagColumn
+        },
         props: {
             noteEvent: {
                 type: Object,
@@ -35,14 +34,10 @@
                 const html = md.render(content.length > 500 ? content.substring(0, 500) : content);
                 return DOMPurify.sanitize(html);
             });
-            const keywordTags = computed(() => {
-                return props.noteEvent.tags?.filter(([type]) => type === "t").map(([, value]) => value) || [];
-            });
 
             return {
                 noteTitle,
                 renderedContent,
-                keywordTags,
             };
         },
     };

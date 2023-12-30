@@ -6,13 +6,7 @@
                 class="flex-1 overflow-auto mb-4 p-2 border border-gray-300 resize-none h-[70vh] max-h-[70vh]"
             ></textarea>
             <div class="flex flex-wrap mb-4">
-                <span
-                    v-for="tag in keywordTags"
-                    :key="tag"
-                    class="bg-gray-200 px-2 py-1 text-sm text-gray-700 mr-2 rounded-md"
-                >
-                    {{ tag }}
-                </span>
+                <TagColumn :tags="localNote?.tags" />
             </div>
             <button type="submit" class="btn btn-primary h-10 self-start">Save</button>
         </form>
@@ -20,11 +14,15 @@
 </template>
 
 <script>
+    import TagColumn from "@/components/TagColumn.vue"
     import { ref, onMounted, watch, computed } from "vue";
     import { storeToRefs } from "pinia";
     import { useNostrStore } from "@/store/nostr";
 
     export default {
+        components: {
+            TagColumn
+        },
         props: {
             id: String,
         },
@@ -35,9 +33,6 @@
             const noteTitle = computed(() => {
                 const titleTag = localNote.value.tags?.find(([key]) => key === "title");
                 return titleTag ? titleTag[1] : "Unknown Title";
-            });
-            const keywordTags = computed(() => {
-                return localNote.value.tags?.filter(([type]) => type === "t").map(([, value]) => value) || [];
             });
             const saveNote = async () => {
                 const noteToSave = {
@@ -76,7 +71,6 @@
                 note: JSON.parse(JSON.stringify(localNote.value)),
                 saveNote,
                 noteTitle,
-                keywordTags,
             };
         },
     };
