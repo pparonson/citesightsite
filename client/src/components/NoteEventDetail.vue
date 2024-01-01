@@ -6,7 +6,7 @@
                 class="flex-1 overflow-auto mb-4 p-2 border border-gray-300 resize-none h-[70vh] max-h-[70vh]"
             ></textarea>
             <div class="flex flex-wrap mb-4">
-                <TagColumn :tags="localNote?.tags" />
+                <Tags :tags="localNote?.tags" />
             </div>
             <button type="submit" class="btn btn-primary h-10 self-start">Save</button>
         </form>
@@ -14,14 +14,14 @@
 </template>
 
 <script>
-    import TagColumn from "@/components/TagColumn.vue"
+    import Tags from "@/components/Tags.vue"
     import { ref, onMounted, watch, computed } from "vue";
     import { storeToRefs } from "pinia";
     import { useNostrStore } from "@/store/nostr";
 
     export default {
         components: {
-            TagColumn
+            Tags
         },
         props: {
             id: String,

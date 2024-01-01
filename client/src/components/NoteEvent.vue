@@ -3,7 +3,7 @@
         <div>{{ noteTitle }}</div>
         <div v-if="noteEvent?.content && noteEvent.content?.length > 500" v-html="`${renderedContent}...`"></div>
         <div v-else v-html="renderedContent"></div>
-        <TagColumn :tags="noteEvent?.tags" />
+        <Tags :tags="noteEvent?.tags" />
         <p class="text-base">ID: {{ noteEvent.id }}</p>
     </div>
 </template>
@@ -11,11 +11,11 @@
 <script>
     import MarkdownIt from "markdown-it";
     import DOMPurify from "dompurify";
-    import TagColumn from '@/components/TagColumn.vue';
+    import Tags from '@/components/Tags.vue';
     import { ref, computed } from "vue";
     export default {
         components: {
-            TagColumn
+            Tags
         },
         props: {
             noteEvent: {

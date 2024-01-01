@@ -3,7 +3,7 @@
     <MenuBar :menuTarget="'/'" />
     <div class="mt-2">
       <div class="mt-2">
-        <TagColumn :tags="tags" />
+        <Tags :tags="tags" />
         <!-- Other settings content goes here -->
       </div>
     </div>
@@ -13,13 +13,13 @@
 <script>
 import { ref, computed, onMounted } from 'vue';
 import MenuBar from '@/components/MenuBar.vue';
-import TagColumn from "@/components/TagColumn.vue";
+import Tags from "@/components/Tags.vue";
 import { useNostrStore } from '@/store/nostr';
 
 export default {
   components: {
     MenuBar,
-    TagColumn,
+    Tags,
   },
   setup() {
     const { user, fetchUser, fetchEvents, subscribeToEvents, noteEvents } = useNostrStore();

@@ -5,17 +5,19 @@
     <ul v-else class="mt-4">
      <li
         v-for="tag in keywordTags"
-        :key="tag.join(',')"
+        :key="tag"
         class="inline-block max-w-xs overflow-hidden text-ellipsis bg-blue-500 text-white px-2 py-1 my-1 rounded-md mr-1"
       >
-        {{ tag[1] }}
+        {{ tag }}
       </li>
     </ul>
   </div>
 </template>
 
 <script>
-export default {
+import { computed, defineComponent } from 'vue';
+
+export default defineComponent({
   props: {
     tags: {
       type: Array,
@@ -25,15 +27,19 @@ export default {
       }
     },
   },
-  computed: {
-    keywordTags() {
-      return this.tags.filter(([type]) => type === 't');
-    },
-  }
-};
+  setup(props) {
+    const keywordTags = computed(() => {
+      return [...new Set(props.tags.filter(([type]) => type === 't').map(tag => tag[1]))];
+    });
+
+    return {
+      keywordTags,
+    };
+  },
+});
 </script>
 
 <style>
-/* Custom styles for the TagColumn component */
+/* Custom styles for the Tags component */
 </style>
 
