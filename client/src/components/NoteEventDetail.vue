@@ -14,14 +14,14 @@
 </template>
 
 <script>
-    import Tags from "@/components/Tags.vue"
+    import Tags from "@/components/Tags.vue";
     import { ref, onMounted, watch, computed } from "vue";
     import { storeToRefs } from "pinia";
     import { useNostrStore } from "@/store/nostr";
 
     export default {
         components: {
-            Tags
+            Tags,
         },
         props: {
             id: String,

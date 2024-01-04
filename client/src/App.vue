@@ -1,13 +1,13 @@
 <template>
-  <div id="app">
-    <RouterView />
-  </div>
+    <div id="app">
+        <RouterView />
+    </div>
 </template>
 
 <script setup>
-import { RouterView } from 'vue-router'
+    import { RouterView } from "vue-router";
 </script>
 
 <style>
-/* Add your global styles here */
+    /* Add your global styles here */
 </style>

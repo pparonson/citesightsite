@@ -16,6 +16,7 @@ export const useNostrStore = defineStore("nostr", {
         return {
             user: null,
             noteEvents: [],
+            latestNotes: {},
             note: {},
         };
     },
@@ -54,54 +55,45 @@ export const useNostrStore = defineStore("nostr", {
                 throw error; // Throw the error to be caught by the caller
             }
         },
-
         async fetchEvents(settings) {
             try {
                 const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
 
                 let events = await ndk.fetchEvents(filter);
-                this.noteEvents = Array.from(events).map((e) => {
-                    let mappedEvent = {
-                        id: e.id,
-                        created_at: e.created_at,
-                        content: e.content,
-                        kind: e.kind,
-                        pubkey: e.pubkey,
-                        url: e.relay?.url,
-                        sig: e.sig,
-                        tags: e.tags,
-                        // tags: e.tags.flat(),
-                    };
-
-                    return mappedEvent;
+                let eventsArray = Array.from(events);
+                // this.noteEvents = Array.from(events).map((e) => {
+                //     let mappedEvent = {
+                //         id: e.id,
+                //         created_at: e.created_at,
+                //         content: e.content,
+                //         kind: e.kind,
+                //         pubkey: e.pubkey,
+                //         url: e.relay?.url,
+                //         sig: e.sig,
+                //         tags: e.tags,
+                //         // tags: e.tags.flat(),
+                //     };
+                //
+                //     return mappedEvent;
+                // });
+                eventsArray.forEach((e) => {
+                    const mappedEvent = this.createMappedEvent(e);
+                    this.processNoteEvent(mappedEvent);
                 });
+
                 console.log("Fetched events:", this.noteEvents);
             } catch (error) {
                 console.error("Error fetching events:", error);
                 throw error; // Throw the error to be caught by the caller
             }
         },
-
         async subscribeToEvents(settings) {
             try {
                 const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
                 const subscription = await ndk.subscribe(filter);
-                let mappedEvent;
                 subscription.on("event", async (e) => {
-                    mappedEvent = {
-                        ...e,
-                        id: e.id,
-                        created_at: e.created_at,
-                        content: e.content,
-                        kind: e.kind,
-                        pubkey: e.pubkey,
-                        url: e.relay?.url,
-                        sig: e.sig,
-                        tags: e.tags,
-                        // tags: e.tags.flat(),
-                    };
-
-                    this.noteEvents.push(mappedEvent);
+                    const mappedEvent = this.createMappedEvent(e);
+                    this.processNoteEvent(mappedEvent);
                 });
 
                 subscription.on("error", (error) => {
@@ -115,14 +107,12 @@ export const useNostrStore = defineStore("nostr", {
                 throw error;
             }
         },
-
         getNoteEventFromState(id) {
             const event = this.noteEvents.find((e) => e.id === id);
             if (event) {
                 this.note = JSON.parse(JSON.stringify(event));
             }
         },
-
         async fetchNoteEventById(eventId) {
             try {
                 const event = await ndk.fetchEvent(eventId);
@@ -131,25 +121,50 @@ export const useNostrStore = defineStore("nostr", {
                     return;
                 }
 
-                let mappedEvent = {
-                    id: event.id,
-                    content: event.content,
-                    kind: event.kind,
-                    pubkey: event.pubkey,
-                    url: event.relay?.url,
-                    sig: event.sig,
-                    tags: event.tags,
-                    // tags: event.tags.flat(),
-                };
+                const mappedEvent = this.createMappedEvent(event);
+                this.processNoteEvent(mappedEvent);
 
-                this.note = JSON.parse(JSON.stringify(mappedEvent));
+                // Set the single note to be the processed and latest version
+                this.note = this.latestNotes[mappedEvent.id] || mappedEvent;
+
                 return this.note;
             } catch (error) {
                 console.error("Error fetching event detail:", error);
                 throw error;
             }
         },
+        updateLatestNotes(noteEvent) {
+            // You should keep track of the first published event (version 1 or without "e" tags).
+            // For this example, we will assume all events refer to a parent note.
+            const previousIdTag = noteEvent.tags.find((tag) => tag[0] === "e");
+            const eventId = noteEvent.id;
 
+            if (previousIdTag) {
+                // Remove the previous version from latestNotes if it exists.
+                const previousId = previousIdTag[1];
+                if (this.latestNotes[previousId]) {
+                    // Delete the old version.
+                    delete this.latestNotes[previousId];
+                }
+            }
+
+            // Add or update the latest version in latestNotes.
+            this.latestNotes[eventId] = noteEvent;
+
+            // Now you want to update your noteEvents array to include only the latest versions of each note.
+            this.filterToLatestNotes();
+        },
+        // Go through each note in latestNotes and replace noteEvents array
+        filterToLatestNotes() {
+            // Reset the noteEvents with only the latestNotes
+            this.noteEvents = Object.values(this.latestNotes);
+        },
+
+        processNoteEvent(noteEvent) {
+            // Update the notes list with the new or updated event (you should call it
+            // for each event you receive after fetching the latest events).
+            this.updateLatestNotes(noteEvent);
+        },
         async publishEvent(note) {
             let isUpdate = note.id ? true : false;
             const eventProperties = await this.handleCreateUpdate(note, isUpdate);
@@ -206,6 +221,19 @@ export const useNostrStore = defineStore("nostr", {
                 kind: note.kind || 1,
                 content: note.content,
                 tags: [...baseTags, ...specificTags],
+            };
+        },
+
+        createMappedEvent(e) {
+            return {
+                id: e.id,
+                created_at: e.created_at,
+                content: e.content,
+                kind: e.kind,
+                pubkey: e.pubkey,
+                url: e.relay?.url,
+                sig: e.sig,
+                tags: e.tags,
             };
         },
         updateNoteEvents(note, newId, isUpdate) {
