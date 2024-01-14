@@ -70,7 +70,6 @@ export const useNostrStore = defineStore("nostr", {
                         url: e.relay?.url,
                         sig: e.sig,
                         tags: e.tags,
-                        // tags: e.tags.flat(),
                     };
 
                     return mappedEvent;
@@ -87,22 +86,22 @@ export const useNostrStore = defineStore("nostr", {
                 const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
                 const subscription = await ndk.subscribe(filter);
                 let mappedEvent;
-                subscription.on("event", async (e) => {
-                    mappedEvent = {
-                        ...e,
-                        id: e.id,
-                        created_at: e.created_at,
-                        content: e.content,
-                        kind: e.kind,
-                        pubkey: e.pubkey,
-                        url: e.relay?.url,
-                        sig: e.sig,
-                        tags: e.tags,
-                        // tags: e.tags.flat(),
-                    };
-
-                    this.noteEvents.push(mappedEvent);
-                });
+                // subscription.on("event", async (e) => {
+                //     mappedEvent = {
+                //         ...e,
+                //         id: e.id,
+                //         created_at: e.created_at,
+                //         content: e.content,
+                //         kind: e.kind,
+                //         pubkey: e.pubkey,
+                //         url: e.relay?.url,
+                //         sig: e.sig,
+                //         tags: e.tags,
+                //         // tags: e.tags.flat(),
+                //     };
+                //
+                //     this.noteEvents.push(mappedEvent);
+                // });
 
                 subscription.on("error", (error) => {
                     console.error("Subscription error:", error);

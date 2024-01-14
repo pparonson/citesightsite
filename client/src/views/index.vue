@@ -10,6 +10,7 @@ import { ref, computed, watch } from 'vue';
 import MenuBar from '@/components/MenuBar.vue';
 import NoteEventList from '@/components/NoteEventList.vue';
 import { useNostrStore } from '@/store/nostr';
+import { storeToRefs } from 'pinia';
 
 export default {
   components: {
@@ -17,7 +18,9 @@ export default {
     NoteEventList,
   },
   setup() {
-    const { user, fetchEvents, subscribeToEvents, noteEvents } = useNostrStore();
+    // const { user, fetchEvents, subscribeToEvents, noteEvents } = useNostrStore();
+    const nostrStore = useNostrStore();
+    const { user, fetchEvents, subscribeToEvents, noteEvents } = storeToRefs(nostrStore);
     const searchTerm = ref('');
     
     const filterNotes = (term) => {
@@ -26,32 +29,41 @@ export default {
 
     const filteredNoteEvents = computed(() => {
       if (searchTerm.value) {
-        return noteEvents.filter(
+        return noteEvents.value.filter(
           (noteEvent) =>
             noteEvent.content.includes(searchTerm.value) ||
             (noteEvent.tags && noteEvent.tags.includes(searchTerm.value))
         );
       } else {
-        return noteEvents;
+        return noteEvents.value;
       }
     });
 
+
     watch(
-      () => filteredNoteEvents,
-      (newVal) => {
-        console.log("Filtered events:", newVal);
-      },
-      { deep: true }
+        noteEvents, 
+        (newEvents, oldEvents) => {
+            console.log("noteEvents changed", { newEvents, oldEvents });
+        }, 
+        { deep: true }
     );
+
+    // watch(
+    //   () => filteredNoteEvents,
+    //   (newVal) => {
+    //     console.log("Filtered events:", newVal);
+    //   },
+    //   { deep: true }
+    // );
 
     console.log(`User: ${JSON.stringify(user, null, 2)}`);
     const settings = { npub: user?.npub, kinds: [1, 30023] };
 
-    fetchEvents(settings).catch(error => {
+    nostrStore.fetchEvents(settings).catch(error => {
       console.error("Error fetching events:", error);
     });
 
-    subscribeToEvents(settings).catch(error => {
+    nostrStore.subscribeToEvents(settings).catch(error => {
       console.error("Error subscribing to events:", error);
     });
 
