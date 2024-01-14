@@ -16,6 +16,7 @@ export const useNostrStore = defineStore("nostr", {
         return {
             user: null,
             noteEvents: [],
+            latestNotes: {},
             note: {},
         };
     },
@@ -60,17 +61,23 @@ export const useNostrStore = defineStore("nostr", {
                 const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
 
                 let events = await ndk.fetchEvents(filter);
-                this.noteEvents = Array.from(events).map((e) => {
-                    return {
-                        id: e.id,
-                        created_at: e.created_at,
-                        content: e.content,
-                        kind: e.kind,
-                        pubkey: e.pubkey,
-                        url: e.relay?.url,
-                        sig: e.sig,
-                        tags: e.tags,
-                    };
+                // this.noteEvents = Array.from(events).map((e) => {
+                //     return {
+                //         id: e.id,
+                //         created_at: e.created_at,
+                //         content: e.content,
+                //         kind: e.kind,
+                //         pubkey: e.pubkey,
+                //         url: e.relay?.url,
+                //         sig: e.sig,
+                //         tags: e.tags,
+                //     };
+                // });
+
+                let eventsArray = Array.from(events);
+                eventsArray.forEach((event) => {
+                    const mappedEvent = this.createMappedEvent(event);
+                    this.processNoteEvent(mappedEvent);
                 });
                 console.log("Fetched events:", this.noteEvents);
             } catch (error) {
@@ -204,6 +211,48 @@ export const useNostrStore = defineStore("nostr", {
                 content: note.content,
                 tags: [...baseTags, ...specificTags],
             };
+        },
+        createMappedEvent(event) {
+            return {
+                id: event.id,
+                created_at: event.created_at,
+                content: event.content,
+                kind: event.kind,
+                pubkey: event.pubkey,
+                url: event.relay?.url,
+                sig: event.sig,
+                tags: event.tags,
+            };
+        },
+        processNoteEvent(event) {
+            this.updateLatestNotes(event);
+
+        },
+        updateLatestNotes(event) {
+            // You should keep track of the first published event (version 1 or without "e" tags).
+            // For this example, we will assume all events refer to a parent note.
+            const previousIdTag = event.tags.find((tag) => tag[0] === "e");
+            const eventId = event.id;
+
+            if (previousIdTag) {
+                // Remove the previous version from latestNotes if it exists.
+                const previousId = previousIdTag[1];
+                if (this.latestNotes[previousId]) {
+                    // Delete the old version.
+                    delete this.latestNotes[previousId];
+                }
+            }
+
+            // Add or update the latest version in latestNotes.
+            this.latestNotes[eventId] = event;
+
+            // Now you want to update your noteEvents array to include only the latest versions of each note.
+            this.filterToLatestNotes();
+        },
+        // Go through each note in latestNotes and replace noteEvents array
+        filterToLatestNotes() {
+            // Reset the noteEvents with only the latestNotes
+            this.noteEvents = Object.values(this.latestNotes);
         },
         updateNoteEvents(note, newId, isUpdate) {
             const updatedNote = { ...note, id: newId };
