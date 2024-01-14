@@ -61,7 +61,7 @@ export const useNostrStore = defineStore("nostr", {
 
                 let events = await ndk.fetchEvents(filter);
                 this.noteEvents = Array.from(events).map((e) => {
-                    let mappedEvent = {
+                    return {
                         id: e.id,
                         created_at: e.created_at,
                         content: e.content,
@@ -71,8 +71,6 @@ export const useNostrStore = defineStore("nostr", {
                         sig: e.sig,
                         tags: e.tags,
                     };
-
-                    return mappedEvent;
                 });
                 console.log("Fetched events:", this.noteEvents);
             } catch (error) {
