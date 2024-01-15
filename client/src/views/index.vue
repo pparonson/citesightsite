@@ -18,7 +18,6 @@ export default {
     NoteEventList,
   },
   setup() {
-    // const { user, fetchEvents, subscribeToEvents, noteEvents } = useNostrStore();
     const nostrStore = useNostrStore();
     const { user, fetchEvents, subscribeToEvents, noteEvents } = storeToRefs(nostrStore);
     const searchTerm = ref('');
@@ -48,15 +47,7 @@ export default {
         { deep: true }
     );
 
-    // watch(
-    //   () => filteredNoteEvents,
-    //   (newVal) => {
-    //     console.log("Filtered events:", newVal);
-    //   },
-    //   { deep: true }
-    // );
-
-    console.log(`User: ${JSON.stringify(user, null, 2)}`);
+    // console.log(`User: ${JSON.stringify(user, null, 2)}`);
     const settings = { npub: user?.npub, kinds: [1, 30023] };
 
     nostrStore.fetchEvents(settings).catch(error => {

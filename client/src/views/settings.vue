@@ -4,7 +4,6 @@
     <div class="mt-2">
       <div class="mt-2">
         <Tags :tags="tags" />
-        <!-- Other settings content goes here -->
       </div>
     </div>
   </div>
@@ -22,7 +21,7 @@ export default {
     Tags,
   },
   setup() {
-    const { user, fetchUser, fetchEvents, subscribeToEvents, noteEvents } = useNostrStore();
+    const { user, fetchEvents, subscribeToEvents, noteEvents } = useNostrStore();
     
     const tags = computed(() => {
       const tagsSet = new Set();
@@ -35,13 +34,7 @@ export default {
     });
 
     onMounted(async () => {
-      // const settings = { user?.npub, kinds: [1] };
-
-      try {
-        // await fetchUser(npub);
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
+      const settings = { npub: user?.npub, kinds: [1, 30023] };
 
       try {
         await fetchEvents(settings);
