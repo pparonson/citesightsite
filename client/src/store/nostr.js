@@ -68,8 +68,6 @@ export const useNostrStore = defineStore("nostr", {
 
                 console.log("Fetched events:", this.noteEvents);
                 this.noteEvents.forEach((event) => {
-                    // const mappedEvent = this.createMappedEvent(event);
-                    // this.processNoteEvent(mappedEvent);
                     this.processNoteEvent(event);
                 });
                 console.log("Fetched and filtered events:", this.noteEvents);
@@ -83,39 +81,27 @@ export const useNostrStore = defineStore("nostr", {
             try {
                 const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
                 const subscription = await ndk.subscribe(filter);
-                // let mappedEvent;
-                // subscription.on("event", async (e) => {
-                //     mappedEvent = {
-                //         ...e,
-                //         id: e.id,
-                //         created_at: e.created_at,
-                //         content: e.content,
-                //         kind: e.kind,
-                //         pubkey: e.pubkey,
-                //         url: e.relay?.url,
-                //         sig: e.sig,
-                //         tags: e.tags,
-                //     };
-                //
-                //     this.noteEvents.push(mappedEvent);
-                // });
 
                 subscription.on("event", async (e) => {
-                    const existingEventIndex = this.noteEvents.findIndex(event => event.id === e.id);
+                    const existingEventIndex = this.noteEvents.findIndex((event) => event.id === e.id);
                     const mappedEvent = this.createMappedEvent(e);
+                    console.log("Fetched event: ", this.noteEvents);
 
-            if (existingEventIndex !== -1) {
-                // TODO: We need to compare the version of the events to see which is newest.
-                const existingVersionTag = this.noteEvents[existingEventIndex].tags.find(tag => tag[0] === 'v');
-                const incomingVersionTag = e.tags.find(tag => tag[0] === 'v');
-                if (existingVersionTag && incomingVersionTag && existingVersionTag[1] < incomingVersionTag[1]) {
-                    // Incoming event is newer. Update the existing event with new data.
-                    this.noteEvents[existingEventIndex] = mappedEvent;
-                }
-            } else {
-                // It's a new event, add it to the array
-                this.noteEvents.push(mappedEvent);
-            }
+                    if (existingEventIndex !== -1) {
+                        // TODO: subscribeToEvents does not correctly filter latest event independent of fetchEvents
+                        const existingVersionTag = this.noteEvents[existingEventIndex].tags.find(
+                            (tag) => tag[0] === "v"
+                        );
+                        const incomingVersionTag = e.tags.find((tag) => tag[0] === "v");
+                        if (existingVersionTag && incomingVersionTag && existingVersionTag[1] < incomingVersionTag[1]) {
+                            // Incoming event is newer. Update the existing event with new data.
+                            this.noteEvents[existingEventIndex] = mappedEvent;
+                            console.log("Fetched and filtered event:", mappedEvent);
+                        }
+                    } else {
+                        // It's a new event, add it to the array
+                        this.noteEvents.push(mappedEvent);
+                    }
 
                     this.processNoteEvent(mappedEvent);
                 });
@@ -237,13 +223,12 @@ export const useNostrStore = defineStore("nostr", {
         },
         processNoteEvent(event) {
             this.filterToLatestNotes(event);
-
         },
         filterToLatestNotes(event) {
             const previousIdTag = event.tags.find((tag) => tag[0] === "e");
             if (previousIdTag) {
                 const previousId = previousIdTag[1];
-                    this.noteEvents = this.noteEvents.filter(e => e.id !== previousId);
+                this.noteEvents = this.noteEvents.filter((e) => e.id !== previousId);
             }
         },
         updateNoteEvents(note, newId, isUpdate) {
