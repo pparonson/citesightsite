@@ -68,8 +68,9 @@ export const useNostrStore = defineStore("nostr", {
 
                 console.log("Fetched events:", this.noteEvents);
                 this.noteEvents.forEach((event) => {
-                    const mappedEvent = this.createMappedEvent(event);
-                    this.processNoteEvent(mappedEvent);
+                    // const mappedEvent = this.createMappedEvent(event);
+                    // this.processNoteEvent(mappedEvent);
+                    this.processNoteEvent(event);
                 });
                 console.log("Fetched and filtered events:", this.noteEvents);
             } catch (error) {
@@ -82,7 +83,7 @@ export const useNostrStore = defineStore("nostr", {
             try {
                 const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
                 const subscription = await ndk.subscribe(filter);
-                let mappedEvent;
+                // let mappedEvent;
                 // subscription.on("event", async (e) => {
                 //     mappedEvent = {
                 //         ...e,
@@ -98,6 +99,26 @@ export const useNostrStore = defineStore("nostr", {
                 //
                 //     this.noteEvents.push(mappedEvent);
                 // });
+
+                subscription.on("event", async (e) => {
+                    const existingEventIndex = this.noteEvents.findIndex(event => event.id === e.id);
+                    const mappedEvent = this.createMappedEvent(e);
+
+            if (existingEventIndex !== -1) {
+                // TODO: We need to compare the version of the events to see which is newest.
+                const existingVersionTag = this.noteEvents[existingEventIndex].tags.find(tag => tag[0] === 'v');
+                const incomingVersionTag = e.tags.find(tag => tag[0] === 'v');
+                if (existingVersionTag && incomingVersionTag && existingVersionTag[1] < incomingVersionTag[1]) {
+                    // Incoming event is newer. Update the existing event with new data.
+                    this.noteEvents[existingEventIndex] = mappedEvent;
+                }
+            } else {
+                // It's a new event, add it to the array
+                this.noteEvents.push(mappedEvent);
+            }
+
+                    this.processNoteEvent(mappedEvent);
+                });
 
                 subscription.on("error", (error) => {
                     console.error("Subscription error:", error);
