@@ -17,7 +17,6 @@ export default {
                 },
                 "light",
                 "dark",
-                "fantasy",
             ],
         },
     },
