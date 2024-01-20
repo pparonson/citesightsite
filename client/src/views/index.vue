@@ -1,7 +1,14 @@
 <template>
   <div class="my-2 mx-4">
     <MenuBar :menuTarget="'/settings'" @search="filterNotes" />
-    <NoteEventList :noteEvents="filteredNoteEvents" />
+    <div class="flex">
+      <div class="w-1/5">
+        <NoteEventList :noteEvents="filteredNoteEvents" />
+      </div>
+      <div class="w-4/5">
+        <NoteEventDetail :id="latestNoteId" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -9,6 +16,7 @@
 import { ref, computed, watch } from 'vue';
 import MenuBar from '@/components/MenuBar.vue';
 import NoteEventList from '@/components/NoteEventList.vue';
+import NoteEventDetail from '@/components/NoteEventDetail.vue';
 import { useNostrStore } from '@/store/nostr';
 import { storeToRefs } from 'pinia';
 
@@ -16,6 +24,7 @@ export default {
   components: {
     MenuBar,
     NoteEventList,
+    NoteEventDetail,
   },
   setup() {
     const nostrStore = useNostrStore();
@@ -61,6 +70,7 @@ export default {
     return {
       filterNotes,
       filteredNoteEvents,
+      latestNoteId,
     };
   },
 };
