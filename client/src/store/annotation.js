@@ -14,9 +14,9 @@ export const useAnnotationStore = defineStore("annotation", {
     },
     actions: {
         async fetchAllAnnotations() {
-            const { annotApiEndpoint, rateLimitMs } = config.connections.annotation;
-            const userFilter = import.meta.env.VITE_ANNOT_USER_FILTER || "";
-            const apiKey = import.meta.env.VITE_ANNOT_API_KEY || "";
+            const { annotApiEndpoint, rateLimitMs, userFilter, apiKey } = config.connections.annotation;
+            // const userFilter = import.meta.env.VITE_ANNOT_USER_FILTER || "";
+            // const apiKey = import.meta.env.VITE_ANNOT_API_KEY || "";
 
             let searchAfter = null;
 
