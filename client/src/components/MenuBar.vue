@@ -1,7 +1,7 @@
 <template>
   <div class="flex justify-between items-center p-4 space-x-2">
     <router-link :to="menuTarget" class="text-xl">
-      <font-awesome-icon icon="bars" aria-label="Menu" />
+      <font-awesome-icon icon="gear" aria-label="Menu" />
     </router-link>
 
     <input
