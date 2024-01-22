@@ -1,10 +1,10 @@
 <template>
-    <div class="p-2 bg-gray-200 my-1 rounded-md">
+    <div class="p-4 bg-gray-200 my-1 rounded-md h-full overflow-y-auto">
         <div>{{ noteTitle }}</div>
-        <div class="break-words" v-if="noteEvent?.content && noteEvent.content?.length > 500" v-html="`${renderedContent}...`"></div>
-        <div class="break-words" v-else v-html="renderedContent"></div>
+        <p class="text-base text-xs overflow-hidden">ID: {{ noteEvent.id }}</p>
         <Tags :tags="noteEvent?.tags" />
-        <p class="text-base text-xs">ID: {{ noteEvent.id }}</p>
+        <div class="" v-if="noteEvent?.content && noteEvent.content?.length > 500" v-html="`${renderedContent}...`"></div>
+        <div class="" v-else v-html="renderedContent"></div>
     </div>
 </template>
 
@@ -31,7 +31,7 @@
             });
             const renderedContent = computed(() => {
                 const content = props.noteEvent?.content || "";
-                const html = md.render(content.length > 500 ? content.substring(0, 500) : content);
+                const html = md.render(content);
                 return DOMPurify.sanitize(html);
             });
 

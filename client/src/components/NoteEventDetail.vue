@@ -1,11 +1,11 @@
 <template>
-    <div class="flex flex-col h-[85vh] overflow-hidden p-2 space-y-2">
+    <div class="flex flex-col h-[93vh] overflow-hidden px-2 py-1 space-y-2">
         <form class="flex flex-col flex-1" @submit.prevent="saveNote">
-            <textarea
+            <textarea 
                 v-model="localNote.content"
-                class="flex-1 overflow-auto mb-4 p-2 border border-gray-300 resize-none h-[70vh] max-h-[70vh]"
+                class="flex-1 overflow-auto mb-2 p-2 border border-gray-300 resize-none h-[75vh] max-h-[75h] break-words"
             ></textarea>
-            <div class="flex flex-wrap mb-4">
+            <div class="flex flex-wrap mb-1">
                 <Tags :tags="localNote?.tags" />
             </div>
             <button type="submit" class="btn btn-primary h-10 self-start">Save</button>

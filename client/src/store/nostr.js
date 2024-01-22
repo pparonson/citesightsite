@@ -16,7 +16,7 @@ export const useNostrStore = defineStore("nostr", {
         return {
             user: null,
             noteEvents: [],
-            latestNotes: {},
+            // latestNotes: {},
             note: {},
         };
     },
@@ -55,7 +55,6 @@ export const useNostrStore = defineStore("nostr", {
                 throw error; // Throw the error to be caught by the caller
             }
         },
-
         async fetchEvents(settings) {
             try {
                 const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
@@ -76,7 +75,6 @@ export const useNostrStore = defineStore("nostr", {
                 throw error;
             }
         },
-
         async subscribeToEvents(settings) {
             try {
                 const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
@@ -117,14 +115,12 @@ export const useNostrStore = defineStore("nostr", {
                 throw error;
             }
         },
-
         getNoteEventFromState(id) {
             const event = this.noteEvents.find((e) => e.id === id);
             if (event) {
                 this.note = JSON.parse(JSON.stringify(event));
             }
         },
-
         async fetchNoteEventById(eventId) {
             try {
                 const event = await ndk.fetchEvent(eventId);
@@ -150,7 +146,6 @@ export const useNostrStore = defineStore("nostr", {
                 throw error;
             }
         },
-
         async publishEvent(note) {
             let isUpdate = note.id ? true : false;
             const eventProperties = await this.handleCreateUpdate(note, isUpdate);
@@ -168,6 +163,26 @@ export const useNostrStore = defineStore("nostr", {
                 throw error;
             }
         },
+
+  sortNoteEventsByDateDesc() {
+    this.noteEvents.sort((a, b) => {
+      // Extract date strings from tags
+      const dateATag = a.tags.find(tag => tag[0] === 'd');
+      const dateBTag = b.tags.find(tag => tag[0] === 'd');
+      
+      // Try parsing the dates, invalid dates will become 'Invalid Date'
+      const dateA = new Date(dateATag ? dateATag[1] : NaN);
+      const dateB = new Date(dateBTag ? dateBTag[1] : NaN);
+
+      // Handle invalid dates by considering them as the largest possible date
+      // this ensures they are pushed to the end of the sorted array
+      if (isNaN(dateA)) return 1; // a goes after b
+      if (isNaN(dateB)) return -1; // a goes before b
+
+      // Compare valid dates in descending order
+      return dateB - dateA;
+    });
+  },
         async handleCreateUpdate(note, isUpdate) {
             // const title = isUpdate ? note.title : getCurrentDate();
             const title = getCurrentDate();
@@ -223,6 +238,8 @@ export const useNostrStore = defineStore("nostr", {
         },
         processNoteEvent(event) {
             this.filterToLatestNotes(event);
+            this.sortNoteEventsByDateDesc(); // this is a potentially expensive use of compute
+            console.log("Sorted note events by date desc:", this.noteEvents);
         },
         filterToLatestNotes(event) {
             const previousIdTag = event.tags.find((tag) => tag[0] === "e");

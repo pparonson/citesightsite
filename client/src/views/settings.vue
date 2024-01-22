@@ -1,5 +1,5 @@
 <template>
-  <div class="my-2 mx-4">
+  <div class="my-1 mx-2">
     <MenuBar :menuTarget="'/'" />
     <div class="mt-2">
       <div class="mt-2">

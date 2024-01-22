@@ -1,6 +1,6 @@
 <template>
-  <div class="flex justify-between items-center p-4 space-x-2">
-    <router-link :to="menuTarget" class="text-xl">
+  <div class="flex justify-between items-center px-4 py-2 space-x-2">
+    <router-link :to="menuTarget" class="text-xl ml-2">
       <font-awesome-icon icon="gear" aria-label="Menu" />
     </router-link>
 
@@ -9,11 +9,11 @@
       @input="onInput"
       type="text"
       placeholder="Search"
-      class="w-11/12 h-10 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:border-blue-300"
+      class="w-11/12 h-10 px-3 rounded-md border border-gray-300 focus:outline-none focus:ring focus:border-blue-300"
     />
 
     <router-link :to="'/note/new'">
-      <button @click="createNewNote" class="btn btn-primary h-10">
+      <button @click="createNewNote" class="btn btn-primary h-10 mr-2">
         <font-awesome-icon icon="plus" aria-label="Add new note" />
       </button>
     </router-link>
