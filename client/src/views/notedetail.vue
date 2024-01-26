@@ -1,5 +1,5 @@
 <template>
-  <div class="px-2">
+  <div class="h-full px-2">
     <div class="mt-4 mb-1">
         <router-link to="/">
             <button class="btn btn-primary h-10 mx-2">

@@ -1,9 +1,9 @@
 <template>
-    <div class="flex flex-col h-[93vh] overflow-hidden px-2 py-1 space-y-2">
+    <div class="flex flex-col h-[90vh] overflow-hidden px-2 py-1 space-y-2">
         <form class="flex flex-col flex-1" @submit.prevent="saveNote">
             <textarea 
                 v-model="localNote.content"
-                class="flex-1 overflow-auto mb-2 p-2 border border-gray-300 resize-none h-[75vh] max-h-[75h] break-words"
+                class="flex-1 overflow-auto mb-2 p-2 border border-gray-300 resize-none h-[80vh] max-h-[80vh] break-words"
             ></textarea>
             <div class="flex flex-wrap mb-1">
                 <Tags :tags="localNote?.tags" />

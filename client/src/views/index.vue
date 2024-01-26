@@ -1,14 +1,28 @@
+<!-- <template> -->
+<!--   <div class="flex flex-col h-screen"> -->
+<!--     <MenuBar :menuTarget="'/settings'" @search="filterNotes" /> -->
+<!--     <div class="flex flex-1 overflow-hidden"> -->
+<!--       <div class="flex flex-col w-1/3 p-1 overflow-y-auto overflow-x-hidden"> -->
+<!--         <NoteEventList :noteEvents="filteredNoteEvents" /> -->
+<!--       </div> -->
+<!--       <div class="flex flex-col w-2/3 p-1 h-full overflow-y-auto overflow-x-hidden"> -->
+<!--         <NoteEventDetailDisplay :noteEvent="note" /> -->
+<!--       </div> -->
+<!--     </div> -->
+<!--   </div> -->
+<!-- </template> -->
+
 <template>
-  <div class="flex flex-col h-screen">
-    <MenuBar :menuTarget="'/settings'" @search="filterNotes" />
-    <div class="flex flex-1 overflow-hidden">
-      <div class="w-1/4 p-1 overflow-y-auto overflow-x-hidden">
-        <NoteEventList :noteEvents="filteredNoteEvents" />
+  <div class="flex h-screen">
+      <div class="flex flex-col w-1/3 p-1 overflow-hidden">
+        <MenuBar :menuTarget="'/settings'" @search="filterNotes" />
+        <div class="flex flex-1 overflow-y-auto overflow-x-hidden">
+          <NoteEventList :noteEvents="filteredNoteEvents" />
+        </div>
       </div>
-      <div class="w-3/4 p-1 flex flex-col overflow-y-auto overflow-x-hidden">
-        <NoteEventDetailDisplay :noteEvent="note" />
+      <div class="flex flex-col h-full w-2/3 p-1 overflow-y-auto overflow-x-hidden">
+          <NoteEventDetailDisplay :noteEvent="note" />
       </div>
-    </div>
   </div>
 </template>
 
