@@ -29,7 +29,15 @@ export default defineComponent({
   },
   setup(props) {
     const keywordTags = computed(() => {
-      return [...new Set(props.tags.filter(([type]) => type === 't').map(tag => tag[1]))];
+        if (!props.tags) {
+            return [];
+        }
+
+        return [...new Set(
+          props.tags
+              .filter(([type]) => type === 't')
+              .map(tag => tag[1])
+      )];
     });
 
     return {
