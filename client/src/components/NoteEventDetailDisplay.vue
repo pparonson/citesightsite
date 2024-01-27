@@ -1,5 +1,5 @@
 <template>
-    <div class="p-2 bg-gray-100 my-1 rounded-md h-full overflow-y-auto">
+    <div class="h-full p-2 my-1 bg-gray-100 rounded-md overflow-y-auto">
         <Tags :tags="noteEvent?.tags" />
     <router-link :to="`/note/${noteEvent?.id}`">
         <div>{{ noteTitle }}</div>

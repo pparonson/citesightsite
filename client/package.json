@@ -19,7 +19,8 @@
         "markdown-it": "^14.0.0",
         "pinia": "^2.1.7",
         "vue": "^3.4.13",
-        "vue-router": "^4.2.5"
+        "vue-router": "^4.2.5",
+        "theme-change": "^2.5.0"
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^4.5.2",

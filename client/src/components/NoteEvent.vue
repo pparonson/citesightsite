@@ -1,8 +1,6 @@
 <template>
     <div class="bg-gray-100 p-2 my-1 rounded-md">
         <div>{{ noteTitle }}</div>
-        <!-- <div class="" v-if="noteEvent?.content && noteEvent.content?.length > 200" v-html="`${renderedContent}...`"></div> -->
-        <!-- <div class="" v-else v-html="renderedContent"></div> -->
         <div class="" v-html="renderedContent"></div>
         <Tags :tags="noteEvent?.tags" />
         <p class="text-base text-xs">ID: {{ noteEvent.id }}</p>
