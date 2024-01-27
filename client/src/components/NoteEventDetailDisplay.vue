@@ -1,5 +1,5 @@
 <template>
-    <div class="p-4 bg-gray-200 my-1 rounded-md h-full overflow-y-auto">
+    <div class="p-2 bg-gray-100 my-1 rounded-md h-full overflow-y-auto">
         <div>{{ noteTitle }}</div>
         <p class="text-base text-xs overflow-hidden">ID: {{ noteEvent.id }}</p>
         <Tags :tags="noteEvent?.tags" />
