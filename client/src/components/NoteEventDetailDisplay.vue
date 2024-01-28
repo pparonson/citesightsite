@@ -13,7 +13,7 @@
     import MarkdownIt from "markdown-it";
     import DOMPurify from "dompurify";
     import Tags from '@/components/Tags.vue';
-    import { ref, computed } from "vue";
+    import { ref, watch } from "vue";
     export default {
         components: {
             Tags
@@ -21,25 +21,27 @@
         props: {
             noteEvent: {
                 type: Object,
-                required: true,
+                default: () => ({}),
+                required: false,
             },
         },
         setup(props) {
             const md = new MarkdownIt();
-            let html;
-            const noteTitle = computed(() => {
-                const titleTag = props.noteEvent?.tags?.find(([key]) => key === "title");
-                return titleTag ? titleTag[1] : "Unknown Title";
-            });
-            const renderedContent = computed(() => {
-                if (!props.noteEvent || !props.noteEvent.tags) {
-                    html = md.render("Note not found"); 
-                    return DOMPurify.sanitize(html);
+            const noteTitle = ref('');
+            const renderedContent = ref('');
+
+            watch(() => props.noteEvent, (newNoteEvent, oldNoteEvent) => {
+                console.log('noteEvent prop changed', newNoteEvent);
+                if (newNoteEvent) {
+                    const titleTag = props.noteEvent?.tags?.find(([key]) => key === "title");
+                    noteTitle.value = titleTag ? titleTag[1] : "Unknown Title";
+
+                    // Markdown update
+                    const content = newNoteEvent.content || "";
+                    const markdownOutput = md.render(content);
+                    renderedContent.value = DOMPurify.sanitize(markdownOutput);
                 }
-                const content = props.noteEvent?.content || "";
-                html = md.render(content);
-                return DOMPurify.sanitize(html);
-            });
+            }, { immediate: true });
 
             return {
                 noteTitle,

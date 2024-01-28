@@ -2,11 +2,9 @@
   <div>
     <div v-if="noteEvents.length === 0" class="text-gray-500">No note events available.</div>
     <div v-else v-for="noteEvent in noteEvents" :key="noteEvent.id">
-      <router-link :to="`/note/${noteEvent.id}`">
-        <div>
+        <div @click="handleNoteClick(noteEvent.id)">
           <NoteEvent :noteEvent="noteEvent" />
         </div>
-      </router-link>
     </div>
   </div>
 </template>
@@ -27,7 +25,15 @@ export default {
         return value.every(noteEvent => noteEvent.hasOwnProperty('id') && noteEvent.hasOwnProperty('content'));
       }
     }
+  },
+  emits: ['noteSelected'],
+  methods: {
+      handleNoteClick(noteId) {
+          this.$emit('noteSelected', noteId); // Emit the selected note id
+      }
+
   }
+
 }
 </script>
 
