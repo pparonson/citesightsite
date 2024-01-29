@@ -16,8 +16,8 @@ export const useNostrStore = defineStore("nostr", {
         return {
             user: null,
             noteEvents: [],
-            // latestNotes: {},
             note: {},
+            selectedNote: null,
         };
     },
 
@@ -260,5 +260,9 @@ export const useNostrStore = defineStore("nostr", {
                 this.noteEvents.push(updatedNote);
             }
         },
+        setSelectedNoteById(noteId) {
+            const note = this.noteEvents.find(n => n.id === noteId);
+            this.selectedNote = note ? { ...note } : null;
+        }
     },
 });

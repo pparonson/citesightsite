@@ -7,7 +7,7 @@
         </div>
       </div>
       <div class="flex flex-col h-full w-2/3 overflow-y-auto overflow-x-hidden">
-          <NoteEventDetailDisplay :noteEvent="selectedNote" :key="selectedNote?.value?.id" />
+          <NoteEventDetailDisplay />
       </div>
   </div>
 </template>
@@ -28,9 +28,8 @@ export default {
   },
   setup() {
     const nostrStore = useNostrStore();
-    const { user, fetchEvents, subscribeToEvents, noteEvents } = storeToRefs(nostrStore);
+    const { user, fetchEvents, subscribeToEvents, noteEvents, setSelectedNoteById, selectedNote } = storeToRefs(nostrStore);
     const searchTerm = ref('');
-    let selectedNote = ref(null);
 
     const filterNotes = (term) => {
       searchTerm.value = term;
@@ -49,19 +48,17 @@ export default {
     });
 
     const handleNoteSelected = (noteId) => {
-      const noteIndex = noteEvents.value.findIndex(n => n.id === noteId);
-      selectedNote.value = noteEvents.value[noteIndex];
+        nostrStore.setSelectedNoteById(noteId);
     };
 
     watch(selectedNote, (newValue) => {
         console.log("selectedNote changed: ", newValue);
-    }, { 
-        deep: true 
     });
 
     watch(noteEvents, (newNoteEvents) => {
-        if (newNoteEvents.length && !selectedNote.value) {
-            selectedNote.value = newNoteEvents[0];
+        if (newNoteEvents?.value?.length > 0 && !selectedNote.value) {
+            nostrStore.setSelectedNoteById(noteId);
+            console.log("selectedNote: ", selectedNote.value);
         }
     }, { 
         immediate: true 

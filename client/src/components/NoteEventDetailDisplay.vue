@@ -14,38 +14,38 @@
     import DOMPurify from "dompurify";
     import Tags from '@/components/Tags.vue';
     import { ref, watch } from "vue";
+    import { useNostrStore } from '@/store/nostr';
+    import { storeToRefs } from 'pinia';
+
     export default {
         components: {
             Tags
         },
-        props: {
-            noteEvent: {
-                type: Object,
-                default: () => ({}),
-                required: false,
-            },
-        },
         setup(props) {
+            const nostrStore = useNostrStore();
+            const { selectedNote } = storeToRefs(nostrStore);
             const md = new MarkdownIt();
             const noteTitle = ref('');
             const renderedContent = ref('');
+            const noteEvent = ref(null);
 
-            watch(() => props.noteEvent, (newNoteEvent, oldNoteEvent) => {
-                console.log('noteEvent prop changed', newNoteEvent);
-                if (newNoteEvent) {
-                    const titleTag = props.noteEvent?.tags?.find(([key]) => key === "title");
-                    noteTitle.value = titleTag ? titleTag[1] : "Unknown Title";
+            watch(selectedNote, (newValue) => {
+                console.log("selectedNote changed: ", newValue);
+                console.log("selectedNote changed: ", selectedNote.value);
+                noteEvent.value = newValue;
+                const titleTag = noteEvent?.value?.tags?.find(([key]) => key === "title");
+                noteTitle.value = titleTag ? titleTag[1] : "Unknown Title";
 
-                    // Markdown update
-                    const content = newNoteEvent.content || "";
-                    const markdownOutput = md.render(content);
-                    renderedContent.value = DOMPurify.sanitize(markdownOutput);
-                }
-            }, { immediate: true });
+                // Markdown update
+                const content = noteEvent?.value?.content || "";
+                const markdownOutput = md.render(content);
+                renderedContent.value = DOMPurify.sanitize(markdownOutput);
+            });
 
             return {
                 noteTitle,
                 renderedContent,
+                noteEvent,
             };
         },
     };
