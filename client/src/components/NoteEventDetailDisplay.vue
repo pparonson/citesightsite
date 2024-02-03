@@ -1,11 +1,14 @@
 <template>
-    <div class="h-full p-2 my-1 bg-gray-100 rounded-md overflow-y-auto">
+    <div 
+        class="h-full p-2 my-1 bg-gray-100 rounded-md overflow-y-auto"
+        @dblclick="handleDoubleClick"
+    >
         <Tags :tags="noteEvent?.tags" />
-    <router-link :to="`/note/${noteEvent?.id}`">
+    <!-- <router-link :to="`/note/${noteEvent?.id}`"> -->
         <div>{{ noteTitle }}</div>
         <p class="text-base text-xs overflow-hidden">ID: {{ noteEvent?.id }}</p>
         <div class="" v-html="renderedContent"></div>
-      </router-link>
+      <!-- </router-link> -->
     </div>
 </template>
 
@@ -15,6 +18,7 @@
     import Tags from '@/components/Tags.vue';
     import { ref, watch } from "vue";
     import { useNostrStore } from '@/store/nostr';
+    import { useRoute, useRouter } from 'vue-router';
     import { storeToRefs } from 'pinia';
 
     export default {
@@ -23,11 +27,18 @@
         },
         setup(props) {
             const nostrStore = useNostrStore();
+            const router = useRouter();
             const { selectedNote } = storeToRefs(nostrStore);
             const md = new MarkdownIt();
             const noteTitle = ref('');
             const renderedContent = ref('');
             const noteEvent = ref(null);
+
+            const handleDoubleClick = () => {
+                if (noteEvent.value?.id) {
+                    router.push(`/note/${noteEvent.value.id}`);
+                }
+            }
 
             watch(selectedNote, (newValue) => {
                 console.log("selectedNote changed: ", newValue);
@@ -46,6 +57,7 @@
                 noteTitle,
                 renderedContent,
                 noteEvent,
+                handleDoubleClick
             };
         },
     };
