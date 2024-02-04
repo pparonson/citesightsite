@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import NDK, { NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
 
 let ndk;
+
 function getCurrentDate() {
     const now = new Date();
     const year = now.getFullYear();
@@ -18,6 +19,7 @@ export const useNostrStore = defineStore("nostr", {
             noteEvents: [],
             note: {},
             selectedNote: null,
+            isFetchingInitialEvents: false,
         };
     },
 
@@ -56,6 +58,7 @@ export const useNostrStore = defineStore("nostr", {
             }
         },
         async fetchEvents(settings) {
+            this.isFetchingInitialEvents = true;
             try {
                 const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
                 const events = await ndk.fetchEvents(filter);
@@ -73,6 +76,9 @@ export const useNostrStore = defineStore("nostr", {
             } catch (error) {
                 console.error("Error fetching events:", error);
                 throw error;
+            } finally {
+                this.isFetchingInitialEvents = false;
+
             }
         },
         async subscribeToEvents(settings) {
@@ -81,6 +87,8 @@ export const useNostrStore = defineStore("nostr", {
                 const subscription = await ndk.subscribe(filter);
 
                 subscription.on("event", async (e) => {
+                    // debounce if still fetching initial notes
+                    if (this.isFetchingInitialEvents) return;
                     const existingEventIndex = this.noteEvents.findIndex((event) => event.id === e.id);
                     const mappedEvent = this.createMappedEvent(e);
                     console.log("Fetched event: ", this.noteEvents);
