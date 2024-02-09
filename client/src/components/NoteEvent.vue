@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-gray-100 p-2 my-1 rounded-md">
+    <div class="bg-gray-100 p-2 my-2 rounded-md">
         <div>{{ noteTitle }}</div>
         <div class="" v-html="renderedContent"></div>
         <Tags :tags="noteEvent?.tags" />

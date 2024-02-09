@@ -4,11 +4,9 @@
         @dblclick="handleDoubleClick"
     >
         <Tags :tags="noteEvent?.tags" />
-    <!-- <router-link :to="`/note/${noteEvent?.id}`"> -->
         <div>{{ noteTitle }}</div>
         <p class="text-base text-xs overflow-hidden">ID: {{ noteEvent?.id }}</p>
         <div class="" v-html="renderedContent"></div>
-      <!-- </router-link> -->
     </div>
 </template>
 
