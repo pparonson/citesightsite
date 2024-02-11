@@ -6,7 +6,11 @@
                 class="flex-1 overflow-auto mb-2 p-2 border border-gray-300 resize-none h-[80vh] max-h-[80vh]"
             ></textarea>
             <div class="flex flex-wrap mb-1">
-                <Tags :tags="localNote?.tags" />
+                <Tags 
+                :tags="localNote?.tags"
+                :editable="true"
+                @remove="handleTagRemoval"
+                />
             </div>
             <button type="submit" class="btn btn-primary h-10 self-start">Save</button>
         </form>
@@ -47,6 +51,14 @@
                 }
             };
 
+            const handleTagRemoval = tagToRemove => {
+                const tagIndex = localNote?.value?.tags?.findIndex(tag => tag[1] === tagToRemove);
+                if (tagIndex > -1) {
+                    localNote.value.tags.splice(tagIndex, 1);
+                }
+
+            };
+
             watch(
                 () => useNostrStore().note,
                 (newNote) => {
@@ -71,6 +83,7 @@
                 note: JSON.parse(JSON.stringify(localNote.value)),
                 saveNote,
                 noteTitle,
+                handleTagRemoval,
             };
         },
     };

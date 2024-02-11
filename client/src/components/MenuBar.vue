@@ -1,7 +1,7 @@
 <template>
   <div class="flex justify-between items-center px-1 py-1 space-x-2">
     <router-link :to="menuTarget" class="text-xl ml-1">
-      <font-awesome-icon icon="gear" aria-label="Menu" />
+      <font-awesome-icon icon="gear" aria-label="Settings" />
     </router-link>
 
     <input

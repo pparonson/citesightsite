@@ -5,9 +5,15 @@
      <li
         v-for="tag in keywordTags"
         :key="tag"
-        class="inline-block max-w-xs overflow-hidden text-xs text-ellipsis bg-blue-300 text-white mx-2 px-2 py-1 rounded-md"
+        class="inline-block max-w-xs overflow-hidden text-xs text-ellipsis bg-blue-300 text-white mx-1 px-2 py-1 rounded-md"
       >
-        {{ tag }}
+      {{ tag }}
+      <font-awesome-icon
+          v-if="editable"
+          icon="xmark"
+          class="ml-2 cursor-pointer"
+          @click.stop="$emit('remove', tag)"
+      />
       </li>
     </ul>
   </div>
@@ -25,8 +31,13 @@ export default defineComponent({
         return value.every(tag => Array.isArray(tag) && tag.length >= 2 && tag.every(String));
       }
     },
+    editable: {
+        type: Boolean,
+        default: false
+    }
   },
-  setup(props) {
+    emits: ['remove'],
+    setup(props, context) {
     const keywordTags = computed(() => {
         if (!props.tags) {
             return [];
@@ -39,8 +50,13 @@ export default defineComponent({
       )];
     });
 
+    const emitRemoveTag = tag => {
+        context.emit('remove', tag);
+    };
+
     return {
       keywordTags,
+      emitRemoveTag,
     };
   },
 });
