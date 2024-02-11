@@ -78,7 +78,6 @@ export const useNostrStore = defineStore("nostr", {
                 throw error;
             } finally {
                 this.isFetchingInitialEvents = false;
-
             }
         },
         async subscribeToEvents(settings) {
@@ -172,25 +171,25 @@ export const useNostrStore = defineStore("nostr", {
             }
         },
 
-  sortNoteEventsByDateDesc() {
-    this.noteEvents.sort((a, b) => {
-      // Extract date strings from tags
-      const dateATag = a.tags.find(tag => tag[0] === 'd');
-      const dateBTag = b.tags.find(tag => tag[0] === 'd');
-      
-      // Try parsing the dates, invalid dates will become 'Invalid Date'
-      const dateA = new Date(dateATag ? dateATag[1] : NaN);
-      const dateB = new Date(dateBTag ? dateBTag[1] : NaN);
+        sortNoteEventsByDateDesc() {
+            this.noteEvents.sort((a, b) => {
+                // Extract date strings from tags
+                const dateATag = a.tags.find((tag) => tag[0] === "d");
+                const dateBTag = b.tags.find((tag) => tag[0] === "d");
 
-      // Handle invalid dates by considering them as the largest possible date
-      // this ensures they are pushed to the end of the sorted array
-      if (isNaN(dateA)) return 1; // a goes after b
-      if (isNaN(dateB)) return -1; // a goes before b
+                // Try parsing the dates, invalid dates will become 'Invalid Date'
+                const dateA = new Date(dateATag ? dateATag[1] : NaN);
+                const dateB = new Date(dateBTag ? dateBTag[1] : NaN);
 
-      // Compare valid dates in descending order
-      return dateB - dateA;
-    });
-  },
+                // Handle invalid dates by considering them as the largest possible date
+                // this ensures they are pushed to the end of the sorted array
+                if (isNaN(dateA)) return 1; // a goes after b
+                if (isNaN(dateB)) return -1; // a goes before b
+
+                // Compare valid dates in descending order
+                return dateB - dateA;
+            });
+        },
         async handleCreateUpdate(note, isUpdate) {
             // const title = isUpdate ? note.title : getCurrentDate();
             const title = getCurrentDate();
@@ -269,8 +268,8 @@ export const useNostrStore = defineStore("nostr", {
             }
         },
         setSelectedNoteById(noteId) {
-            const note = this.noteEvents.find(n => n.id === noteId);
+            const note = this.noteEvents.find((n) => n.id === noteId);
             this.selectedNote = note ? { ...note } : null;
-        }
+        },
     },
 });

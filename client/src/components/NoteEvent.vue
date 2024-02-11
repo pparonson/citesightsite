@@ -10,11 +10,11 @@
 <script>
     import MarkdownIt from "markdown-it";
     import DOMPurify from "dompurify";
-    import Tags from '@/components/Tags.vue';
+    import Tags from "@/components/Tags.vue";
     import { ref, computed } from "vue";
     export default {
         components: {
-            Tags
+            Tags,
         },
         props: {
             noteEvent: {

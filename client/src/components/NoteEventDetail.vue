@@ -1,16 +1,12 @@
 <template>
     <div class="flex flex-col h-[90vh] overflow-hidden px-2 py-1 space-y-2">
         <form class="flex flex-col flex-1" @submit.prevent="saveNote">
-            <textarea 
+            <textarea
                 v-model="localNote.content"
                 class="flex-1 overflow-auto mb-2 p-2 border border-gray-300 resize-none h-[80vh] max-h-[80vh]"
             ></textarea>
             <div class="flex flex-wrap mb-1">
-                <Tags 
-                :tags="localNote?.tags"
-                :editable="true"
-                @remove="handleTagRemoval"
-                />
+                <Tags :tags="localNote?.tags" :editable="true" @remove="handleTagRemoval" />
             </div>
             <button type="submit" class="btn btn-primary h-10 self-start">Save</button>
         </form>
@@ -18,14 +14,14 @@
 </template>
 
 <script>
-    import Tags from "@/components/Tags.vue"
+    import Tags from "@/components/Tags.vue";
     import { ref, onMounted, watch, computed } from "vue";
     import { storeToRefs } from "pinia";
     import { useNostrStore } from "@/store/nostr";
 
     export default {
         components: {
-            Tags
+            Tags,
         },
         props: {
             id: String,
@@ -51,12 +47,11 @@
                 }
             };
 
-            const handleTagRemoval = tagToRemove => {
-                const tagIndex = localNote?.value?.tags?.findIndex(tag => tag[1] === tagToRemove);
+            const handleTagRemoval = (tagToRemove) => {
+                const tagIndex = localNote?.value?.tags?.findIndex((tag) => tag[1] === tagToRemove);
                 if (tagIndex > -1) {
                     localNote.value.tags.splice(tagIndex, 1);
                 }
-
             };
 
             watch(
