@@ -8,7 +8,9 @@
             <div class="flex flex-wrap mb-1">
                 <Tags :tags="localNote?.tags" :editable="true" @remove="handleTagRemoval" />
             </div>
-            <button type="submit" class="btn btn-primary h-10 self-start">Save</button>
+            <button type="submit" class="btn btn-primary h-10 self-start">
+                Pen it in! <font-awesome-icon icon="pen" aria-label="PenItIn" />
+            </button>
         </form>
     </div>
 </template>
