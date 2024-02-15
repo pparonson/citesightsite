@@ -13,9 +13,9 @@
         />
 
         <router-link :to="'/note/new'">
-            <button @click="createNewNote" class="btn btn-primary h-10 mr-1">
-                <font-awesome-icon icon="spinner" aria-label="Add new note" />
-            </button>
+            <div @click="createNewNote" class="text-xl mr-1">
+                <font-awesome-icon icon="calendar-day" aria-label="Add new note" />
+            </div>
         </router-link>
     </div>
 </template>
