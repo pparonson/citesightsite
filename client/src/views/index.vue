@@ -13,7 +13,7 @@
 </template>
 
 <script>
-    import { ref, computed, watch } from "vue";
+    import { ref, computed, onMounted, watch } from "vue";
     import MenuBar from "@/components/MenuBar.vue";
     import NoteEventList from "@/components/NoteEventList.vue";
     import NoteEventDetailDisplay from "@/components/NoteEventDetailDisplay.vue";
@@ -31,7 +31,6 @@
             const { user, fetchEvents, subscribeToEvents, noteEvents, setSelectedNoteById, selectedNote } =
                 storeToRefs(nostrStore);
             const searchTerm = ref("");
-
             const filterNotes = (term) => {
                 searchTerm.value = term;
             };
@@ -51,6 +50,10 @@
             const handleNoteSelected = (noteId) => {
                 nostrStore.setSelectedNoteById(noteId);
             };
+
+            onMounted(async () => {
+                refreshComponent();
+            });
 
             watch(selectedNote, (newValue) => {
                 console.log("selectedNote changed: ", newValue);

@@ -191,29 +191,34 @@ export const useNostrStore = defineStore("nostr", {
             });
         },
         async handleCreateUpdate(note, isUpdate) {
-            // const title = isUpdate ? note.title : getCurrentDate();
-            const title = getCurrentDate();
+            const prevNote = await this.fetchNoteEventById(note?.id);
+            let title =
+                isUpdate && prevNote?.tags?.find((tag) => tag[0] === "title")
+                    ? String(prevNote.tags.find((tag) => tag[0] === "title")[1])
+                    : getCurrentDate();
 
-            const baseTags = [
+            let baseTags = [
                 ["title", title],
-                ["t", "note"],
-                ["t", "test"],
-                ["t", "example"],
-                ["t", "sample_tag"],
                 ["d", title],
             ];
+
             let version = "1";
             let eventId = null;
+            let userTags = [];
+            note?.tags?.forEach((tag) => {
+                if (tag[0] === "t") {
+                    userTags.push([tag[0], tag[1]]);
+                }
+            });
 
             // If it's an update, fetch the previous event
-            if (isUpdate && note.id) {
-                const prevNote = await this.fetchNoteEventById(note.id);
-                if (prevNote) {
-                    const versionTag = prevNote.tags.find((tag) => tag[0] === "v");
-                    version = versionTag ? String(Number(versionTag[1]) + 1) : "2";
-                    eventId = prevNote.id;
-                }
+            if (isUpdate && prevNote) {
+                const versionTag = prevNote.tags.find((tag) => tag[0] === "v");
+                version = versionTag ? String(Number(versionTag[1]) + 1) : "2";
+                eventId = prevNote.id;
             }
+
+            // const customTags = keywordTags && keywordTags.length > 0 ? [...keywordTags] : [];
 
             // Tags specific to updates or new notes
             const specificTags = [
@@ -228,7 +233,8 @@ export const useNostrStore = defineStore("nostr", {
             return {
                 kind: note.kind || 1,
                 content: note.content,
-                tags: [...baseTags, ...specificTags],
+                // tags: [...baseTags, ...specificTags],
+                tags: [...baseTags, ...specificTags, ...userTags],
             };
         },
         createMappedEvent(event) {

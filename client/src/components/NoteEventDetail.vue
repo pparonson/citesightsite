@@ -8,8 +8,22 @@
             <div class="flex flex-wrap mb-1">
                 <Tags :tags="localNote?.tags" :editable="true" @remove="handleTagRemoval" />
             </div>
+
+            <div class="flex mb-1">
+                <input
+                    type="text"
+                    v-model="newTag"
+                    @keydown.enter.prevent="addTag"
+                    placeholder="Enter new tag"
+                    class="p-2 border border-gray-300 rounded"
+                />
+                <button type="button" @click="addTag" class="ml-2 btn btn-secondary h-10">
+                    Tag it! <font-awesome-icon icon="tags" aria-label="tagIt" />
+                </button>
+            </div>
+
             <button type="submit" class="btn btn-primary h-10 self-start">
-                Pen it in! <font-awesome-icon icon="pen" aria-label="PenItIn" />
+                Pen it in! <font-awesome-icon icon="pen" aria-label="penItIn" />
             </button>
         </form>
     </div>
@@ -19,6 +33,7 @@
     import Tags from "@/components/Tags.vue";
     import { ref, onMounted, watch, computed } from "vue";
     import { storeToRefs } from "pinia";
+    import { useRouter } from "vue-router";
     import { useNostrStore } from "@/store/nostr";
 
     export default {
@@ -29,13 +44,18 @@
             id: String,
         },
         setup(props) {
-            const { getNoteEventFromState, fetchNoteEventById, publishEvent } = useNostrStore();
+            const router = useRouter();
+            // const { getNoteEventFromState, fetchNoteEventById, publishEvent } = useNostrStore();
+            const nostrStore = useNostrStore();
             let { note } = storeToRefs(useNostrStore());
             let localNote = ref({ tags: [] });
+            // Data property for the new tag
+            let newTag = ref("");
             const noteTitle = computed(() => {
                 const titleTag = localNote.value.tags?.find(([key]) => key === "title");
                 return titleTag ? titleTag[1] : "Unknown Title";
             });
+
             const saveNote = async () => {
                 const noteToSave = {
                     ...localNote.value,
@@ -43,9 +63,23 @@
                     kind: localNote.value.kind || 1,
                 };
                 try {
-                    await publishEvent(noteToSave);
+                    await nostrStore.publishEvent(noteToSave);
+                    const settings = { npub: nostrStore.user?.npub, kinds: [1, 30023] };
+                    // await nostrStore.fetchEvents(settings);
+                    await nostrStore.subscribeToEvents(settings);
+                    router.push("/");
                 } catch (error) {
                     console.error(`Error publishing note event detail: ${error}`);
+                }
+            };
+
+            const addTag = () => {
+                const tagExists = localNote.value.tags.some(
+                    ([key, value]) => value.trim().toLowerCase() === newTag.value.trim().toLowerCase()
+                );
+                if (newTag.value && !tagExists) {
+                    localNote.value.tags.push(["t", String(newTag.value).toLowerCase()]);
+                    newTag.value = "";
                 }
             };
 
@@ -66,8 +100,8 @@
 
             onMounted(async () => {
                 if (props?.id) {
-                    await getNoteEventFromState(props.id);
-                    await fetchNoteEventById(props.id);
+                    await nostrStore.getNoteEventFromState(props.id);
+                    await nostrStore.fetchNoteEventById(props.id);
                     console.log("Mounted note:", JSON.stringify(note));
                     console.log("Mounted localNote:", JSON.stringify(localNote.value));
                 } else {
@@ -77,10 +111,12 @@
 
             return {
                 localNote,
+                newTag,
                 note: JSON.parse(JSON.stringify(localNote.value)),
                 saveNote,
                 noteTitle,
                 handleTagRemoval,
+                addTag,
             };
         },
     };

@@ -3,13 +3,14 @@ import { createPinia } from "pinia";
 import { library, config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { 
-    faAnglesLeft, 
-    faGear, 
-    faPen, 
-    faXmark, 
+import {
+    faAnglesLeft,
+    faGear,
+    faPen,
+    faXmark,
     faCalendarDay,
-    faSpinner
+    faSpinner,
+    faTags,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNostrStore } from "@/store/nostr";
 import { useAnnotationStore } from "@/store/annotation";
@@ -19,14 +20,7 @@ import "./assets/main.css";
 
 async function init() {
     config.autoAddCss = false; // this setting provides more control the imported css
-    library.add(
-        faAnglesLeft, 
-        faGear, 
-        faPen, 
-        faXmark, 
-        faCalendarDay, 
-        faSpinner
-    );
+    library.add(faAnglesLeft, faGear, faPen, faXmark, faCalendarDay, faSpinner, faTags);
 
     const app = createApp(App);
     const pinia = createPinia();
