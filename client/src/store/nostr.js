@@ -1,5 +1,11 @@
 import { defineStore } from "pinia";
 import NDK, { NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
+import { 
+    deriveAESKey,
+    encrypt, 
+    decrypt, 
+} from "../utils/crypto.js";
+import config from "../../config/config.js";
 
 let ndk;
 
@@ -63,15 +69,22 @@ export const useNostrStore = defineStore("nostr", {
                 const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
                 const events = await ndk.fetchEvents(filter);
                 const eventsArray = Array.from(events);
-                eventsArray.forEach((event) => {
+                // eventsArray.forEach((event) => {
+                //     const mappedEvent = this.createMappedEvent(event);
+                //     this.noteEvents.push(mappedEvent);
+                // });
+
+                for (const event of eventsArray) {
                     const mappedEvent = this.createMappedEvent(event);
                     this.noteEvents.push(mappedEvent);
-                });
+                    const processedNote = await this.processNoteEvent(event);
+                    console.log("processed note event:", processedNote);
+                }
 
-                console.log("Fetched events:", this.noteEvents);
-                this.noteEvents.forEach((event) => {
-                    this.processNoteEvent(event);
-                });
+                // console.log("Fetched events:", this.noteEvents);
+                // for (const event of this.noteEvents) {
+                //    await this.processNoteEvent(event);
+                // }
                 console.log("Fetched and filtered events:", this.noteEvents);
             } catch (error) {
                 console.error("Error fetching events:", error);
@@ -108,7 +121,8 @@ export const useNostrStore = defineStore("nostr", {
                         this.noteEvents.push(mappedEvent);
                     }
 
-                    this.processNoteEvent(mappedEvent);
+                    const processedNote = this.processNoteEvent(mappedEvent);
+                    console.log("processed note event:", processedNote);
                 });
 
                 subscription.on("error", (error) => {
@@ -155,7 +169,19 @@ export const useNostrStore = defineStore("nostr", {
         },
         async publishEvent(note) {
             let isUpdate = note.id ? true : false;
-            const eventProperties = await this.handleCreateUpdate(note, isUpdate);
+
+            const {secretBase64, saltBase64, ivBase64} = config.encryptionCredentials;
+            const aesKey  = await deriveAESKey(secretBase64, saltBase64);
+            const encrypted = await encrypt( aesKey, ivBase64, note.content );
+
+            const eventProperties = await this.handleCreateUpdate(
+                { ...note, content: encrypted.content },
+                isUpdate
+            );
+
+            eventProperties.tags.push(["encrypted", "1"]);
+            eventProperties.tags.push(["ivBase64", encrypted.ivBase64]);
+
             let event = new NDKEvent(ndk, eventProperties);
 
             try {
@@ -211,16 +237,12 @@ export const useNostrStore = defineStore("nostr", {
                 }
             });
 
-            // If it's an update, fetch the previous event
             if (isUpdate && prevNote) {
                 const versionTag = prevNote.tags.find((tag) => tag[0] === "v");
                 version = versionTag ? String(Number(versionTag[1]) + 1) : "2";
                 eventId = prevNote.id;
             }
 
-            // const customTags = keywordTags && keywordTags.length > 0 ? [...keywordTags] : [];
-
-            // Tags specific to updates or new notes
             const specificTags = [
                 ["v", version],
                 ["isUpdated", isUpdate ? "true" : "false"],
@@ -233,7 +255,6 @@ export const useNostrStore = defineStore("nostr", {
             return {
                 kind: note.kind || 1,
                 content: note.content,
-                // tags: [...baseTags, ...specificTags],
                 tags: [...baseTags, ...specificTags, ...userTags],
             };
         },
@@ -249,10 +270,23 @@ export const useNostrStore = defineStore("nostr", {
                 tags: event.tags,
             };
         },
-        processNoteEvent(event) {
+        async processNoteEvent(event) {
+            const isEncrypted = event.tags.some((tag) => tag[0] === "encrypted" && tag[1] === "1");
+            if (isEncrypted) {
+                try {
+                    const {secretBase64, saltBase64, ivBase64} = config.encryptionCredentials;
+                    let aesKey  = await deriveAESKey(secretBase64, saltBase64);
+                    const decrypted = await decrypt(aesKey, ivBase64, event.content);
+                    event.content = decrypted.content;
+                } catch (error) {
+                    console.error(`Failed to decrypt event content: ${error}`);
+                }
+            }
             this.filterToLatestNotes(event);
-            this.sortNoteEventsByDateDesc(); // this is a potentially expensive use of compute
+            this.sortNoteEventsByDateDesc(); // TODO: this is potentially expensive use of compute
+            // console.log("processed note event: ", JSON.stringify(event, null, 2) );
             console.log("Sorted note events by date desc:", this.noteEvents);
+            return event;
         },
         filterToLatestNotes(event) {
             const previousIdTag = event.tags.find((tag) => tag[0] === "e");

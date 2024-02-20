@@ -13,14 +13,17 @@
         "@fortawesome/fontawesome-svg-core": "^6.5.1",
         "@fortawesome/free-solid-svg-icons": "^6.5.1",
         "@fortawesome/vue-fontawesome": "^3.0.5",
+        "@noble/secp256k1": "^2.0.0",
         "@nostr-dev-kit/ndk": "^2.4.2",
+        "bitcoinjs-lib": "^6.1.5",
+        "browserify-cipher": "^1.0.1",
         "dompurify": "^3.0.6",
         "lodash": "^4.17.21",
         "markdown-it": "^14.0.0",
         "pinia": "^2.1.7",
+        "theme-change": "^2.5.0",
         "vue": "^3.4.13",
-        "vue-router": "^4.2.5",
-        "theme-change": "^2.5.0"
+        "vue-router": "^4.2.5"
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^5.0.4",
