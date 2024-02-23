@@ -76,8 +76,9 @@ export const useNostrStore = defineStore("nostr", {
 
                 for (const event of eventsArray) {
                     const mappedEvent = this.createMappedEvent(event);
+                    // this.noteEvents.push(mappedEvent);
+                    const processedNote = await this.processNoteEvent(mappedEvent);
                     this.noteEvents.push(mappedEvent);
-                    const processedNote = await this.processNoteEvent(event);
                     console.log("processed note event:", processedNote);
                 }
 
@@ -277,7 +278,7 @@ export const useNostrStore = defineStore("nostr", {
                     const {secretBase64, saltBase64, ivBase64} = config.encryptionCredentials;
                     let aesKey  = await deriveAESKey(secretBase64, saltBase64);
                     const decrypted = await decrypt(aesKey, ivBase64, event.content);
-                    event.content = decrypted.content;
+                    event.content = decrypted;
                 } catch (error) {
                     console.error(`Failed to decrypt event content: ${error}`);
                 }

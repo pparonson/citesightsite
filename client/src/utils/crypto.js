@@ -48,7 +48,7 @@ export const encrypt = async (aesKey, ivBase64, content) => {
 
 export const decrypt = async (aesKey, ivBase64, content) => {
     const decrypted = await window.crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv: fromBase64(ivBase64) }, fromBase64(aesKey), fromBase64(content)
+        { name: 'AES-GCM', iv: fromBase64(ivBase64) }, aesKey, fromBase64(content)
     );
     const decoded = new TextDecoder().decode(decrypted);
 

@@ -74,9 +74,9 @@
                 console.error("Error fetching events:", error);
             });
 
-            nostrStore.subscribeToEvents(settings).catch((error) => {
-                console.error("Error subscribing to events:", error);
-            });
+            // nostrStore.subscribeToEvents(settings).catch((error) => {
+            //     console.error("Error subscribing to events:", error);
+            // });
 
             return {
                 filterNotes,
