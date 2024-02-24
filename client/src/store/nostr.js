@@ -262,29 +262,6 @@ export const useNostrStore = defineStore("nostr", {
                 this.noteEvents = this.noteEvents.filter((e) => e.id !== previousId);
             }
         },
-        updateNoteEvents(note, newId, isUpdate) {
-            const updatedNote = { ...note, id: newId };
-            const existingEventIndex = this.noteEvents.findIndex((e) => e.id === updatedNote.id);
-
-            if (existingEventIndex !== -1) {
-                const existingVersionTag = this.noteEvents[existingEventIndex].tags.find((tag) => tag[0] === "v");
-                const incomingVersionTag = updatedNote.tags.find((tag) => tag[0] === "v");
-                if (existingVersionTag && incomingVersionTag && existingVersionTag[1] < incomingVersionTag[1]) {
-                    // Incoming event is newer. Update the existing event with new data.
-                    this.noteEvents[existingEventIndex] = updatedNote;
-                }
-            } else {
-                this.noteEvents.push(updatedNote);
-            }
-            // if (isUpdate) {
-            //     const index = this.noteEvents.findIndex((e) => e.id === note.id);
-            //     if (index !== -1) {
-            //         this.noteEvents[index] = updatedNote;
-            //     }
-            // } else {
-            //     this.noteEvents.push(updatedNote);
-            // }
-        },
         setSelectedNoteById(noteId) {
             const note = this.noteEvents.find((n) => n.id === noteId);
             this.selectedNote = note ? { ...note } : null;
