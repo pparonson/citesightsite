@@ -69,24 +69,13 @@ export const useNostrStore = defineStore("nostr", {
                 const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
                 const events = await ndk.fetchEvents(filter);
                 const eventsArray = Array.from(events);
-                // eventsArray.forEach((event) => {
-                //     const mappedEvent = this.createMappedEvent(event);
-                //     this.noteEvents.push(mappedEvent);
-                // });
 
                 for (const event of eventsArray) {
                     const mappedEvent = this.createMappedEvent(event);
-                    // this.noteEvents.push(mappedEvent);
                     const processedNote = await this.processNoteEvent(mappedEvent);
-                    this.noteEvents.push(mappedEvent);
                     console.log("processed note event:", processedNote);
                 }
-
-                // console.log("Fetched events:", this.noteEvents);
-                // for (const event of this.noteEvents) {
-                //    await this.processNoteEvent(event);
-                // }
-                console.log("Fetched and filtered events:", this.noteEvents);
+                this.sortNoteEventsByDateTag();
             } catch (error) {
                 console.error("Error fetching events:", error);
                 throw error;
@@ -104,7 +93,6 @@ export const useNostrStore = defineStore("nostr", {
                     if (this.isFetchingInitialEvents) return;
                     const existingEventIndex = this.noteEvents.findIndex((event) => event.id === e.id);
                     const mappedEvent = this.createMappedEvent(e);
-                    console.log("Fetched event: ", this.noteEvents);
 
                     if (existingEventIndex !== -1) {
                         // TODO: subscribeToEvents does not correctly filter latest event independent of fetchEvents
@@ -115,7 +103,6 @@ export const useNostrStore = defineStore("nostr", {
                         if (existingVersionTag && incomingVersionTag && existingVersionTag[1] < incomingVersionTag[1]) {
                             // Incoming event is newer. Update the existing event with new data.
                             this.noteEvents[existingEventIndex] = mappedEvent;
-                            console.log("Fetched and filtered event:", mappedEvent);
                         }
                     } else {
                         // It's a new event, add it to the array
@@ -124,12 +111,13 @@ export const useNostrStore = defineStore("nostr", {
 
                     const processedNote = this.processNoteEvent(mappedEvent);
                     console.log("processed note event:", processedNote);
+
+                    this.sortNoteEventsByDateTag();
+                    console.log("Sorted note events by date desc:", this.noteEvents);
                 });
 
                 subscription.on("error", (error) => {
-                    console.error("Subscription error:", error);
-                    // Handle subscription errors here, e.g., reconnect or notify the user
-                    // For example, you can dispatch the fetchEvents action as a fallback mechanism
+                    console.error("Subscription to note events error:", error);
                     this.fetchEvents(settings);
                 });
             } catch (error) {
@@ -161,8 +149,7 @@ export const useNostrStore = defineStore("nostr", {
                     tags: event.tags,
                 };
 
-                this.note = JSON.parse(JSON.stringify(mappedEvent));
-                return this.note;
+                return this.note = await this.processNoteEvent( JSON.parse(JSON.stringify( mappedEvent) ));
             } catch (error) {
                 console.error("Error fetching event detail:", error);
                 throw error;
@@ -186,19 +173,14 @@ export const useNostrStore = defineStore("nostr", {
             let event = new NDKEvent(ndk, eventProperties);
 
             try {
-                // Publish the event and update local state
                 const published = await ndk.publish(event);
-                console.log(`Published: ${JSON.stringify(published, null, 2)}`);
-
-                // method to update the notes array
                 this.updateNoteEvents(note, published.id, isUpdate);
             } catch (error) {
                 console.error("Error publishing event:", error);
                 throw error;
             }
         },
-
-        sortNoteEventsByDateDesc() {
+        sortNoteEventsByDateTag() {
             this.noteEvents.sort((a, b) => {
                 // Extract date strings from tags
                 const dateATag = a.tags.find((tag) => tag[0] === "d");
@@ -283,10 +265,9 @@ export const useNostrStore = defineStore("nostr", {
                     console.error(`Failed to decrypt event content: ${error}`);
                 }
             }
+
+            this.noteEvents.push(event);
             this.filterToLatestNotes(event);
-            this.sortNoteEventsByDateDesc(); // TODO: this is potentially expensive use of compute
-            // console.log("processed note event: ", JSON.stringify(event, null, 2) );
-            console.log("Sorted note events by date desc:", this.noteEvents);
             return event;
         },
         filterToLatestNotes(event) {

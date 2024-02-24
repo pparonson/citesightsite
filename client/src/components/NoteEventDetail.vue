@@ -45,11 +45,9 @@
         },
         setup(props) {
             const router = useRouter();
-            // const { getNoteEventFromState, fetchNoteEventById, publishEvent } = useNostrStore();
             const nostrStore = useNostrStore();
             let { note } = storeToRefs(useNostrStore());
             let localNote = ref({ tags: [] });
-            // Data property for the new tag
             let newTag = ref("");
             const noteTitle = computed(() => {
                 const titleTag = localNote.value.tags?.find(([key]) => key === "title");
@@ -65,7 +63,7 @@
                 try {
                     await nostrStore.publishEvent(noteToSave);
                     const settings = { npub: nostrStore.user?.npub, kinds: [1, 30023] };
-                    // await nostrStore.fetchEvents(settings);
+                    await nostrStore.fetchEvents(settings);
                     await nostrStore.subscribeToEvents(settings);
                     router.push("/");
                 } catch (error) {
