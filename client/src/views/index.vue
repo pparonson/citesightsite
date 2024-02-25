@@ -28,7 +28,7 @@
         },
         setup() {
             const nostrStore = useNostrStore();
-            const { user, fetchEvents, subscribeToEvents, noteEvents, setSelectedNoteById, selectedNote } =
+            const { user, fetchEvents, subscribeToEvents, sortEventsByDateTag, noteEvents, setSelectedNoteById, selectedNote } =
                 storeToRefs(nostrStore);
             const searchTerm = ref("");
             const filterNotes = (term) => {
@@ -54,10 +54,13 @@
             onMounted(async () => {
                 const settings = { npub: user?.value?.npub, kinds: [1, 30023] };
                 try {
-                    await nostrStore.fetchEvents(settings);
-                    await nostrStore.subscribeToEvents(settings);
+                    // await nostrStore.fetchEvents(settings);
+                    // await nostrStore.subscribeToEvents(settings);
+                    
                 } catch (error) {
                     console.error('Error during onMounted data fetching or subscription setup:', error);
+                } finally {
+                    // nostrStore.sortEventsByDateTag();
                 }
             });
 
@@ -80,13 +83,13 @@
 
             const settings = { npub: user?.npub, kinds: [1, 30023] };
 
-            // nostrStore.fetchEvents(settings).catch((error) => {
-            //     console.error("Error fetching events:", error);
-            // });
+            nostrStore.fetchEvents(settings).catch((error) => {
+                console.error("Error fetching events:", error);
+            });
 
-            // nostrStore.subscribeToEvents(settings).catch((error) => {
-            //     console.error("Error subscribing to events:", error);
-            // });
+            nostrStore.subscribeToEvents(settings).catch((error) => {
+                console.error("Error subscribing to events:", error);
+            });
 
             return {
                 filterNotes,

@@ -21,7 +21,7 @@ export const useNostrStore = defineStore("nostr", {
             noteEvents: [],
             note: {},
             selectedNote: null,
-            isFetchingInitialEvents: false,
+            isFetchingEvents: true,
         };
     },
 
@@ -59,7 +59,7 @@ export const useNostrStore = defineStore("nostr", {
             }
         },
         async fetchEvents(settings) {
-            this.isFetchingInitialEvents = true;
+            this.isFetchingEvents = true;
             try {
                 const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
                 const events = await ndk.fetchEvents(filter);
@@ -74,7 +74,7 @@ export const useNostrStore = defineStore("nostr", {
                 console.error("Error fetching events:", error);
                 throw error;
             } finally {
-                this.isFetchingInitialEvents = false;
+                this.isFetchingEvents = false;
             }
         },
         async subscribeToEvents(settings) {
@@ -84,9 +84,10 @@ export const useNostrStore = defineStore("nostr", {
 
                 subscription.on("event", async (e) => {
                     // debounce if still fetching initial notes
-                    if (this.isFetchingInitialEvents) return;
+                    if (this.isFetchingEvents) return;
                     const mappedEvent = this.createMappedEvent(e);
                     await this.processNoteEvent(mappedEvent);
+                    this.sortNoteEventsByDateTag();
                 });
 
                 subscription.on("error", (error) => {
@@ -96,9 +97,7 @@ export const useNostrStore = defineStore("nostr", {
             } catch (error) {
                 console.error("Error subscribing to events:", error);
                 throw error;
-            } finally {
-                this.sortNoteEventsByDateTag();
-            }
+            } 
         },
         getNoteEventFromState(id) {
             const event = this.noteEvents.find((e) => e.id === id);
