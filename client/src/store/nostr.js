@@ -87,7 +87,6 @@ export const useNostrStore = defineStore("nostr", {
                     if (this.isFetchingInitialEvents) return;
                     const mappedEvent = this.createMappedEvent(e);
                     await this.processNoteEvent(mappedEvent);
-                    this.sortNoteEventsByDateTag();
                 });
 
                 subscription.on("error", (error) => {
@@ -97,6 +96,8 @@ export const useNostrStore = defineStore("nostr", {
             } catch (error) {
                 console.error("Error subscribing to events:", error);
                 throw error;
+            } finally {
+                this.sortNoteEventsByDateTag();
             }
         },
         getNoteEventFromState(id) {

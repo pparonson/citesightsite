@@ -13,7 +13,7 @@
 </template>
 
 <script>
-    import { ref, computed, watch } from "vue";
+    import { ref, onMounted, computed, watch } from "vue";
     import MenuBar from "@/components/MenuBar.vue";
     import NoteEventList from "@/components/NoteEventList.vue";
     import NoteEventDetailDisplay from "@/components/NoteEventDetailDisplay.vue";
@@ -51,6 +51,16 @@
                 nostrStore.setSelectedNoteById(noteId);
             };
 
+            onMounted(async () => {
+                const settings = { npub: user?.value?.npub, kinds: [1, 30023] };
+                try {
+                    await nostrStore.fetchEvents(settings);
+                    await nostrStore.subscribeToEvents(settings);
+                } catch (error) {
+                    console.error('Error during onMounted data fetching or subscription setup:', error);
+                }
+            });
+
             watch(selectedNote, (newValue) => {
                 console.log("selectedNote changed: ", newValue);
             });
@@ -70,13 +80,13 @@
 
             const settings = { npub: user?.npub, kinds: [1, 30023] };
 
-            nostrStore.fetchEvents(settings).catch((error) => {
-                console.error("Error fetching events:", error);
-            });
+            // nostrStore.fetchEvents(settings).catch((error) => {
+            //     console.error("Error fetching events:", error);
+            // });
 
-            nostrStore.subscribeToEvents(settings).catch((error) => {
-                console.error("Error subscribing to events:", error);
-            });
+            // nostrStore.subscribeToEvents(settings).catch((error) => {
+            //     console.error("Error subscribing to events:", error);
+            // });
 
             return {
                 filterNotes,

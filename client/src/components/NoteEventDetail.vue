@@ -61,13 +61,14 @@
                     kind: localNote.value.kind || 1,
                 };
                 try {
-                    await nostrStore.publishEvent(noteToSave);
                     const settings = { npub: nostrStore.user?.npub, kinds: [1, 30023] };
+                    await nostrStore.publishEvent(noteToSave);
                     // await nostrStore.fetchEvents(settings);
                     // await nostrStore.subscribeToEvents(settings);
-                    router.push("/");
                 } catch (error) {
                     console.error(`Error publishing note event detail: ${error}`);
+                } finally {
+                    router.push("/");
                 }
             };
 
