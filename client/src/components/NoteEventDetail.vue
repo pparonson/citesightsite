@@ -53,7 +53,7 @@
                 const titleTag = localNote.value.tags?.find(([key]) => key === "title");
                 return titleTag ? titleTag[1] : "Unknown Title";
             });
-
+        
             const saveNote = async () => {
                 const noteToSave = {
                     ...localNote.value,
