@@ -20,7 +20,6 @@
         },
         setup() {
             const router = useRouter();
-
             const eventId = computed(() => {
                 const currentRoute = router.currentRoute.value;
                 const params = currentRoute.params;

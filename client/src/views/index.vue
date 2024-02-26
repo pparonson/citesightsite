@@ -28,7 +28,7 @@
         },
         setup() {
             const nostrStore = useNostrStore();
-            const { user, fetchEvents, subscribeToEvents, sortEventsByDateTag, noteEvents, setSelectedNoteById, selectedNote } =
+            const { user, fetchEvents, subscribeToEvents, sortNoteEventsByDateTag, noteEvents, setSelectedNoteById, selectedNote } =
                 storeToRefs(nostrStore);
             const searchTerm = ref("");
             const filterNotes = (term) => {
@@ -52,15 +52,19 @@
             };
 
             onMounted(async () => {
-                const settings = { npub: user?.value?.npub, kinds: [1, 30023] };
-                try {
+                // if (!selectedNote?.value?.id) {
+                //     nostrStore.setSelectedNoteById(newNoteEvents[0].id);
+                //
+                // }
+                const settings = { npub: user?.value?.npub, kinds: [1, 30023] }; try {
                     // await nostrStore.fetchEvents(settings);
                     // await nostrStore.subscribeToEvents(settings);
-                    
+                    // nostrStore.sortNoteEventsByDateTag();
                 } catch (error) {
                     console.error('Error during onMounted data fetching or subscription setup:', error);
                 } finally {
-                    // nostrStore.sortEventsByDateTag();
+                    // nostrStore.setSelectedNoteById(newNoteEvents[0].id);
+                    // nostrStore.sortNoteEventsByDateTag();
                 }
             });
 
@@ -71,9 +75,12 @@
             watch(
                 noteEvents,
                 (newNoteEvents) => {
-                    if (newNoteEvents?.value?.length > 0 && !selectedNote.value) {
-                        nostrStore.setSelectedNoteById(noteId);
-                        console.log("selectedNote: ", selectedNote.value);
+                    if (newNoteEvents?.length > 0) {
+                        // nostrStore.sortNoteEventsByDateTag();
+                        if (!selectedNote.value) {
+                            nostrStore.setSelectedNoteById(newNoteEvents[0].id);
+                            console.log("selectedNote: ", selectedNote.value);
+                        } 
                     }
                 },
                 {
