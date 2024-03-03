@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-gray-100 p-2 my-2 rounded-md">
+    <div :class="noteClasses" class="p-2 my-2 rounded-md">
         <div>{{ noteTitle }}</div>
         <div class="" v-html="renderedContent"></div>
         <Tags :tags="noteEvent?.tags" />
@@ -11,7 +11,10 @@
     import MarkdownIt from "markdown-it";
     import DOMPurify from "dompurify";
     import Tags from "@/components/Tags.vue";
-    import { ref, computed } from "vue";
+    import { ref, computed, watch } from "vue";
+    import { useNostrStore } from "@/store/nostr";
+    import { storeToRefs } from "pinia";
+
     export default {
         components: {
             Tags,
@@ -23,6 +26,8 @@
             },
         },
         setup(props) {
+            const nostrStore = useNostrStore();
+            const { selectedNote } = storeToRefs(nostrStore);
             const md = new MarkdownIt();
             const noteTitle = computed(() => {
                 const titleTag = props.noteEvent.tags?.find(([key]) => key === "title");
@@ -33,10 +38,17 @@
                 const html = md.render(content.length > 200 ? content.substring(0, 200) : content);
                 return DOMPurify.sanitize(html);
             });
+            let isSelected = computed(() => selectedNote?.value?.id === props.noteEvent.id);
+            let noteClasses = computed(() => ({
+                'bg-orange-100': isSelected.value,
+                'bg-gray-100': !isSelected.value,
+            }));
 
             return {
                 noteTitle,
                 renderedContent,
+                isSelected,
+                noteClasses,
             };
         },
     };

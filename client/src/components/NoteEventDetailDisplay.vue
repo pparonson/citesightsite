@@ -16,6 +16,18 @@
     import { useRoute, useRouter } from "vue-router";
     import { storeToRefs } from "pinia";
 
+function updateLinksToOpenInNewTabs(htmlString) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, 'text/html');
+  const links = doc.querySelectorAll('a');
+
+  links.forEach(link => {
+    link.setAttribute('target', '_blank');
+    link.setAttribute('rel', 'noopener noreferrer');
+  });
+
+  return doc.body.innerHTML;
+}
     export default {
         components: {
             Tags,
@@ -36,16 +48,20 @@
             };
 
             watch(selectedNote, (newValue) => {
-                console.log("selectedNote changed: ", newValue);
-                console.log("selectedNote changed: ", selectedNote.value);
+                // console.log("selectedNote changed: ", newValue);
+                // console.log("selectedNote changed: ", selectedNote.value);
                 noteEvent.value = newValue;
                 const titleTag = noteEvent?.value?.tags?.find(([key]) => key === "title");
                 noteTitle.value = titleTag ? titleTag[1] : "Unknown Title";
 
                 // Markdown update
                 const content = noteEvent?.value?.content || "";
-                const markdownOutput = md.render(content);
-                renderedContent.value = DOMPurify.sanitize(markdownOutput);
+                let markdownOutput = md.render(content);
+                // Update hyperlinks to open in new tabs
+                markdownOutput = updateLinksToOpenInNewTabs(markdownOutput);
+                renderedContent.value = DOMPurify.sanitize(markdownOutput, {
+                    ADD_ATTR: ['target', 'rel'] // Allow "target" and "rel" attributes
+                });
             });
 
             return {
