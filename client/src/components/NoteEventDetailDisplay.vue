@@ -24,6 +24,7 @@ function updateLinksToOpenInNewTabs(htmlString) {
   links.forEach(link => {
     link.setAttribute('target', '_blank');
     link.setAttribute('rel', 'noopener noreferrer');
+    link.classList.add('text-blue-500', 'hover:text-blue-700');
   });
 
   return doc.body.innerHTML;
