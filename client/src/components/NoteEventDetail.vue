@@ -6,7 +6,7 @@
                 class="flex-1 overflow-auto mb-2 p-2 border border-gray-300 resize-none h-[80vh] max-h-[80vh]"
             ></textarea>
             <div class="flex flex-wrap mb-1">
-                <Tags :tags="localNote?.tags" :editable="true" @remove="handleTagRemoval" />
+                <Tags :tags="localNote?.tags || []" :editable="true" @remove="handleTagRemoval" />
             </div>
 
             <div class="flex mb-1">
@@ -46,7 +46,7 @@
         setup(props) {
             const router = useRouter();
             const nostrStore = useNostrStore();
-            let { note } = storeToRefs(useNostrStore());
+            let { note, setSelectedNoteById } = storeToRefs(nostrStore);
             let localNote = ref({ tags: [] });
             let newTag = ref("");
             const noteTitle = computed(() => {
@@ -61,10 +61,8 @@
                     kind: localNote.value.kind || 1,
                 };
                 try {
-                    const settings = { npub: nostrStore.user?.npub, kinds: [1, 30023] };
                     await nostrStore.publishEvent(noteToSave);
-                    // await nostrStore.fetchEvents(settings);
-                    // await nostrStore.subscribeToEvents(settings);
+                    nostrStore.setSelectedNoteById(null); // index.vue will reset selected note after re-fetch
                 } catch (error) {
                     console.error(`Error publishing note event detail: ${error}`);
                 } finally {

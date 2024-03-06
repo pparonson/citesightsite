@@ -31,7 +31,7 @@
         emits: ["noteSelected"],
         methods: {
             handleNoteClick(noteId) {
-                this.$emit("noteSelected", noteId); // Emit the selected note id
+                this.$emit("noteSelected", noteId);
             },
         },
     };

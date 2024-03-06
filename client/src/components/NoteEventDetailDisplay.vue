@@ -1,6 +1,6 @@
 <template>
     <div class="h-full p-2 my-1 bg-gray-100 rounded-md overflow-y-auto" @dblclick="handleDoubleClick">
-        <Tags :tags="noteEvent?.tags" />
+        <Tags :tags="noteEvent?.tags || []" />
         <div>{{ noteTitle }}</div>
         <p class="text-base text-xs overflow-hidden">ID: {{ noteEvent?.id }}</p>
         <div class="" v-html="renderedContent"></div>

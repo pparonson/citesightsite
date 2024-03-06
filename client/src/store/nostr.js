@@ -27,10 +27,15 @@ export const useNostrStore = defineStore("nostr", {
 
     actions: {
         async initializeNDK() {
+            localStorage.setItem('debug', 'ndk:*'); // debug NDK internals
             const nip07signer = new NDKNip07Signer();
             ndk = new NDK({
                 signer: nip07signer,
-                explicitRelayUrls: ["wss://relay.nostr.band", "wss://relay.damus.io", "wss://purplepag.es"],
+                explicitRelayUrls: [
+                    "wss://relay.nostr.band", 
+                    "wss://relay.damus.io", 
+                    // "wss://purplepag.es"
+                ],
             });
 
             try {
@@ -75,6 +80,7 @@ export const useNostrStore = defineStore("nostr", {
                 throw error;
             } finally {
                 this.isFetchingEvents = false;
+                return this.noteEvents;
             }
         },
         async subscribeToEvents(settings) {
@@ -92,7 +98,7 @@ export const useNostrStore = defineStore("nostr", {
 
                 subscription.on("error", (error) => {
                     console.error("Subscription to note events error:", error);
-                    this.fetchEvents(settings);
+                    // this.fetchEvents(settings);
                 });
             } catch (error) {
                 console.error("Error subscribing to events:", error);
@@ -161,8 +167,11 @@ export const useNostrStore = defineStore("nostr", {
                 const dateBTag = b.tags.find((tag) => tag[0] === "d");
 
                 // Try parsing the dates, invalid dates will become 'Invalid Date'
-                const dateA = new Date(dateATag ? dateATag[1] : NaN);
-                const dateB = new Date(dateBTag ? dateBTag[1] : NaN);
+                // const dateA = new Date(dateATag ? dateATag[1] : NaN);
+                // const dateB = new Date(dateBTag ? dateBTag[1] : NaN);
+
+                const dateA = a.created_at;
+                const dateB = b.created_at;
 
                 // Handle invalid dates by considering them as the largest possible date
                 // this ensures they are pushed to the end of the sorted array

@@ -2,7 +2,7 @@
     <div :class="noteClasses" class="p-2 my-2 rounded-md">
         <div>{{ noteTitle }}</div>
         <div class="" v-html="renderedContent"></div>
-        <Tags :tags="noteEvent?.tags" />
+        <Tags :tags="noteEvent?.tags || []" />
         <p class="text-base text-xs">ID: {{ noteEvent.id }}</p>
     </div>
 </template>
