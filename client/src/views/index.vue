@@ -1,12 +1,12 @@
 <template>
     <div class="flex h-screen">
-        <div class="flex flex-col w-1/3 p-1 overflow-hidden">
+        <div class="flex flex-col w-1/4 p-1 overflow-hidden">
             <MenuBar :menuTarget="'/settings'" @search="filterNotes" />
             <div class="flex flex-1 overflow-y-auto overflow-x-hidden">
                 <NoteEventList :noteEvents="filteredNoteEvents" @noteSelected="handleNoteSelected" />
             </div>
         </div>
-        <div class="flex flex-col h-full w-2/3 overflow-y-auto overflow-x-hidden">
+        <div class="flex flex-col h-full w-3/4 overflow-y-auto overflow-x-hidden">
             <NoteEventDetailDisplay />
         </div>
     </div>

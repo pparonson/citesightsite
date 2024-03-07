@@ -170,8 +170,8 @@ export const useNostrStore = defineStore("nostr", {
                 // const dateA = new Date(dateATag ? dateATag[1] : NaN);
                 // const dateB = new Date(dateBTag ? dateBTag[1] : NaN);
 
-                const dateA = a.created_at;
-                const dateB = b.created_at;
+                const dateA = a.created_at ? a.created_at : NaN;
+                const dateB = b.created_at ? b.created_at : NaN;
 
                 // Handle invalid dates by considering them as the largest possible date
                 // this ensures they are pushed to the end of the sorted array
@@ -183,7 +183,8 @@ export const useNostrStore = defineStore("nostr", {
             });
         },
         async handleCreateUpdate(note, isUpdate) {
-            const prevNote = await this.fetchNoteEventById(note?.id);
+            // if update, get prevNote and if create, set as null
+            const prevNote = note.id ? await this.fetchNoteEventById(note.id) : null;
             let title =
                 isUpdate && prevNote?.tags?.find((tag) => tag[0] === "title")
                     ? String(prevNote.tags.find((tag) => tag[0] === "title")[1])
