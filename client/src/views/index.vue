@@ -28,23 +28,39 @@
         },
         setup() {
             const nostrStore = useNostrStore();
-            const { user, fetchEvents, subscribeToEvents, sortNoteEventsByDateTag, noteEvents, setSelectedNoteById, selectedNote } =
-                storeToRefs(nostrStore);
-            const searchTerm = ref("");
-            const filterNotes = (term) => {
-                searchTerm.value = term;
+            const { user, 
+                fetchEvents, 
+                subscribeToEvents, 
+                sortNoteEventsByDateTag, 
+                noteEvents, 
+                setSelectedNoteById, 
+                selectedNote 
+            } = storeToRefs(nostrStore);
+            const searchParams = ref({ term: "", scope: "all" });
+            const filterNotes = (params) => {
+                searchParams.value = params;
             };
 
             const filteredNoteEvents = computed(() => {
-                if (searchTerm?.value) {
-                    return noteEvents?.value?.filter(
-                        (noteEvent) =>
-                            noteEvent?.content?.includes(searchTerm.value) ||
-                            (noteEvent?.tags && noteEvent?.tags?.includes(searchTerm.value))
-                    );
-                } else {
+                const { term, scope } = searchParams.value;
+                if (!term) {
                     return noteEvents.value;
                 }
+
+                return noteEvents.value.filter((noteEvent) => {
+                    // Get tags of type 't' for this note event
+                    const userTags = (noteEvent.tags || []).filter(tag => tag[0] === 't').map(tag => tag[1]);
+
+                    // Perform different comparisons based on search scope
+                    switch (scope) {
+                        case 'all':
+                            return noteEvent.content.includes(term) || userTags.includes(term);
+                        case 'userTags':
+                            return userTags.includes(term);
+                        default:
+                            return false;
+                    }
+                });
             });
 
             const handleNoteSelected = (noteId) => {

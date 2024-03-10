@@ -4,12 +4,19 @@
             <font-awesome-icon icon="gear" aria-label="Settings" />
         </router-link>
 
+        <!-- Dropdown for selecting the search scope -->
+        <select v-model="searchScope" class="w-2/12 rounded-md border border-gray-300">
+            <option value="all">All</option>
+            <option value="userTags">User Tags Only</option>
+            <!-- Add more options for other filters in the future here -->
+        </select>
+
         <input
-            v-model="searchQuery"
+            v-model="searchTerm"
             @input="onInput"
             type="text"
             placeholder="Search"
-            class="w-11/12 h-10 px-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:border-blue-300"
+            class="w-9/12 h-10 px-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:border-blue-300"
         />
 
         <router-link :to="'/note/new'">
@@ -32,10 +39,12 @@
             },
         },
         setup(props, { emit }) {
-            const searchQuery = ref("");
+            const searchTerm = ref("");
+        const searchScope = ref("all");
 
             const onInput = debounce(() => {
-                emit("search", searchQuery.value);
+                // emit("search", searchTerm.value);
+                emit("search", { term: searchTerm.value, scope: searchScope.value });
             }, 300);
 
             const createNewNote = () => {
@@ -43,7 +52,8 @@
             };
 
             return {
-                searchQuery,
+                searchTerm,
+                searchScope,
                 onInput,
                 createNewNote,
             };
