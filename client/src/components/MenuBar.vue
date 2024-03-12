@@ -4,11 +4,9 @@
             <font-awesome-icon icon="gear" aria-label="Settings" />
         </router-link>
 
-        <!-- Dropdown for selecting the search scope -->
-        <select v-model="searchScope" class="w-2/12 rounded-md border border-gray-300">
+        <select v-model="searchScope" class="select select-bordered select-sm w-2/12 h-10 rounded-md focus:outline-none focus:border-blue-300">
             <option value="all">All</option>
-            <option value="userTags">User Tags Only</option>
-            <!-- Add more options for other filters in the future here -->
+            <option value="userTags">Tags</option>
         </select>
 
         <input
@@ -16,7 +14,7 @@
             @input="onInput"
             type="text"
             placeholder="Search"
-            class="w-9/12 h-10 px-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:border-blue-300"
+            class="w-10/12 h-10 px-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:border-blue-300"
         />
 
         <router-link :to="'/note/new'">

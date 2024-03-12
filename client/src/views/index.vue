@@ -1,12 +1,12 @@
 <template>
     <div class="flex h-screen">
-        <div class="flex flex-col w-1/4 p-1 overflow-hidden">
+        <div class="flex flex-col w-1/3 p-1 overflow-hidden">
             <MenuBar :menuTarget="'/settings'" @search="filterNotes" />
             <div class="flex flex-1 overflow-y-auto overflow-x-hidden">
                 <NoteEventList :noteEvents="filteredNoteEvents" @noteSelected="handleNoteSelected" />
             </div>
         </div>
-        <div class="flex flex-col h-full w-3/4 overflow-y-auto overflow-x-hidden">
+        <div class="flex flex-col h-full w-2/3 overflow-y-auto overflow-x-hidden">
             <NoteEventDetailDisplay />
         </div>
     </div>
@@ -45,26 +45,30 @@
                 const { term, scope } = searchParams.value;
                 if (!term) {
                     return noteEvents.value;
+                } else {
+                    const lowercasedTerm = term.toLowerCase();
+
+                    return noteEvents.value.filter((noteEvent) => {
+                        // Get tags of type 't' for this note event
+                        const userTags = (noteEvent.tags || [])
+                            .filter(tag => tag[0] === 't')
+                            .map(tag => tag[1].toLowerCase());
+
+                        // Perform different comparisons based on search scope
+                        switch (scope) {
+                            case 'all':
+                                return noteEvent.content.includes(lowercasedTerm) || userTags.includes(lowercasedTerm);
+                            case 'userTags':
+                                return userTags.includes(lowercasedTerm);
+                            default:
+                                return false;
+                        }
+                    });
                 }
-
-                return noteEvents.value.filter((noteEvent) => {
-                    // Get tags of type 't' for this note event
-                    const userTags = (noteEvent.tags || []).filter(tag => tag[0] === 't').map(tag => tag[1]);
-
-                    // Perform different comparisons based on search scope
-                    switch (scope) {
-                        case 'all':
-                            return noteEvent.content.includes(term) || userTags.includes(term);
-                        case 'userTags':
-                            return userTags.includes(term);
-                        default:
-                            return false;
-                    }
-                });
             });
 
             const handleNoteSelected = (noteId) => {
-                nostrStore.setSelectedNoteById(noteId);
+                nostrStore.setSelectedNoteById(noteId)
             };
 
             const settings = { npub: user?.npub, kinds: [1, 30023] };
