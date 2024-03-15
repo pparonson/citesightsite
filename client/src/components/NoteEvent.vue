@@ -15,6 +15,20 @@
     import { useNostrStore } from "@/store/nostr";
     import { storeToRefs } from "pinia";
 
+    function disableLinks(htmlString) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlString, "text/html");
+        const links = doc.querySelectorAll("a");
+
+        links.forEach((link) => {
+            link.removeAttribute("href"); // Remove the href attribute
+            link.style.pointerEvents = "none"; // Disable pointer events
+            link.style.color = "inherit"; // Make links the same color as the text
+            link.style.textDecoration = "none"; // Remove the underline from links to indicate they are inactive
+        });
+
+        return doc.body.innerHTML;
+    }
     export default {
         components: {
             Tags,
@@ -35,13 +49,14 @@
             });
             const renderedContent = computed(() => {
                 const content = props.noteEvent?.content || "";
-                const html = md.render(content.length > 200 ? content.substring(0, 200) : content);
+                let html = md.render(content.length > 200 ? content.substring(0, 200) : content);
+                html = disableLinks(html);
                 return DOMPurify.sanitize(html);
             });
             let isSelected = computed(() => selectedNote?.value?.id === props.noteEvent.id);
             let noteClasses = computed(() => ({
-                'bg-orange-100': isSelected.value,
-                'bg-gray-100': !isSelected.value,
+                "bg-orange-100": isSelected.value,
+                "bg-gray-100": !isSelected.value,
             }));
 
             return {
