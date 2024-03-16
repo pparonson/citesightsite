@@ -21,10 +21,10 @@
         const links = doc.querySelectorAll("a");
 
         links.forEach((link) => {
-            link.removeAttribute("href"); // Remove the href attribute
+            link.removeAttribute("href"); // Remove href attribute
             link.style.pointerEvents = "none"; // Disable pointer events
-            link.style.color = "inherit"; // Make links the same color as the text
-            link.style.textDecoration = "none"; // Remove the underline from links to indicate they are inactive
+            link.style.color = "inherit"; // Make links the same color as text
+            link.style.textDecoration = "none"; // Remove underline from links to indicate inactive
         });
 
         return doc.body.innerHTML;
