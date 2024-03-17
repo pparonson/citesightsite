@@ -4,12 +4,16 @@
             <font-awesome-icon icon="gear" aria-label="Settings" />
         </router-link>
 
-        <select v-model="searchScope" class="select select-bordered select-sm w-2/12 h-10 rounded-md focus:outline-none focus:border-blue-300">
+        <select 
+            v-if="!isSettingsRoute"
+            v-model="searchScope" 
+            class="select select-bordered select-sm w-2/12 h-10 rounded-md focus:outline-none focus:border-blue-300">
             <option value="all">All</option>
             <option value="userTags">Tags</option>
         </select>
 
         <input
+            v-if="!isSettingsRoute"
             v-model="searchTerm"
             @input="onInput"
             type="text"
@@ -17,17 +21,19 @@
             class="w-10/12 h-10 px-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:border-blue-300"
         />
 
-        <router-link :to="'/note/new'">
+        <router-link :to="'/note/new'" v-if="!isSettingsRoute">
             <div @click="createNewNote" class="text-xl mr-1">
-                <font-awesome-icon icon="calendar-day" aria-label="Add new note" />
+                <!-- <font-awesome-icon icon="calendar-day" aria-label="Add new note" /> -->
+                <font-awesome-icon icon="square-plus" aria-label="Add new note" />
             </div>
         </router-link>
     </div>
 </template>
 
 <script>
-    import { ref } from "vue";
+    import { ref, computed } from "vue";
     import { debounce } from "lodash";
+    import { useRouter } from "vue-router";
 
     export default {
         props: {
@@ -38,7 +44,12 @@
         },
         setup(props, { emit }) {
             const searchTerm = ref("");
-        const searchScope = ref("all");
+            const searchScope = ref("all");
+            const router = useRouter();
+
+            const isSettingsRoute = computed(() => {
+                return router.currentRoute.value.name.toLowerCase() === 'settings';
+            });
 
             const onInput = debounce(() => {
                 // emit("search", searchTerm.value);
@@ -52,6 +63,7 @@
             return {
                 searchTerm,
                 searchScope,
+                isSettingsRoute,
                 onInput,
                 createNewNote,
             };

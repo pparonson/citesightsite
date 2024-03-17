@@ -9,6 +9,7 @@ import {
     faPen,
     faXmark,
     faCalendarDay,
+    faSquarePlus,
     faSpinner,
     faTags,
 } from "@fortawesome/free-solid-svg-icons";
@@ -20,7 +21,7 @@ import "./assets/main.css";
 
 async function init() {
     config.autoAddCss = false; // this setting provides more control the imported css
-    library.add(faAnglesLeft, faGear, faPen, faXmark, faCalendarDay, faSpinner, faTags);
+    library.add(faAnglesLeft, faGear, faPen, faXmark, faCalendarDay, faSquarePlus, faSpinner, faTags);
 
     const app = createApp(App);
     const pinia = createPinia();

@@ -1,6 +1,6 @@
 <template>
     <div class="flex flex-col h-[90vh] overflow-hidden px-2 py-1 space-y-2">
-        <form class="flex flex-col flex-1" @submit.prevent="saveNote">
+        <form class="flex flex-col flex-1" @submit.prevent="handleSave">
             <textarea
                 v-model="localNote.content"
                 class="flex-1 overflow-auto mb-2 p-2 border border-gray-300 resize-none h-[80vh] max-h-[80vh]"
@@ -54,7 +54,7 @@
                 return titleTag ? titleTag[1] : "Unknown Title";
             });
         
-            const saveNote = async () => {
+            const handleSave = async () => {
                 const noteToSave = {
                     ...localNote.value,
                     content: localNote.value?.content,
@@ -110,7 +110,7 @@
                 localNote,
                 newTag,
                 note: JSON.parse(JSON.stringify(localNote.value)),
-                saveNote,
+                handleSave,
                 noteTitle,
                 handleTagRemoval,
                 addTag,
