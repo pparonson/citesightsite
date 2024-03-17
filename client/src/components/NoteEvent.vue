@@ -1,9 +1,9 @@
 <template>
     <div :class="noteClasses" class="p-2 my-2 rounded-md">
         <div>{{ noteTitle }}</div>
-        <div class="" v-html="renderedContent"></div>
+        <div v-html="renderedContent"></div>
         <Tags :tags="noteEvent?.tags || []" />
-        <p class="text-base text-xs">ID: {{ noteEvent.id }}</p>
+        <p class="text-xs">ID: {{ noteEvent.id }}</p>
     </div>
 </template>
 
@@ -49,7 +49,7 @@
             });
             const renderedContent = computed(() => {
                 const content = props.noteEvent?.content || "";
-                let html = md.render(content.length > 200 ? content.substring(0, 200) : content);
+                let html = md.render(content.length > 100 ? content.substring(0, 100) : content);
                 html = disableLinks(html);
                 return DOMPurify.sanitize(html);
             });
