@@ -28,13 +28,14 @@
         },
         setup() {
             const nostrStore = useNostrStore();
-            const { user, 
-                fetchEvents, 
-                subscribeToEvents, 
-                sortNoteEventsByDateTag, 
-                noteEvents, 
-                setSelectedNoteById, 
-                selectedNote 
+            const {
+                user,
+                fetchEvents,
+                subscribeToEvents,
+                sortNoteEventsByDateTag,
+                noteEvents,
+                setSelectedNoteById,
+                selectedNote,
             } = storeToRefs(nostrStore);
             const searchParams = ref({ term: "", scope: "all" });
             const filterNotes = (params) => {
@@ -51,14 +52,14 @@
                     return noteEvents.value.filter((noteEvent) => {
                         // Get tags of type 't' for this note event
                         const userTags = (noteEvent.tags || [])
-                            .filter(tag => tag[0] === 't')
-                            .map(tag => tag[1].toLowerCase());
+                            .filter((tag) => tag[0] === "t")
+                            .map((tag) => tag[1].toLowerCase());
 
                         // Perform different comparisons based on search scope
                         switch (scope) {
-                            case 'all':
+                            case "all":
                                 return noteEvent.content.includes(lowercasedTerm) || userTags.includes(lowercasedTerm);
-                            case 'userTags':
+                            case "userTags":
                                 return userTags.includes(lowercasedTerm);
                             default:
                                 return false;
@@ -68,19 +69,22 @@
             });
 
             const handleNoteSelected = (noteId) => {
-                nostrStore.setSelectedNoteById(noteId)
+                nostrStore.setSelectedNoteById(noteId);
             };
 
             const settings = { npub: user?.npub, kinds: [1, 30023] };
 
-            nostrStore.fetchEvents(settings).then((noteEvents) => {
-                console.log("Fetched", noteEvents);
-                if (!selectedNote.value) {
-                    nostrStore.setSelectedNoteById(noteEvents[0].id);
-                }
-            }).catch((error) => {
-                console.error("Error fetching events:", error);
-            });
+            nostrStore
+                .fetchEvents(settings)
+                .then((noteEvents) => {
+                    console.log("Fetched", noteEvents);
+                    if (!selectedNote.value) {
+                        nostrStore.setSelectedNoteById(noteEvents[0].id);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching events:", error);
+                });
 
             // TODO: subscribe causes issues with rerendering after updates
             // nostrStore.subscribeToEvents(settings).then((value) => {

@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col h-[90vh] overflow-hidden px-2 py-1 space-y-2">
+    <div class="flex flex-col h-[93vh] overflow-hidden px-2 py-1 space-y-2">
         <form class="flex flex-col flex-1" @submit.prevent="handleSave">
             <textarea
                 v-model="localNote.content"
@@ -53,7 +53,7 @@
                 const titleTag = localNote.value.tags?.find(([key]) => key === "title");
                 return titleTag ? titleTag[1] : "Unknown Title";
             });
-        
+
             const handleSave = async () => {
                 const noteToSave = {
                     ...localNote.value,

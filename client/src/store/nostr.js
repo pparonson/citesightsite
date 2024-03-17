@@ -27,13 +27,13 @@ export const useNostrStore = defineStore("nostr", {
 
     actions: {
         async initializeNDK() {
-            localStorage.setItem('debug', 'ndk:*'); // debug NDK internals
+            localStorage.setItem("debug", "ndk:*"); // debug NDK internals
             const nip07signer = new NDKNip07Signer();
             ndk = new NDK({
                 signer: nip07signer,
                 explicitRelayUrls: [
-                    "wss://relay.nostr.band", 
-                    "wss://relay.damus.io", 
+                    "wss://relay.nostr.band",
+                    "wss://relay.damus.io",
                     // "wss://purplepag.es"
                 ],
             });
@@ -103,7 +103,7 @@ export const useNostrStore = defineStore("nostr", {
             } catch (error) {
                 console.error("Error subscribing to events:", error);
                 throw error;
-            } 
+            }
         },
         getNoteEventFromState(id) {
             const event = this.noteEvents.find((e) => e.id === id);
