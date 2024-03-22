@@ -9,22 +9,23 @@
                 <Tags :tags="localNote?.tags || []" :editable="true" @remove="handleTagRemoval" />
             </div>
 
-            <div class="flex mb-1">
+            <div class="flex items-center justify-between mb-1">
                 <input
                     type="text"
                     v-model="newTag"
                     @keydown.enter.prevent="addTag"
                     placeholder="Enter new tag"
-                    class="p-2 border border-gray-300 rounded"
+                    class="w-1/10 p-2 border border-gray-300 rounded"
                 />
                 <button type="button" @click="addTag" class="ml-2 btn btn-secondary h-10">
                     Tag it! <font-awesome-icon icon="tags" aria-label="tagIt" />
                 </button>
+                <!-- Space between input and button -->
+                <span class="flex-1"></span> 
+                <button type="submit" class="ml-auto btn btn-primary h-10 self-start">
+                    Pen it in! <font-awesome-icon icon="pen" aria-label="penItIn" />
+                </button>
             </div>
-
-            <button type="submit" class="btn btn-primary h-10 self-start">
-                Pen it in! <font-awesome-icon icon="pen" aria-label="penItIn" />
-            </button>
         </form>
     </div>
 </template>
