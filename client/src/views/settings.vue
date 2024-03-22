@@ -3,28 +3,59 @@
         <MenuBar :menuTarget="'/'" />
         <div class="mt-2">
             <form @submit.prevent="handleSave">
-                <div>
-                    <h4 class="text-xl">Hypothes.is</h4>
-                    <label for="account-field">Account:</label>
-                    <input
-                        id="account-field"
-                        v-model="annotAcct"
-                        type="text"
-                        placeholder="Enter new tag"
-                        class="p-2 border border-gray-300 rounded"
-                    />
-                    <label for="secret-field">API Key:</label>
-                    <input
-                        id="secret-field"
-                        v-model="annotAPIKey"
-                        type="text"
-                        placeholder="Enter new tag"
-                        class="p-2 border border-gray-300 rounded"
-                    />
+                <h4 class="text-md ml-2">Annotations API</h4>
+                <div class="flex flex-col">
+                    <div class="mt-1 ml-6">
+                        <label for="account-field">Account:</label>
+                        <input
+                            id="account-field"
+                            v-model="annotAcct"
+                            type="text"
+                            placeholder="name"
+                            class="ml-2 p-2 border border-gray-300 rounded text-sm h-8 w-1/10"
+                        />
+                    </div>
+                    <div class="mt-1 ml-6 lex-col">
+                        <label for="secret-field">API Key:</label>
+                        <input
+                            id="secret-field"
+                            v-model="annotAPIKey"
+                            type="text"
+                            placeholder="key"
+                            class="ml-2 p-2 border border-gray-300 rounded text-sm h-8 w-1/10"
+                        />
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary h-10 self-start">
-                    Save <font-awesome-icon icon="pen" aria-label="save" />
-                </button>
+
+                <h4 class="text-md ml-2 mt-6">AI Model API</h4>
+                <div class="flex flex-col">
+                    <div class="mt-1 ml-6">
+                        <label for="account-field">Account:</label>
+                        <input
+                            id="account-field"
+                            v-model="annotAcct"
+                            type="text"
+                            placeholder="name"
+                            class="ml-2 p-2 border border-gray-300 rounded text-sm h-8 w-1/10"
+                        />
+                    </div>
+                    <div class="mt-1 ml-6">
+                        <label for="secret-field">API Key:</label>
+                        <input
+                            id="secret-field"
+                            v-model="annotAPIKey"
+                            type="text"
+                            placeholder="key"
+                            class="ml-2 p-2 border border-gray-300 rounded text-sm h-8 w-1/10"
+                        />
+                    </div>
+                </div>
+
+                <div class="flex justify-end mr-6 mt-6">
+                    <button type="submit" class="btn btn-primary text-sm self-start">
+                        Save <font-awesome-icon icon="pen" aria-label="save" />
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -84,3 +115,9 @@
         },
     };
 </script>
+<style scoped>
+.btn {
+    @apply h-8;
+    @apply min-h-[2rem];
+}
+</style>
