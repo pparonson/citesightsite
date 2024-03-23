@@ -1,7 +1,8 @@
 import { defineStore } from "pinia";
 import NDK, { NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
-import { deriveAESKey, encrypt, decrypt } from "../utils/crypto.js";
-import config from "../../config/config.js";
+import { nip44 } from 'nostr-tools';
+// import { deriveAESKey, encrypt, decrypt } from "../utils/crypto.js";
+// import config from "../../config/config.js";
 
 let ndk;
 
@@ -138,14 +139,17 @@ export const useNostrStore = defineStore("nostr", {
         async publishEvent(note) {
             let isUpdate = note.id ? true : false;
 
-            const { secretBase64, saltBase64, ivBase64 } = config.encryptionCredentials;
-            const aesKey = await deriveAESKey(secretBase64, saltBase64);
-            const encrypted = await encrypt(aesKey, ivBase64, note.content);
+            const privateKey = "";
+            let encrypted; 
+            try {
+                // Encrypt the event using NIP-44
+                encrypted = nip44.v2.encrypt(note.content, privateKey);
+            } catch (error) {
+                console.error("Error: Failed to encrypt event content: ", error.message);
+            }
 
-            const eventProperties = await this.handleCreateUpdate({ ...note, content: encrypted.content }, isUpdate);
-
+            const eventProperties = await this.handleCreateUpdate({ ...note, content: encrypted }, isUpdate);
             eventProperties.tags.push(["encrypted", "1"]);
-            eventProperties.tags.push(["ivBase64", encrypted.ivBase64]);
 
             let event = new NDKEvent(ndk, eventProperties);
 
@@ -241,10 +245,11 @@ export const useNostrStore = defineStore("nostr", {
             const isEncrypted = event.tags.some((tag) => tag[0] === "encrypted" && tag[1] === "1");
             if (isEncrypted) {
                 try {
-                    const { secretBase64, saltBase64, ivBase64 } = config.encryptionCredentials;
-                    let aesKey = await deriveAESKey(secretBase64, saltBase64);
-                    const decrypted = await decrypt(aesKey, ivBase64, event.content);
-                    event.content = decrypted;
+                    // Decrypt the event using NIP-44
+                    const privateKey = "";
+                    const decrypted = nip44?.v2?.decrypt(event.content, privateKey);
+                    console.log(decrypted);
+                    event = {...event, content: decrypted};
                 } catch (error) {
                     console.error("Error: Failed to decrypt event content: ", error);
                 }
