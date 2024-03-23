@@ -3,55 +3,70 @@
         <MenuBar :menuTarget="'/'" />
         <div class="mt-2">
             <form @submit.prevent="handleSave">
-                <h4 class="text-md ml-2">Annotations API</h4>
+
+                <h4 class="text-md ml-2">Encryption</h4>
                 <div class="flex flex-col">
-                    <div class="mt-1 ml-6">
-                        <label for="account-field">Account:</label>
+                    <div class="flex items-center mt-1 ml-6">
+                        <label class="w-1/6" for="account-field">Encryption Key (Hex Format):</label>
+                        <input
+                            id="encryptionKey-field"
+                            v-model="annotAcct"
+                            type="text"
+                            placeholder="key"
+                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
+                        />
+                    </div>
+                </div>
+
+                <h4 class="text-md ml-2 mt-6">Annotations API</h4>
+                <div class="flex flex-col">
+                    <div class="flex items-center mt-1 ml-6">
+                        <label class="w-1/6" for="account-field">Account:</label>
                         <input
                             id="account-field"
                             v-model="annotAcct"
                             type="text"
                             placeholder="name"
-                            class="ml-2 p-2 border border-gray-300 rounded text-sm h-8 w-1/10"
+                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
                         />
                     </div>
-                    <div class="mt-1 ml-6 lex-col">
-                        <label for="secret-field">API Key:</label>
+                    <div class="flex items-center mt-1 ml-6">
+                        <label class="w-1/6" for="secret-field">API Key:</label>
                         <input
                             id="secret-field"
                             v-model="annotAPIKey"
                             type="text"
                             placeholder="key"
-                            class="ml-2 p-2 border border-gray-300 rounded text-sm h-8 w-1/10"
+                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
                         />
                     </div>
                 </div>
 
                 <h4 class="text-md ml-2 mt-6">AI Model API</h4>
                 <div class="flex flex-col">
-                    <div class="mt-1 ml-6">
-                        <label for="account-field">Account:</label>
+                    <div class="flex items-center mt-1 ml-6">
+                        <label class="w-1/6" for="account-field">Account:</label>
                         <input
                             id="account-field"
                             v-model="annotAcct"
                             type="text"
                             placeholder="name"
-                            class="ml-2 p-2 border border-gray-300 rounded text-sm h-8 w-1/10"
+                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
                         />
                     </div>
-                    <div class="mt-1 ml-6">
-                        <label for="secret-field">API Key:</label>
+                    <div class="flex items-center mt-1 ml-6">
+                        <label class="w-1/6" for="secret-field">API Key:</label>
                         <input
                             id="secret-field"
                             v-model="annotAPIKey"
                             type="text"
                             placeholder="key"
-                            class="ml-2 p-2 border border-gray-300 rounded text-sm h-8 w-1/10"
+                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
                         />
                     </div>
                 </div>
 
-                <div class="flex justify-end mr-6 mt-6">
+                <div class="ml-2 mt-10">
                     <button type="submit" class="btn btn-primary text-sm self-start">
                         Save <font-awesome-icon icon="pen" aria-label="save" />
                     </button>

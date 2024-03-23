@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="noteEvents.length === 0" class="text-gray-500">No note events available.</div>
+        <div v-if="noteEvents.length === 0" class="text-gray-500">No note events found.</div>
         <div v-else v-for="noteEvent in noteEvents" :key="noteEvent.id">
             <div @click="handleNoteClick(noteEvent.id)">
                 <NoteEvent :noteEvent="noteEvent" />
