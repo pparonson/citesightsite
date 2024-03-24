@@ -3,14 +3,13 @@
         <MenuBar :menuTarget="'/'" />
         <div class="mt-2">
             <form @submit.prevent="handleSave">
-
                 <h4 class="text-md ml-2">Encryption</h4>
                 <div class="flex flex-col">
                     <div class="flex items-center mt-1 ml-6">
-                        <label class="w-1/6" for="account-field">Encryption Key (Hex Format):</label>
+                        <label class="w-1/6" for="encryption-key-field">Encryption Key (Hex Format):</label>
                         <input
-                            id="encryptionKey-field"
-                            v-model="annotAcct"
+                            id="encryption-key-field"
+                            v-model="encryptionKey"
                             type="text"
                             placeholder="key"
                             class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
@@ -21,19 +20,19 @@
                 <h4 class="text-md ml-2 mt-6">Annotations API</h4>
                 <div class="flex flex-col">
                     <div class="flex items-center mt-1 ml-6">
-                        <label class="w-1/6" for="account-field">Account:</label>
+                        <label class="w-1/6" for="annot-account-field">Account:</label>
                         <input
-                            id="account-field"
-                            v-model="annotAcct"
+                            id="annot-account-field"
+                            v-model="annotAPIAcct"
                             type="text"
                             placeholder="name"
                             class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
                         />
                     </div>
                     <div class="flex items-center mt-1 ml-6">
-                        <label class="w-1/6" for="secret-field">API Key:</label>
+                        <label class="w-1/6" for="annot-key-field">API Key:</label>
                         <input
-                            id="secret-field"
+                            id="annot-key-field"
                             v-model="annotAPIKey"
                             type="text"
                             placeholder="key"
@@ -42,29 +41,29 @@
                     </div>
                 </div>
 
-                <h4 class="text-md ml-2 mt-6">AI Model API</h4>
-                <div class="flex flex-col">
-                    <div class="flex items-center mt-1 ml-6">
-                        <label class="w-1/6" for="account-field">Account:</label>
-                        <input
-                            id="account-field"
-                            v-model="annotAcct"
-                            type="text"
-                            placeholder="name"
-                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
-                        />
-                    </div>
-                    <div class="flex items-center mt-1 ml-6">
-                        <label class="w-1/6" for="secret-field">API Key:</label>
-                        <input
-                            id="secret-field"
-                            v-model="annotAPIKey"
-                            type="text"
-                            placeholder="key"
-                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
-                        />
-                    </div>
-                </div>
+                <!-- <h4 v-if="false" class="text-md ml-2 mt-6">AI Model API</h4> -->
+                <!-- <div v-if="false"  class="flex flex-col"> -->
+                <!--     <div class="flex items-center mt-1 ml-6"> -->
+                <!--         <label class="w-1/6" for="ai-account-field">Account:</label> -->
+                <!--         <input -->
+                <!--             id="ai-account-field" -->
+                <!--             v-model="aIAPIAcct" -->
+                <!--             type="text" -->
+                <!--             placeholder="name" -->
+                <!--             class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8" -->
+                <!--         /> -->
+                <!--     </div> -->
+                <!--     <div class="flex items-center mt-1 ml-6"> -->
+                <!--         <label class="w-1/6" for="ai-key-field">API Key:</label> -->
+                <!--         <input -->
+                <!--             id="ai-key-field" -->
+                <!--             v-model="aIAPIKey" -->
+                <!--             type="text" -->
+                <!--             placeholder="key" -->
+                <!--             class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8" -->
+                <!--         /> -->
+                <!--     </div> -->
+                <!-- </div> -->
 
                 <div class="ml-2 mt-10">
                     <button type="submit" class="btn btn-primary text-sm self-start">
@@ -77,11 +76,11 @@
 </template>
 
 <script>
-    import { ref } from "vue";
+    import { ref, computed } from "vue";
     import MenuBar from "@/components/MenuBar.vue";
+    import { nip44 } from "nostr-tools";
     import { useNostrStore } from "@/store/nostr";
     import { storeToRefs } from "pinia";
-    import { deriveAESKey, encrypt, decrypt } from "../utils/crypto.js";
     import { useIndexedDB } from "@/utils/indexedDB";
 
     export default {
@@ -91,8 +90,31 @@
         setup() {
             const nostrStore = useNostrStore();
             const { user } = storeToRefs(nostrStore);
-            const annotAcct = ref("");
-            const annotAPIKey = ref("");
+            const rawEncryptionKey = ref("");
+            const rawAnnotAPIAcct = ref("");
+            const rawAnnotAPIKey = ref("");
+            const privateKey = "";  // TODO: remove after testing
+
+            async function initData() {
+                try {
+                    const userData = await useIndexedDB().get(user.value.npub);
+                    if (!userData) {
+                        console.log("No user data found in IndexedDB");
+                        return;
+                    } else {
+                        try {
+                            rawAnnotAPIAcct.value = await decrypt(userSettings.encryptedAnnotAccount, privateKey);
+                            rawAnnotAPIKey.value = await decrypt(userSettings.encryptedAnnotAPIKey, privateKey);
+                        } catch (error) {
+                            console.error("Failed to decrypt settings", error);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Failed to get and decrypt settings", error);
+                }
+            }
+
+            initData();
 
             const handleSave = async () => {
                 if (!user.value?.npub) {
@@ -100,39 +122,29 @@
                     return;
                 }
 
-                const secret = "YourStaticSecretHere"; // Should be provided safely
-                const salt = "YourStaticSaltHere"; // Should be provided safely
-                const iv = "YourStaticIvHere"; // Should be provided safely
-
-                const encryptedAnnotAccount = await encrypt(annotAcct.value);
-                const encryptedAnnotAPIKey = await encrypt(annotAPIKey.value);
+                const encryptedAnnotAPIAccount = await encrypt(annotAcct.value, privateKey);
+                const encryptedAnnotAPIKey = await encrypt(annotAPIKey.value, privateKey);
 
                 try {
                     await useIndexedDB().set(user.value.npub, {
-                        encryptedAnnotAccount: encryptedAnnotAccount.content,
-                        encryptedAnnotAPIKey: encryptedAnnotAPIKey.content,
+                        encryptedAnnotAPIAccount: annotAPIAcct.value,
+                        encryptedAnnotAPIKey: annotAPIKey.value,
                     });
                 } catch (error) {
                     console.error("Failed to save secrets to IndexedDB", error);
                 }
-
-                // await useIndexedDB().set(user.value.npub, {
-                //     encryptedAnnotAccount: encryptedAnnotAccount.content,
-                //     encryptedAnnotAPIKey: encryptedAnnotAPIKey.content
-                // });
             };
 
             return {
-                annotAcct, // TODO: can these be removed from return?
-                annotAPIKey,
+                encryptionKey,
                 handleSave,
             };
         },
     };
 </script>
 <style scoped>
-.btn {
-    @apply h-8;
-    @apply min-h-[2rem];
-}
+    .btn {
+        @apply h-8;
+        @apply min-h-[2rem];
+    }
 </style>

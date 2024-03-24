@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import NDK, { NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
-import { nip44 } from 'nostr-tools';
-// import { deriveAESKey, encrypt, decrypt } from "../utils/crypto.js";
+import { nip44 } from "nostr-tools";
 // import config from "../../config/config.js";
 
 let ndk;
@@ -140,7 +139,7 @@ export const useNostrStore = defineStore("nostr", {
             let isUpdate = note.id ? true : false;
 
             const privateKey = "";
-            let encrypted; 
+            let encrypted;
             try {
                 // Encrypt the event using NIP-44
                 encrypted = nip44.v2.encrypt(note.content, privateKey);
@@ -249,7 +248,7 @@ export const useNostrStore = defineStore("nostr", {
                     const privateKey = "";
                     const decrypted = nip44?.v2?.decrypt(event.content, privateKey);
                     console.log(decrypted);
-                    event = {...event, content: decrypted};
+                    event = { ...event, content: decrypted };
                 } catch (error) {
                     console.error("Error: Failed to decrypt event content: ", error);
                 }
