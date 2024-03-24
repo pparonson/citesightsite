@@ -136,7 +136,9 @@
             };
 
             return {
-                encryptionKey,
+                rawEncryptionKey,
+                rawAnnotAPIAcct,
+                rawAnnotAPIKey,
                 handleSave,
             };
         },
