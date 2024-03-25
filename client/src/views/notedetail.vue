@@ -10,7 +10,7 @@
 </template>
 
 <script>
-    import { onMounted, computed } from "vue";
+    import { computed } from "vue";
     import { useRouter } from "vue-router";
     import NoteEventDetail from "@/components/NoteEventDetail.vue";
 

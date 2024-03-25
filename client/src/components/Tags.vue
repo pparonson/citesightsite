@@ -1,6 +1,6 @@
 <template>
     <div class="">
-        <div v-if="keywordTags.length === 0" class="text-gray-500">No tags found.</div>
+        <div v-if="keywordTags.length === 0" class="text-xs text-gray-500">No tags found.</div>
         <ul v-else class="">
             <li
                 v-for="tag in keywordTags"

@@ -3,27 +3,13 @@
         <MenuBar :menuTarget="'/'" />
         <div class="mt-2">
             <form @submit.prevent="handleSave">
-                <h4 class="text-md ml-2">Encryption</h4>
-                <div class="flex flex-col">
-                    <div class="flex items-center mt-1 ml-6">
-                        <label class="w-1/6" for="encryption-key-field">Encryption Key (Hex Format):</label>
-                        <input
-                            id="encryption-key-field"
-                            v-model="encryptionKey"
-                            type="text"
-                            placeholder="key"
-                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
-                        />
-                    </div>
-                </div>
-
-                <h4 class="text-md ml-2 mt-6">Annotations API</h4>
+                <h4 class="text-md ml-2">Annotation API</h4>
                 <div class="flex flex-col">
                     <div class="flex items-center mt-1 ml-6">
                         <label class="w-1/6" for="annot-account-field">Account:</label>
                         <input
                             id="annot-account-field"
-                            v-model="annotAPIAcct"
+                            v-model="rawAnnotAPIAcct"
                             type="text"
                             placeholder="name"
                             class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
@@ -33,37 +19,13 @@
                         <label class="w-1/6" for="annot-key-field">API Key:</label>
                         <input
                             id="annot-key-field"
-                            v-model="annotAPIKey"
+                            v-model="rawAnnotAPIKey"
                             type="text"
-                            placeholder="key"
+                            placeholder="Add a new key"
                             class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
                         />
                     </div>
                 </div>
-
-                <!-- <h4 v-if="false" class="text-md ml-2 mt-6">AI Model API</h4> -->
-                <!-- <div v-if="false"  class="flex flex-col"> -->
-                <!--     <div class="flex items-center mt-1 ml-6"> -->
-                <!--         <label class="w-1/6" for="ai-account-field">Account:</label> -->
-                <!--         <input -->
-                <!--             id="ai-account-field" -->
-                <!--             v-model="aIAPIAcct" -->
-                <!--             type="text" -->
-                <!--             placeholder="name" -->
-                <!--             class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8" -->
-                <!--         /> -->
-                <!--     </div> -->
-                <!--     <div class="flex items-center mt-1 ml-6"> -->
-                <!--         <label class="w-1/6" for="ai-key-field">API Key:</label> -->
-                <!--         <input -->
-                <!--             id="ai-key-field" -->
-                <!--             v-model="aIAPIKey" -->
-                <!--             type="text" -->
-                <!--             placeholder="key" -->
-                <!--             class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8" -->
-                <!--         /> -->
-                <!--     </div> -->
-                <!-- </div> -->
 
                 <div class="ml-2 mt-10">
                     <button type="submit" class="btn btn-primary text-sm self-start">
@@ -80,6 +42,7 @@
     import MenuBar from "@/components/MenuBar.vue";
     import { nip44 } from "nostr-tools";
     import { useNostrStore } from "@/store/nostr";
+    import { useKeyStore } from "@/store/key";
     import { storeToRefs } from "pinia";
     import { useIndexedDB } from "@/utils/indexedDB";
 
@@ -89,11 +52,15 @@
         },
         setup() {
             const nostrStore = useNostrStore();
+            const keyStore = useKeyStore();
             const { user } = storeToRefs(nostrStore);
-            const rawEncryptionKey = ref("");
-            const rawAnnotAPIAcct = ref("");
-            const rawAnnotAPIKey = ref("");
-            const privateKey = "";  // TODO: remove after testing
+            const { encryptionKey } = storeToRefs(keyStore);
+            let rawAnnotAPIAcct = ref("");
+            let rawAnnotAPIKey = ref("");
+            let annotAPIKeyExists = ref(false);
+
+            // TODO: remove key after testing
+            keyStore.setEncryptionKey("");
 
             async function initData() {
                 try {
@@ -103,8 +70,22 @@
                         return;
                     } else {
                         try {
-                            rawAnnotAPIAcct.value = await decrypt(userSettings.encryptedAnnotAccount, privateKey);
-                            rawAnnotAPIKey.value = await decrypt(userSettings.encryptedAnnotAPIKey, privateKey);
+                            if (!encryptionKey.value) {
+                                console.log("Encryption key is required to decrypt user data.");
+                                return;
+                            }
+                            rawAnnotAPIAcct.value = nip44?.v2?.decrypt(
+                                userData.encryptedAnnotAPIAcct,
+                                encryptionKey.value
+                            );
+                            rawAnnotAPIKey.value = nip44?.v2?.decrypt(
+                                userData.encryptedAnnotAPIKey,
+                                encryptionKey.value
+                            );
+
+                            if (rawAnnotAPIKey.value) {
+                                annotAPIKeyExists.value = true;
+                            }
                         } catch (error) {
                             console.error("Failed to decrypt settings", error);
                         }
@@ -122,23 +103,37 @@
                     return;
                 }
 
-                const encryptedAnnotAPIAccount = await encrypt(annotAcct.value, privateKey);
-                const encryptedAnnotAPIKey = await encrypt(annotAPIKey.value, privateKey);
+                const encryptionKey = getPublicKey(privateKey);
+                let encryptedAnnotAPIAcct = "";
+                let encryptedAnnotAPIKey = "";
 
                 try {
-                    await useIndexedDB().set(user.value.npub, {
-                        encryptedAnnotAPIAccount: annotAPIAcct.value,
-                        encryptedAnnotAPIKey: annotAPIKey.value,
-                    });
+                    // Encrypt the event using NIP-44
+                    encryptedAnnotAPIAcct = nip44?.v2?.encrypt(rawAnnotAPIAcct.value, encryptionKey);
+                    encryptedAnnotAPIKey = nip44?.v2?.encrypt(rawAnnotAPIKey.value, encryptionKey);
                 } catch (error) {
-                    console.error("Failed to save secrets to IndexedDB", error);
+                    console.error("Error: Failed to encrypt event content: ", error.message);
+                }
+
+                if (!encryptedAnnotAPIAcct || !encryptedAnnotAPIKey) {
+                    console.error("Failed to encrypt settings");
+                    return;
+                } else {
+                    try {
+                        await useIndexedDB().set(user.value.npub, {
+                            encryptedAnnotAPIAcct: encryptedAnnotAPIAcct,
+                            encryptedAnnotAPIKey: encryptedAnnotAPIKey,
+                        });
+                    } catch (error) {
+                        console.error("Failed to save secrets to IndexedDB", error);
+                    }
                 }
             };
 
             return {
-                rawEncryptionKey,
                 rawAnnotAPIAcct,
                 rawAnnotAPIKey,
+                annotAPIKeyExists,
                 handleSave,
             };
         },

@@ -22,7 +22,7 @@
                 </button>
 
                 <!-- Space between input and button -->
-                <span class="flex-1"></span> 
+                <span class="flex-1"></span>
 
                 <button type="submit" class="btn btn-primary ml-auto mr-6 text-sm self-start">
                     Pen it in! <font-awesome-icon icon="pen" aria-label="penItIn" />
@@ -49,7 +49,7 @@
         setup(props) {
             const router = useRouter();
             const nostrStore = useNostrStore();
-            let { note, setSelectedNoteById } = storeToRefs(nostrStore);
+            let { note } = storeToRefs(nostrStore);
             let localNote = ref({ tags: [] });
             let newTag = ref("");
             const noteTitle = computed(() => {
@@ -123,8 +123,8 @@
 </script>
 
 <style scoped>
-.btn {
-    @apply h-8;
-    @apply min-h-[2rem];
-}
+    .btn {
+        @apply h-8;
+        @apply min-h-[2rem];
+    }
 </style>

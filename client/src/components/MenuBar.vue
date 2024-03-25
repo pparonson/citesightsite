@@ -7,7 +7,7 @@
         <select 
             v-if="!isSettingsRoute"
             v-model="searchScope" 
-            class="select select-bordered select-sm w-2/12 h-10 rounded-md focus:outline-none focus:border-blue-300">
+            class="select select-bordered select-sm w-3/12 h-10 rounded-md focus:outline-none focus:border-blue-300">
             <option value="all">All</option>
             <option value="userTags">Tags</option>
         </select>
@@ -18,7 +18,7 @@
             @input="onInput"
             type="text"
             placeholder="Search"
-            class="w-10/12 h-10 px-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:border-blue-300"
+            class="w-9/12 h-10 px-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:border-blue-300"
         />
 
         <router-link :to="'/note/new'" v-if="!isSettingsRoute">

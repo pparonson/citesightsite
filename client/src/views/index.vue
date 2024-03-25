@@ -13,7 +13,7 @@
 </template>
 
 <script>
-    import { ref, computed } from "vue";
+    import { ref, computed, onMounted } from "vue";
     import MenuBar from "@/components/MenuBar.vue";
     import NoteEventList from "@/components/NoteEventList.vue";
     import NoteEventDetailDisplay from "@/components/NoteEventDetailDisplay.vue";
@@ -28,15 +28,7 @@
         },
         setup() {
             const nostrStore = useNostrStore();
-            const {
-                user,
-                fetchEvents,
-                subscribeToEvents,
-                sortNoteEventsByDateTag,
-                noteEvents,
-                setSelectedNoteById,
-                selectedNote,
-            } = storeToRefs(nostrStore);
+            const { user, noteEvents, selectedNote } = storeToRefs(nostrStore);
             const searchParams = ref({ term: "", scope: "all" });
             const filterNotes = (params) => {
                 searchParams.value = params;
