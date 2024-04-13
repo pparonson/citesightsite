@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import NDK, { NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
 import { nip44 } from "nostr-tools";
-// import config from "../../config/config.js";
+import { useIndexedDB } from "@/utils/indexedDB";
 
 let ndk;
 
@@ -27,14 +27,13 @@ export const useNostrStore = defineStore("nostr", {
 
     actions: {
         async initializeNDK() {
-            localStorage.setItem("debug", "ndk:*"); // debug NDK internals
+            // localStorage.setItem("debug", "ndk:*"); // debug NDK internals
             const nip07signer = new NDKNip07Signer();
             ndk = new NDK({
                 signer: nip07signer,
                 explicitRelayUrls: [
-                    "wss://relay.nostr.band",
-                    "wss://relay.damus.io",
-                    // "wss://purplepag.es"
+                    "wss://lunchbox.sandwich.farm",
+                    "wss://relay.n057r.club",
                 ],
             });
 
@@ -137,12 +136,19 @@ export const useNostrStore = defineStore("nostr", {
         },
         async publishEvent(note) {
             let isUpdate = note.id ? true : false;
+            let encryptionKey = ""; 
+            const userData = await useIndexedDB().get(this.user.npub);
+            if (!userData) {
+                console.log("No user data found in IndexedDB. Cannot encrypt event.");
+                return;
+            } else {
+                encryptionKey = userData.encryptionKey;
+            }
 
-            const privateKey = "";
             let encrypted;
             try {
                 // Encrypt the event using NIP-44
-                encrypted = nip44.v2.encrypt(note.content, privateKey);
+                encrypted = nip44.v2.encrypt(note.content, encryptionKey);
             } catch (error) {
                 console.error("Error: Failed to encrypt event content: ", error.message);
             }
@@ -241,12 +247,20 @@ export const useNostrStore = defineStore("nostr", {
             };
         },
         async processNoteEvent(event) {
+            let encryptionKey = ""; 
+            const userData = await useIndexedDB().get(this.user.npub);
+            if (!userData) {
+                console.log("No user data found in IndexedDB. Cannot encrypt event.");
+                return;
+            } else {
+                encryptionKey = userData.encryptionKey;
+            }
+
             const isEncrypted = event.tags.some((tag) => tag[0] === "encrypted" && tag[1] === "1");
             if (isEncrypted) {
                 try {
                     // Decrypt the event using NIP-44
-                    const privateKey = "";
-                    const decrypted = nip44?.v2?.decrypt(event.content, privateKey);
+                    const decrypted = nip44?.v2?.decrypt(event.content, encryptionKey);
                     console.log(decrypted);
                     event = { ...event, content: decrypted };
                 } catch (error) {

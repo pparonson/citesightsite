@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import config from "./../../config/config";
+import { useIndexedDB } from "@/utils/indexedDB";
 
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -14,9 +15,22 @@ export const useAnnotationStore = defineStore("annotation", {
     },
     actions: {
         async fetchAllAnnotations() {
-            const { annotApiEndpoint, rateLimitMs, userFilter, apiKey } = config.connections.annotation;
-            // const userFilter = import.meta.env.VITE_ANNOT_USER_FILTER || "";
-            // const apiKey = import.meta.env.VITE_ANNOT_API_KEY || "";
+            const { annotApiEndpoint, rateLimitMs } = config.connections.annotation;
+            let userFilter = null;
+            let apiKey = null;
+
+            try {
+                const userData = await useIndexedDB().get(this.user.npub);
+                if (!userData) {
+                    console.log("No user data found in IndexedDB. Cannot encrypt event.");
+                    return;
+                } else {
+                    userFilter = userData.encryptedAnnotAPIAcct;
+                    apiKey = userData.encryptedAnnotAPIKey;
+                }
+            } catch (error) {
+                console.error(`Error fetching user data: ${error}`);
+            }
 
             let searchAfter = null;
 

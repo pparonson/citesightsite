@@ -18,6 +18,7 @@
     import NoteEventList from "@/components/NoteEventList.vue";
     import NoteEventDetailDisplay from "@/components/NoteEventDetailDisplay.vue";
     import { useNostrStore } from "@/store/nostr";
+    import { useAnnotationStore } from "@/store/annotation";
     import { storeToRefs } from "pinia";
 
     export default {
@@ -28,11 +29,23 @@
         },
         setup() {
             const nostrStore = useNostrStore();
+            const annotationStore = useAnnotationStore();
             const { user, noteEvents, selectedNote } = storeToRefs(nostrStore);
+            const { annotations } = storeToRefs(annotationStore);
             const searchParams = ref({ term: "", scope: "all" });
             const filterNotes = (params) => {
                 searchParams.value = params;
             };
+
+            onMounted(async () => {
+                try {
+                    await annotationStore.fetchAllAnnotations();
+                    console.log("Annotation store:", annotations.value);
+                } catch (error) {
+                    console.error(`Failed to fetch annotations: ${error}`);
+                }
+            });
+
 
             const filteredNoteEvents = computed(() => {
                 const { term, scope } = searchParams.value;

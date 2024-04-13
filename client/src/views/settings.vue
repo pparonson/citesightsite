@@ -11,7 +11,7 @@
                             id="annot-account-field"
                             v-model="rawAnnotAPIAcct"
                             type="text"
-                            placeholder="name"
+                            placeholder="Account name"
                             class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
                         />
                     </div>
@@ -22,6 +22,20 @@
                             v-model="rawAnnotAPIKey"
                             type="text"
                             placeholder="Add a new key"
+                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
+                        />
+                    </div>
+                </div>
+
+                <h4 class="text-md mt-6 ml-2">Encryption</h4>
+                <div class="flex flex-col">
+                    <div class="flex items-center mt-1 ml-6">
+                        <label class="w-1/6" for="annot-account-field">Encryption Key:</label>
+                        <input
+                            id="encryption-key-field"
+                            v-model="rawEncryptionKey"
+                            type="text"
+                            placeholder="Add a new Key"
                             class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
                         />
                     </div>
@@ -42,7 +56,6 @@
     import MenuBar from "@/components/MenuBar.vue";
     import { nip44 } from "nostr-tools";
     import { useNostrStore } from "@/store/nostr";
-    import { useKeyStore } from "@/store/key";
     import { storeToRefs } from "pinia";
     import { useIndexedDB } from "@/utils/indexedDB";
 
@@ -52,15 +65,13 @@
         },
         setup() {
             const nostrStore = useNostrStore();
-            const keyStore = useKeyStore();
             const { user } = storeToRefs(nostrStore);
-            const { encryptionKey } = storeToRefs(keyStore);
             let rawAnnotAPIAcct = ref("");
             let rawAnnotAPIKey = ref("");
-            let annotAPIKeyExists = ref(false);
+            let rawEncryptionKey = ref("");
 
             // TODO: remove key after testing
-            keyStore.setEncryptionKey("");
+            // keyStore.setEncryptionKey("");
 
             async function initData() {
                 try {
@@ -70,22 +81,21 @@
                         return;
                     } else {
                         try {
-                            if (!encryptionKey.value) {
-                                console.log("Encryption key is required to decrypt user data.");
-                                return;
-                            }
-                            rawAnnotAPIAcct.value = nip44?.v2?.decrypt(
-                                userData.encryptedAnnotAPIAcct,
-                                encryptionKey.value
-                            );
-                            rawAnnotAPIKey.value = nip44?.v2?.decrypt(
-                                userData.encryptedAnnotAPIKey,
-                                encryptionKey.value
-                            );
-
-                            if (rawAnnotAPIKey.value) {
-                                annotAPIKeyExists.value = true;
-                            }
+                            // if (!encryptionKey.value) {
+                            //     console.log("Encryption key is required to decrypt user data.");
+                            //     return;
+                            // }
+                            // rawAnnotAPIAcct.value = nip44?.v2?.decrypt(
+                            //     userData.encryptedAnnotAPIAcct,
+                            //     encryptionKey.value
+                            // );
+                            // rawAnnotAPIKey.value = nip44?.v2?.decrypt(
+                            //     userData.encryptedAnnotAPIKey,
+                            //     encryptionKey.value
+                            // );
+                            rawAnnotAPIAcct.value = userData.encryptedAnnotAPIAcct;
+                            rawAnnotAPIKey.value = userData.encryptedAnnotAPIKey;
+                            rawEncryptionKey.value = userData.encryptionKey;
                         } catch (error) {
                             console.error("Failed to decrypt settings", error);
                         }
@@ -103,17 +113,18 @@
                     return;
                 }
 
-                const encryptionKey = getPublicKey(privateKey);
-                let encryptedAnnotAPIAcct = "";
-                let encryptedAnnotAPIKey = "";
+                // const encryptionKey = getPublicKey(encryptionKey);
+                let encryptedAnnotAPIAcct = rawAnnotAPIAcct.value || "";
+                let encryptedAnnotAPIKey = rawAnnotAPIKey.value || "";
+                let encryptionKey = rawEncryptionKey.value || "";
 
-                try {
-                    // Encrypt the event using NIP-44
-                    encryptedAnnotAPIAcct = nip44?.v2?.encrypt(rawAnnotAPIAcct.value, encryptionKey);
-                    encryptedAnnotAPIKey = nip44?.v2?.encrypt(rawAnnotAPIKey.value, encryptionKey);
-                } catch (error) {
-                    console.error("Error: Failed to encrypt event content: ", error.message);
-                }
+                // try {
+                //     // Encrypt the event using NIP-44
+                //     encryptedAnnotAPIAcct = nip44?.v2?.encrypt(rawAnnotAPIAcct.value, encryptionKey);
+                //     encryptedAnnotAPIKey = nip44?.v2?.encrypt(rawAnnotAPIKey.value, encryptionKey);
+                // } catch (error) {
+                //     console.error("Error: Failed to encrypt event content: ", error.message);
+                // }
 
                 if (!encryptedAnnotAPIAcct || !encryptedAnnotAPIKey) {
                     console.error("Failed to encrypt settings");
@@ -123,6 +134,7 @@
                         await useIndexedDB().set(user.value.npub, {
                             encryptedAnnotAPIAcct: encryptedAnnotAPIAcct,
                             encryptedAnnotAPIKey: encryptedAnnotAPIKey,
+                            encryptionKey: encryptionKey,
                         });
                     } catch (error) {
                         console.error("Failed to save secrets to IndexedDB", error);
@@ -133,7 +145,7 @@
             return {
                 rawAnnotAPIAcct,
                 rawAnnotAPIKey,
-                annotAPIKeyExists,
+                rawEncryptionKey,
                 handleSave,
             };
         },

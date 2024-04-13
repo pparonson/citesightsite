@@ -31,22 +31,12 @@ async function init() {
     app.use(pinia);
 
     const nostrStore = useNostrStore();
-    const annotationStore = useAnnotationStore();
 
     try {
         await nostrStore.initializeNDK();
         console.log("Nostr store:", pinia.state.value);
     } catch (error) {
         console.error(`Failed to initialize NDK: ${error}`);
-        throw error;
-    }
-
-    try {
-        await annotationStore.fetchAllAnnotations();
-        console.log("Annotation store:", pinia.state.value);
-    } catch (error) {
-        console.error(`Failed: ${error}`);
-        throw error;
     }
 
     app.mount("#app");
