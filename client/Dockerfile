@@ -17,7 +17,7 @@ RUN npm install @vue/cli
 COPY ./ ./
 
 # start app
-CMD ["npm", "run", "build"]
+CMD ["npm", "run", "production-build"]
 
 FROM nginx
 COPY --from=builder /app/build /usr/share/nginx/html
