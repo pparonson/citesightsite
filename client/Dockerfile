@@ -20,4 +20,5 @@ COPY ./ ./
 CMD ["npm", "run", "production-build"]
 
 FROM nginx
-COPY --from=builder /app/build /usr/share/nginx/html
+RUN rm -rf /usr/share/nginx/html/*
+COPY --from=builder /app/dist /usr/share/nginx/html
