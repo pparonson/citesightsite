@@ -30,14 +30,14 @@ async function init() {
     app.use(router);
     app.use(pinia);
 
-    const nostrStore = useNostrStore();
-
-    try {
-        await nostrStore.initializeNDK();
-        console.log("Nostr store:", pinia.state.value);
-    } catch (error) {
-        console.error(`Failed to initialize NDK: ${error}`);
-    }
+    // const nostrStore = useNostrStore();
+    //
+    // try {
+    //     await nostrStore.initializeNDK();
+    //     console.log("Nostr store:", pinia.state.value);
+    // } catch (error) {
+    //     console.error(`Failed to initialize NDK: ${error}`);
+    // }
 
     app.mount("#app");
 }
