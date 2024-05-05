@@ -13,7 +13,7 @@ import {
     faSpinner,
     faTags,
 } from "@fortawesome/free-solid-svg-icons";
-import { useNostrStore } from "@/store/nostr";
+// import { useNostrStore } from "@/store/nostr";
 import { useAnnotationStore } from "@/store/annotation";
 import App from "./App.vue";
 import router from "./router";
@@ -31,7 +31,7 @@ async function init() {
     app.use(pinia);
 
     // const nostrStore = useNostrStore();
-    //
+
     // try {
     //     await nostrStore.initializeNDK();
     //     console.log("Nostr store:", pinia.state.value);

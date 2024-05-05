@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import NDK, { NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
 import { nip44 } from "nostr-tools";
 import { useIndexedDB } from "@/utils/indexedDB";
+import { useAuthStore } from "@/store/auth";
 
 let ndk;
 
@@ -27,35 +28,45 @@ export const useNostrStore = defineStore("nostr", {
 
     actions: {
         async initializeNDK() {
-            // localStorage.setItem("debug", "ndk:*"); // debug NDK internals
-            const nip07signer = new NDKNip07Signer();
-            ndk = new NDK({
-                signer: nip07signer,
-                explicitRelayUrls: [
-                    "wss://lunchbox.sandwich.farm",
-                    "wss://relay.n057r.club",
-                ],
-            });
+            localStorage.setItem("debug", "ndk:*"); // debug NDK internals
+            const authStore = useAuthStore();
+            let { loginMethod, toggleModal, setLoginStatus } = authStore;
 
-            try {
-                await ndk.connect();
-                console.log("NDK Connected..");
+            let explicitRelayUrls = [
+                "wss://lunchbox.sandwich.farm",
+                "wss://relay.n057r.club",
+            ];
 
-                const user = await nip07signer.user();
-                if (user?.npub) {
-                    console.log("Permission granted to read their public key:", user.npub);
-                    this.user = user;
-                    await this.fetchUser(user.npub);
+            if (loginMethod === "NIP07" && !ndk) {
+                const nip07signer = new NDKNip07Signer();
+                ndk = new NDK({
+                    signer: nip07signer,
+                    explicitRelayUrls,
+                });
+
+                try {
+                    await ndk.connect();
+                    console.log("NDK Connected..");
+
+                    const user = await nip07signer.user();
+                    if (user?.npub) {
+                        console.log("Permission granted to read their public key:", user.npub);
+                        let resp = await this.fetchUser(user.npub)
+                        if (resp) {
+                            setLoginStatus(true);
+                            toggleModal(false);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error connecting to NDK:", error);
+                    throw error
                 }
-            } catch (error) {
-                console.error("Error connecting to NDK:", error);
-                throw error;
             }
         },
         async fetchUser(npub) {
             try {
                 const user = ndk.getUser({ npub });
-                await user.fetchProfile();
+                // await user.fetchProfile();
                 return (this.user = user);
             } catch (error) {
                 console.error("Error fetching user:", error);

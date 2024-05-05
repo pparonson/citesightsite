@@ -1,11 +1,13 @@
 import { defineStore } from "pinia";
 
 export const useAuthStore = defineStore("auth", {
-    state: () => ({
-        showModal: true,
-        isLoggedIn: false,
-        loginMethod: null, // 'NIP07' or 'NIP46'
-    }),
+    state: () => {
+        return {
+            showModal: true,
+            isLoggedIn: false,
+            loginMethod: null, // 'NIP07' or 'NIP46'
+        };
+    },
     actions: {
         toggleModal(show = null) {
             if (show !== null) {
@@ -17,5 +19,8 @@ export const useAuthStore = defineStore("auth", {
         setLoginMethod(method) {
             this.loginMethod = method;
         },
+        setLoginStatus(status) {
+            this.isLoggedIn = status;
+        }
     },
 });

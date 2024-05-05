@@ -13,12 +13,13 @@
 </template>
 
 <script>
-    import { ref, computed, onMounted } from "vue";
+    import { ref, computed, onMounted, watch } from "vue";
     import MenuBar from "@/components/MenuBar.vue";
     import NoteEventList from "@/components/NoteEventList.vue";
     import NoteEventDetailDisplay from "@/components/NoteEventDetailDisplay.vue";
     import { useNostrStore } from "@/store/nostr";
     import { useAnnotationStore } from "@/store/annotation";
+    import { useAuthStore } from '@/store/auth';
     import { storeToRefs } from "pinia";
 
     export default {
@@ -30,8 +31,10 @@
         setup() {
             const nostrStore = useNostrStore();
             const annotationStore = useAnnotationStore();
+            const authStore = useAuthStore();
             const { user, noteEvents, selectedNote } = storeToRefs(nostrStore);
             const { annotations } = storeToRefs(annotationStore);
+            const { isLoggedIn } = storeToRefs(authStore);
             const searchParams = ref({ term: "", scope: "all" });
             const filterNotes = (params) => {
                 searchParams.value = params;
@@ -39,13 +42,43 @@
 
             onMounted(async () => {
                 try {
-                    await annotationStore.fetchAllAnnotations();
-                    console.log("Annotation store:", annotations.value);
+                    await fetchAnnotationsAndEvents();
                 } catch (error) {
-                    console.error(`Failed to fetch annotations: ${error}`);
+                    console.error(`Failed to fetch annotations and events on mount: ${error}`);
                 }
             });
+            
+            watch(
+                () => isLoggedIn.value,
+                async () => {
+                    if (isLoggedIn.value) {
+                        await fetchAnnotationsAndEvents();
+                    }
+                }
+            );
 
+            const fetchAnnotationsAndEvents = async () => {
+                if (isLoggedIn.value) {
+                    // try {
+                    //     await annotationStore.fetchAllAnnotations();
+                    //     console.log("Annotation store:", annotations.value);
+                    // } catch (error) {
+                    //     console.error(`Failed to fetch annotations: ${error}`);
+                    // }
+
+                    try {
+                        await nostrStore.fetchEvents({ npub: user?.value?.npub, kinds: [1, 30023] });
+                        console.log("Fetched", noteEvents.value);
+                        if (!selectedNote.value) {
+                            nostrStore.setSelectedNoteById(noteEvents.value[0].id);
+                        }
+                    } catch (error) {
+                        console.error("Error fetching events:", error);
+                    }
+
+                }
+
+            };
 
             const filteredNoteEvents = computed(() => {
                 const { term, scope } = searchParams.value;
@@ -77,19 +110,19 @@
                 nostrStore.setSelectedNoteById(noteId);
             };
 
-            const settings = { npub: user?.npub, kinds: [1, 30023] };
+            // const settings = { npub: user?.npub, kinds: [1, 30023] };
 
-            nostrStore
-                .fetchEvents(settings)
-                .then((noteEvents) => {
-                    console.log("Fetched", noteEvents);
-                    if (!selectedNote.value) {
-                        nostrStore.setSelectedNoteById(noteEvents[0].id);
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error fetching events:", error);
-                });
+            // nostrStore
+            //     .fetchEvents(settings)
+            //     .then((noteEvents) => {
+            //         console.log("Fetched", noteEvents);
+            //         if (!selectedNote.value) {
+            //             nostrStore.setSelectedNoteById(noteEvents[0].id);
+            //         }
+            //     })
+            //     .catch((error) => {
+            //         console.error("Error fetching events:", error);
+            //     });
 
             // TODO: subscribe causes issues with rerendering after updates
             // nostrStore.subscribeToEvents(settings).then((value) => {
