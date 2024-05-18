@@ -67,7 +67,8 @@
                     // }
 
                     try {
-                        await nostrStore.fetchEvents({ npub: user?.value?.npub, kinds: [1, 30023] });
+                        const settings = { npub: user?.npub, kinds: [1, 30023] };
+                        await nostrStore.fetchEvents(settings);
                         console.log("Fetched", noteEvents.value);
                         if (!selectedNote.value) {
                             nostrStore.setSelectedNoteById(noteEvents.value[0].id);

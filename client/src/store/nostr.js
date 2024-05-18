@@ -76,7 +76,8 @@ export const useNostrStore = defineStore("nostr", {
         async fetchEvents(settings) {
             this.isFetchingEvents = true;
             try {
-                const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
+                // const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
+                const filter = settings;
                 const events = await ndk.fetchEvents(filter);
                 const eventsArray = Array.from(events);
 
