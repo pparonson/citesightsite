@@ -67,7 +67,7 @@
                     // }
 
                     try {
-                        const settings = { npub: user?.npub, kinds: [1, 30023] };
+                        const settings = { npub: user?.value?._npub, kinds: [1, 30023] };
                         await nostrStore.fetchEvents(settings);
                         // nostrStore
                         //     .fetchEvents(settings)
