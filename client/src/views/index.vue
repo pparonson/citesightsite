@@ -67,19 +67,8 @@
                     // }
 
                     try {
-                        const settings = { npub: user?.value?._npub, kinds: [1, 30023] };
+                        const settings = { kinds: [1, 30023] };
                         await nostrStore.fetchEvents(settings);
-                        // nostrStore
-                        //     .fetchEvents(settings)
-                        //     .then((noteEvents) => {
-                        //         console.log("Fetched", noteEvents);
-                        //         if (!selectedNote.value) {
-                        //             nostrStore.setSelectedNoteById(noteEvents[0].id);
-                        //         }
-                        //     })
-                        //     .catch((error) => {
-                        //         console.error("Error fetching events:", error);
-                        //     });
                         console.log("Fetched", noteEvents.value);
                         if (!selectedNote.value) {
                             nostrStore.setSelectedNoteById(noteEvents.value[0].id);

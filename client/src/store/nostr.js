@@ -76,14 +76,8 @@ export const useNostrStore = defineStore("nostr", {
         async fetchEvents(settings) {
             this.isFetchingEvents = true;
             try {
-                // const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
-                const filter = settings;
+                const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
                 const events = await ndk.fetchEvents(filter);
-                // const events = await ndk.fetchEvents(filter).catch(error => {
-                //     console.error("Error during ndk.fetchEvents():", error.message, error.stack);
-                //     this.errorMessage = "Failed to fetch events: " + error.message;
-                //     return []; // Return an empty array to ensure further processing continues
-                // });
                 const eventsArray = Array.from(events);
 
                 for (const event of eventsArray) {
@@ -114,7 +108,7 @@ export const useNostrStore = defineStore("nostr", {
 
                 subscription.on("error", (error) => {
                     console.error("Subscription to note events error:", error);
-                    // this.fetchEvents(settings);
+                    this.fetchEvents(settings);
                 });
             } catch (error) {
                 console.error("Error subscribing to events:", error);
