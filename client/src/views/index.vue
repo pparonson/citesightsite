@@ -21,6 +21,9 @@
     import { useAnnotationStore } from "@/store/annotation";
     import { useAuthStore } from '@/store/auth';
     import { storeToRefs } from "pinia";
+    import config from "./../../config/config";
+
+    const customEventKind = config.nostr.config.encryptedLongFormNoteKind;
 
     export default {
         components: {
@@ -59,7 +62,8 @@
 
             const fetchAnnotationsAndEvents = async () => {
                 if (isLoggedIn.value) {
-                    const settings = { kinds: [1, 30023] };
+                    // kind 30024: custom encrypted long-form note kind
+                    const settings = { kinds: [1, customEventKind ] };
                     // try {
                     //     await annotationStore.fetchAllAnnotations();
                     //     console.log("Annotation store:", annotations.value);

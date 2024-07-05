@@ -38,6 +38,7 @@
     import { storeToRefs } from "pinia";
     import { useRouter } from "vue-router";
     import { useNostrStore } from "@/store/nostr";
+    import config from "./../../config/config.js";
 
     export default {
         components: {
