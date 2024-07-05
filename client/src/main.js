@@ -13,8 +13,6 @@ import {
     faSpinner,
     faTags,
 } from "@fortawesome/free-solid-svg-icons";
-// import { useNostrStore } from "@/store/nostr";
-import { useAnnotationStore } from "@/store/annotation";
 import App from "./App.vue";
 import router from "./router";
 import "./assets/main.css";
@@ -29,15 +27,6 @@ async function init() {
     app.component("font-awesome-icon", FontAwesomeIcon);
     app.use(router);
     app.use(pinia);
-
-    // const nostrStore = useNostrStore();
-
-    // try {
-    //     await nostrStore.initializeNDK();
-    //     console.log("Nostr store:", pinia.state.value);
-    // } catch (error) {
-    //     console.error(`Failed to initialize NDK: ${error}`);
-    // }
 
     app.mount("#app");
 }

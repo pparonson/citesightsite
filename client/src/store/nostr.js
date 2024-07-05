@@ -107,7 +107,7 @@ export const useNostrStore = defineStore("nostr", {
                 });
 
                 subscription.on("error", (error) => {
-                    console.error("Subscription to note events error:", error);
+                    console.error("Error: Subscription to note events failed:", error);
                     this.fetchEvents(settings);
                 });
             } catch (error) {
@@ -272,7 +272,6 @@ export const useNostrStore = defineStore("nostr", {
                 try {
                     // Decrypt the event using NIP-44
                     const decrypted = nip44?.v2?.decrypt(event.content, encryptionKey);
-                    console.log(decrypted);
                     event = { ...event, content: decrypted };
                 } catch (error) {
                     console.error("Error: Failed to decrypt event content: ", error);

@@ -44,7 +44,7 @@
                 try {
                     await fetchAnnotationsAndEvents();
                 } catch (error) {
-                    console.error(`Failed to fetch annotations and events on mount: ${error}`);
+                    console.error(`Error: Failed to fetch annotations and events on mount: ${error}`);
                 }
             });
             
@@ -59,6 +59,7 @@
 
             const fetchAnnotationsAndEvents = async () => {
                 if (isLoggedIn.value) {
+                    const settings = { kinds: [1, 30023] };
                     // try {
                     //     await annotationStore.fetchAllAnnotations();
                     //     console.log("Annotation store:", annotations.value);
@@ -67,15 +68,20 @@
                     // }
 
                     try {
-                        const settings = { kinds: [1, 30023] };
                         await nostrStore.fetchEvents(settings);
-                        console.log("Fetched", noteEvents.value);
+                        // console.log("Fetched", noteEvents.value);
                         if (!selectedNote.value) {
                             nostrStore.setSelectedNoteById(noteEvents.value[0].id);
                         }
                     } catch (error) {
                         console.error("Error fetching events:", error);
                     }
+
+                    // try {
+                    //     await nostrStore.subscribeToEvents(settings);
+                    // } catch (error) {
+                    //     console.error("Error subscribing to events:", error);
+                    // }
 
                 }
 
