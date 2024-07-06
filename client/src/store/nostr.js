@@ -32,25 +32,26 @@ export const useNostrStore = defineStore("nostr", {
             const authStore = useAuthStore();
             let { loginMethod, toggleModal, setLoginStatus } = authStore;
 
-            let explicitRelayUrls = [
-                "wss://lunchbox.sandwich.farm",
-                "wss://relay.n057r.club",
-            ];
-
             if (loginMethod === "NIP07" && !ndk) {
-                const nip07signer = new NDKNip07Signer();
-                ndk = new NDK({
-                    signer: nip07signer,
-                    explicitRelayUrls,
-                });
 
                 try {
-                    await ndk.connect();
-                    console.log("NDK Connected..");
-
+                    const nip07signer = new NDKNip07Signer();
                     const user = await nip07signer.user();
                     if (user?.npub) {
-                        console.log("Permission granted to read their public key:", user.npub);
+                        const userData = await useIndexedDB().get(user?.npub || "");
+                        let explicitRelayUrls = [];
+                        if (userData?.relayUrls?.length) {
+                            explicitRelayUrls = userData.relayUrls;
+                        }
+
+                        ndk = new NDK({
+                            signer: nip07signer,
+                            explicitRelayUrls,
+                        });
+
+                        await ndk.connect();
+                        console.log("NDK Connected..");
+
                         let resp = await this.fetchUser(user.npub)
                         if (resp) {
                             setLoginStatus(true);
@@ -66,7 +67,7 @@ export const useNostrStore = defineStore("nostr", {
         async fetchUser(npub) {
             try {
                 const user = ndk.getUser({ npub });
-                // await user.fetchProfile();
+                // let profile = await user.fetchProfile();
                 return (this.user = user);
             } catch (error) {
                 console.error("Error fetching user:", error);
