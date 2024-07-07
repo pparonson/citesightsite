@@ -3,6 +3,16 @@
         <div class="flex flex-col w-1/4 p-1 overflow-hidden">
             <MenuBar :menuTarget="'/settings'" @search="filterNotes" />
             <div class="flex flex-1 overflow-y-auto overflow-x-hidden">
+                <teleport to="body">
+                    <div v-if="isLoggedIn && isFetchingEvents" class="fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full" id="spinnerModal">
+                        <div class="relative mx-auto mt-20 w-full max-w-lg h-96">
+                            <div class="mt-3 text-center">
+                                <span v-if="isLoggedIn && isFetchingEvents" class="loading loading-spinner loading-lg"></span>
+                                <p>Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+                </teleport>
                 <NoteEventList :noteEvents="filteredNoteEvents" @noteSelected="handleNoteSelected" />
             </div>
         </div>
@@ -35,7 +45,7 @@
             const nostrStore = useNostrStore();
             const annotationStore = useAnnotationStore();
             const authStore = useAuthStore();
-            const { user, noteEvents, selectedNote } = storeToRefs(nostrStore);
+            const { user, noteEvents, selectedNote, isFetchingEvents } = storeToRefs(nostrStore);
             const { annotations } = storeToRefs(annotationStore);
             const { isLoggedIn } = storeToRefs(authStore);
             const searchParams = ref({ term: "", scope: "all" });
@@ -146,6 +156,8 @@
                 filterNotes,
                 filteredNoteEvents,
                 handleNoteSelected,
+                isLoggedIn,
+                isFetchingEvents,
             };
         },
     };

@@ -23,7 +23,6 @@
 
         <router-link :to="'/note/new'" v-if="!isSettingsRoute">
             <div @click="createNewNote" class="text-xl mr-1">
-                <!-- <font-awesome-icon icon="calendar-day" aria-label="Add new note" /> -->
                 <font-awesome-icon icon="square-plus" aria-label="Add new note" />
             </div>
         </router-link>

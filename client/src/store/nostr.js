@@ -23,6 +23,7 @@ export const useNostrStore = defineStore("nostr", {
             note: {},
             selectedNote: null,
             isFetchingEvents: true,
+            isPublishingEvent: false
         };
     },
 
@@ -147,6 +148,7 @@ export const useNostrStore = defineStore("nostr", {
             }
         },
         async publishEvent(note) {
+            this.isPublishingEvent = true;
             let isUpdate = note.id ? true : false;
             let encryptionKey = ""; 
             const userData = await useIndexedDB().get(this.user.npub);
@@ -163,6 +165,8 @@ export const useNostrStore = defineStore("nostr", {
                 encrypted = nip44.v2.encrypt(note.content, encryptionKey);
             } catch (error) {
                 console.error("Error: Failed to encrypt event content: ", error.message);
+            } finally {
+                this.isPublishingEvent = false;
             }
 
             const eventProperties = await this.handleCreateUpdate({ ...note, content: encrypted }, isUpdate);

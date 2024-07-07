@@ -5,11 +5,26 @@
                 <font-awesome-icon icon="angles-left" aria-label="back" />
             </router-link>
         </div>
-        <div><NoteEventDetail :id="eventId" /></div>
+        <div>
+            <teleport to="body">
+                <div v-if="isPublishingEvent" class="fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full" id="spinnerModal">
+                    <div class="relative mx-auto mt-20 w-full max-w-lg h-96">
+                        <div class="mt-3 text-center">
+                            <span v-if="isPublishingEvent" class="loading loading-spinner loading-lg"></span>
+                            <p>Saving...</p>
+                        </div>
+                    </div>
+                </div>
+            </teleport>
+            <NoteEventDetail :id="eventId" />
+        </div>
     </div>
 </template>
 
 <script>
+    import { useAuthStore } from "@/store/auth";
+    import { useNostrStore } from "@/store/nostr";
+    import { storeToRefs } from "pinia";
     import { computed } from "vue";
     import { useRouter } from "vue-router";
     import NoteEventDetail from "@/components/NoteEventDetail.vue";
@@ -19,6 +34,10 @@
             NoteEventDetail,
         },
         setup() {
+            const authStore = useAuthStore();
+            const { isLoggedIn } = storeToRefs(authStore);
+            const nostrStore = useNostrStore();
+            const { isPublishingEvent } = storeToRefs(nostrStore);
             const router = useRouter();
             const eventId = computed(() => {
                 const currentRoute = router.currentRoute.value;
@@ -29,6 +48,7 @@
 
             return {
                 eventId,
+                isPublishingEvent
             };
         },
     };
