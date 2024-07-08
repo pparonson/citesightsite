@@ -21,7 +21,6 @@
                     Tag it! <font-awesome-icon icon="tags" aria-label="tagIt" />
                 </button>
 
-                <!-- Space between input and button -->
                 <span class="flex-1"></span>
 
                 <button type="submit" class="btn btn-primary ml-auto mr-6 text-sm self-start">

@@ -6,39 +6,68 @@
                 <h4 class="text-md ml-2">Annotation API</h4>
                 <div class="flex flex-col">
                     <div class="flex items-center mt-1 ml-6">
-                        <label class="w-1/6" for="annot-account-field">Account:</label>
-                        <input id="annot-account-field" v-model="rawAnnotAPIAcct" type="text" placeholder="Account name"
-                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8" />
+                        <label class="w-1/6" for="annot-account-field"
+                            >Account:</label
+                        >
+                        <input
+                            id="annot-account-field"
+                            v-model="rawAnnotAPIAcct"
+                            type="text"
+                            placeholder="Account name"
+                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
+                        />
                     </div>
                     <div class="flex items-center mt-1 ml-6">
-                        <label class="w-1/6" for="annot-key-field">API Key:</label>
-                        <input id="annot-key-field" v-model="rawAnnotAPIKey" type="text" placeholder="Add a new key"
-                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8" />
+                        <label class="w-1/6" for="annot-key-field"
+                            >API Key:</label
+                        >
+                        <input
+                            id="annot-key-field"
+                            v-model="rawAnnotAPIKey"
+                            type="text"
+                            placeholder="Add a new key"
+                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
+                        />
                     </div>
                 </div>
 
                 <h4 class="text-md mt-6 ml-2">Encryption</h4>
                 <div class="flex flex-col">
                     <div class="flex items-center mt-1 ml-6">
-                        <label class="w-1/6" for="annot-account-field">Encryption Key:</label>
-                        <input id="encryption-key-field" v-model="rawEncryptionKey" type="text"
+                        <label class="w-1/6" for="annot-account-field"
+                            >Encryption Key:</label
+                        >
+                        <input
+                            id="encryption-key-field"
+                            v-model="rawEncryptionKey"
+                            type="text"
                             placeholder="Add a new Key"
-                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8" />
+                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm h-8"
+                        />
                     </div>
                 </div>
 
                 <h4 class="text-md mt-6 ml-2">Nostr Settings</h4>
                 <div class="flex flex-col">
                     <div class="flex items-center mt-1 ml-6">
-                        <label class="w-1/6" for="relay-urls-field">Relay URLs:</label>
-                        <textarea id="relay-urls-field" v-model="relayUrls"
-                            placeholder="Enter relay URLs, separated by commas" rows="4"
-                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm" />
+                        <label class="w-1/6" for="relay-urls-field"
+                            >Relay URLs:</label
+                        >
+                        <textarea
+                            id="relay-urls-field"
+                            v-model="relayUrls"
+                            placeholder="Enter relay URLs, separated by commas"
+                            rows="4"
+                            class="w-1/4 ml-2 p-2 border border-gray-300 rounded text-sm"
+                        />
                     </div>
                 </div>
 
                 <div class="ml-2 mt-10">
-                    <button type="submit" class="btn btn-primary text-sm self-start">
+                    <button
+                        type="submit"
+                        class="btn btn-primary text-sm self-start"
+                    >
                         Save <font-awesome-icon icon="pen" aria-label="save" />
                     </button>
                 </div>
@@ -78,6 +107,7 @@ export default {
                     return;
                 } else {
                     try {
+                        // retain this commented-out code for testing
                         // if (!encryptionKey.value) {
                         //     console.log("Encryption key is required to decrypt user data.");
                         //     return;
@@ -118,6 +148,7 @@ export default {
             let encryptedAnnotAPIKey = rawAnnotAPIKey.value || "";
             let encryptionKey = rawEncryptionKey.value || "";
 
+            // retain this commented-out code for testing
             // try {
             //     // Encrypt the event using NIP-44
             //     encryptedAnnotAPIAcct = nip44?.v2?.encrypt(rawAnnotAPIAcct.value, encryptionKey);
