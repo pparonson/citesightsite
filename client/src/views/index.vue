@@ -12,23 +12,23 @@
         <div
             class="flex flex-col h-full w-3/4 overflow-y-auto overflow-x-hidden"
         >
-            <teleport to="body">
-                <div
-                    v-if="isLoggedIn && isFetchingEvents"
-                    class="fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full"
-                    id="spinnerModal"
-                >
-                    <div class="relative mx-auto mt-20 w-full max-w-lg h-96">
-                        <div class="mt-3 text-center">
-                            <span
-                                v-if="isLoggedIn && isFetchingEvents"
-                                class="loading loading-spinner loading-lg"
-                            ></span>
-                            <p>Loading...</p>
-                        </div>
-                    </div>
-                </div>
-            </teleport>
+            <!-- <teleport to="body"> -->
+            <!--     <div -->
+            <!--         v-if="isLoggedIn && isFetchingEvents" -->
+            <!--         class="fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full" -->
+            <!--         id="spinnerModal" -->
+            <!--     > -->
+            <!--         <div class="relative mx-auto mt-20 w-full max-w-lg h-96"> -->
+            <!--             <div class="mt-3 text-center"> -->
+            <!--                 <span -->
+            <!--                     v-if="isLoggedIn && isFetchingEvents" -->
+            <!--                     class="loading loading-spinner loading-lg" -->
+            <!--                 ></span> -->
+            <!--                 <p>Loading...</p> -->
+            <!--             </div> -->
+            <!--         </div> -->
+            <!--     </div> -->
+            <!-- </teleport> -->
             <NoteEventDetailDisplay />
         </div>
     </div>
