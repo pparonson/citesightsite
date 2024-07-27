@@ -23,7 +23,9 @@ export const useNostrStore = defineStore("nostr", {
             note: {},
             selectedNote: null,
             isFetchingEvents: true,
-            isPublishingEvent: false
+            isPublishingEvent: false,
+            missingEncryptionKey: false,
+            missingOptionalCredentials: false,
         };
     },
 
@@ -40,6 +42,19 @@ export const useNostrStore = defineStore("nostr", {
                     const user = await nip07signer.user();
                     if (user?.npub) {
                         const userData = await useIndexedDB().get(user?.npub || "");
+                        if (userData) {
+                            if (!userData.encryptionKey) {
+                                this.missingEncryptionKey = true;
+                            } else {
+                                const missingOptionalCredentials = !userData.encryptedAnnotAPIAcct || !userData.encryptedAnnotAPIKey || !userData.relayUrls || userData.relayUrls.length === 0;
+                                if (missingOptionalCredentials) {
+                                    this.missingOptionalCredentials = true
+                                }
+                            }
+                        } else {
+                            this.missingEncryptionKey = true;
+                        }
+
                         let explicitRelayUrls = [];
                         if (userData?.relayUrls?.length) {
                             explicitRelayUrls = userData.relayUrls;

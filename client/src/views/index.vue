@@ -12,6 +12,22 @@
         <div
             class="flex flex-col h-full w-3/4 overflow-y-auto overflow-x-hidden"
         >
+
+        <div v-if="missingEncryptionKey"
+            class="alert alert-error shadow-lg mb-4"
+            >
+            <div>
+                <span>Encryption Key is missing! Please provide it in the settings page for the app to work.</span>
+            </div>
+        </div>
+        <div v-if="missingOptionalCredentials && showInitialLoadAlert" 
+            class="alert alert-warning shadow-lg mb-4"
+            >
+            <div>
+                <span>Optional Credentials (Relay URLs, Annotation API Account/Key) are missing!</span>
+            </div>
+        </div>
+
             <!-- <teleport to="body"> -->
             <!--     <div -->
             <!--         v-if="isLoggedIn && isFetchingEvents" -->
@@ -57,7 +73,7 @@ export default {
         const nostrStore = useNostrStore();
         const annotationStore = useAnnotationStore();
         const authStore = useAuthStore();
-        const { user, noteEvents, selectedNote, isFetchingEvents } =
+        const { user, noteEvents, selectedNote, isFetchingEvents, missingEncryptionKey, missingOptionalCredentials } =
             storeToRefs(nostrStore);
         const { annotations } = storeToRefs(annotationStore);
         const { isLoggedIn } = storeToRefs(authStore);
@@ -153,6 +169,8 @@ export default {
             handleNoteSelected,
             isLoggedIn,
             isFetchingEvents,
+            missingEncryptionKey,
+            missingOptionalCredentials
         };
     },
 };
