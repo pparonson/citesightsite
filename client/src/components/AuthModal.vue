@@ -17,13 +17,11 @@
                     <div class="mt-10 flex flex-col items-center">
                         <button
                             class="btn btn-primary w-60 text-white hover:bg-purple-500 font-bold py-2 px-2 mx-2"
-                            :class="{ 'bg-gray-400 cursor-not-allowed': true }"
-                            disabled
                             @click="login('NIP46')"
                         >
                             NIP46 Login (nsecbunker)
-                            <br />
-                            (Coming soon)
+                            <!-- <br /> -->
+                            <!-- (Coming soon) -->
                         </button>
                         <button
                             class="btn btn-primary w-60 text-white hover:bg-orange-500 font-bold py-2 px-4 mx-2 mt-10"

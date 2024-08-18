@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
-import NDK, { NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
+import NDK, { NDKNip07Signer, NDKNip46Signer, NDKEvent } from "@nostr-dev-kit/ndk";
+import { init as initNostrLogin, launch as launchNostrLoginDialog } from "nostr-login";
 import { nip44 } from "nostr-tools";
 import { useIndexedDB } from "@/utils/indexedDB";
 import { useAuthStore } from "@/store/auth";
@@ -34,50 +35,77 @@ export const useNostrStore = defineStore("nostr", {
             localStorage.setItem("debug", "ndk:*"); // debug NDK internals
             const authStore = useAuthStore();
             let { loginMethod, toggleModal, setLoginStatus } = authStore;
-
-            if (loginMethod === "NIP07" && !ndk) {
-
-                try {
-                    const nip07signer = new NDKNip07Signer();
-                    const user = await nip07signer.user();
-                    if (user?.npub) {
-                        const userData = await useIndexedDB().get(user?.npub || "");
-                        if (userData) {
-                            if (!userData.encryptionKey) {
-                                this.missingEncryptionKey = true;
-                            } else {
-                                const missingOptionalCredentials = !userData.encryptedAnnotAPIAcct || !userData.encryptedAnnotAPIKey || !userData.relayUrls || userData.relayUrls.length === 0;
-                                if (missingOptionalCredentials) {
-                                    this.missingOptionalCredentials = true
-                                }
-                            }
-                        } else {
-                            this.missingEncryptionKey = true;
-                        }
-
-                        let explicitRelayUrls = [];
-                        if (userData?.relayUrls?.length) {
-                            explicitRelayUrls = userData.relayUrls;
-                        }
-
-                        ndk = new NDK({
-                            signer: nip07signer,
-                            explicitRelayUrls,
-                        });
-
-                        await ndk.connect();
-                        console.log("NDK Connected..");
-
-                        let resp = await this.fetchUser(user.npub)
-                        if (resp) {
-                            setLoginStatus(true);
-                            toggleModal(false);
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error connecting to NDK:", error);
-                    throw error
+            let signer;
+            let remoteNpub;
+            try {
+                if (!ndk) {
+                    ndk = new NDK();
                 }
+                if (loginMethod === "NIP07") {
+                    signer = new NDKNip07Signer();
+                } else if (loginMethod === "NIP46") {
+                    try {
+                        await initNostrLogin({
+                            bunkers: 'nsec.app',
+                            theme: 'ocean',
+                            darkMode: true,
+                            perms: 'sign_event:1, nip04_encrypt',
+                            noBanner: true,
+                            onAuth: async (npub, options) => {
+                                console.log(`User authenticated with pubkey: ${npub}`, options);
+                                remoteNpub = npub;
+                            },
+                        }).catch((ex) => {
+                            console.error('Error initializing Nostr Login:', ex);
+                        });
+                    } catch (ex) {
+                        console.error('Error initializing Nostr Login:', ex);
+                    }
+
+                    await launchNostrLoginDialog({ startScreen: 'login' });
+
+                    if (window.nostr) {
+                        // const remotePubKey = await window.nostr.getPublicKey();
+                        // remotePubKey;
+                        
+                        signer = new NDKNip46Signer(ndk, remoteNpub, window.nostr);
+                    }
+
+                } else {
+                    throw new Error(`Unsupported login method: ${loginMethod}`);
+                }
+
+                const user = await signer.user();
+                if (user?.npub) {
+                    const userData = await useIndexedDB().get(user.npub || "");
+                    if (userData) {
+                        if (!userData.encryptionKey) {
+                            this.missingEncryptionKey = true;
+                        } else {
+                            const missingOptionalCredentials = !userData.encryptedAnnotAPIAcct || !userData.encryptedAnnotAPIKey || !userData.relayUrls || userData.relayUrls.length === 0;
+                            if (missingOptionalCredentials) {
+                                this.missingOptionalCredentials = true;
+                            }
+                        }
+                    } else {
+                        this.missingEncryptionKey = true;
+                    }
+
+                    const explicitRelayUrls = userData?.relayUrls?.length ? userData.relayUrls : [];
+
+                    ndk = new NDK({ signer, explicitRelayUrls });
+                    await ndk.connect();
+                    console.log("NDK Connected..");
+
+                    const resp = await this.fetchUser(user.npub);
+                    if (resp) {
+                        setLoginStatus(true);
+                        toggleModal(false);
+                    }
+                }
+            }catch (error) {
+                console.error("Error connecting to NDK:", error);
+                throw error;
             }
         },
         async fetchUser(npub) {
