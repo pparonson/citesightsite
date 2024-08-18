@@ -32,7 +32,7 @@ export const useNostrStore = defineStore("nostr", {
 
     actions: {
         async initializeNDK() {
-            localStorage.setItem("debug", "ndk:*"); // debug NDK internals
+            localStorage.setItem("debug", "ndk:*"); // TODO: TESTING debug NDK internals
             const authStore = useAuthStore();
             let { loginMethod, toggleModal, setLoginStatus } = authStore;
             let signer;
@@ -51,6 +51,7 @@ export const useNostrStore = defineStore("nostr", {
                             darkMode: true,
                             perms: 'sign_event:1, nip04_encrypt',
                             noBanner: true,
+                            isSignInWithExtension: false, // TODO: not working as expected
                             onAuth: async (npub, options) => {
                                 console.log(`User authenticated with pubkey: ${npub}`, options);
                                 remoteNpub = npub;
@@ -62,13 +63,14 @@ export const useNostrStore = defineStore("nostr", {
                         console.error('Error initializing Nostr Login:', ex);
                     }
 
-                    await launchNostrLoginDialog({ startScreen: 'login' });
+                    await launchNostrLoginDialog({ 
+                        startScreen: 'login-bunker-url' // TODO: Not workng as expected
+                    });
 
                     if (window.nostr) {
-                        // const remotePubKey = await window.nostr.getPublicKey();
-                        // remotePubKey;
-                        
                         signer = new NDKNip46Signer(ndk, remoteNpub, window.nostr);
+                    } else {
+                        throw new Error('Nostr Login not initialized');
                     }
 
                 } else {
