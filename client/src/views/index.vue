@@ -60,6 +60,7 @@ import { useAnnotationStore } from "@/store/annotation";
 import { useAuthStore } from "@/store/auth";
 import { storeToRefs } from "pinia";
 import config from "./../../config/config";
+import version from "./../../../.version.json" with { type: 'json' };
 
 const customEventKind = config.nostr.config.encryptedLongFormNoteKind;
 
@@ -70,6 +71,7 @@ export default {
         NoteEventDetailDisplay,
     },
     setup() {
+        console.log(`PenItIn version: ${version.version}`);  
         const nostrStore = useNostrStore();
         const annotationStore = useAnnotationStore();
         const authStore = useAuthStore();

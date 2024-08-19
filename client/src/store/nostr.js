@@ -83,8 +83,18 @@ export const useNostrStore = defineStore("nostr", {
                     if (userData) {
                         if (!userData.encryptionKey) {
                             this.missingEncryptionKey = true;
-                        } else {
-                            const missingOptionalCredentials = !userData.encryptedAnnotAPIAcct || !userData.encryptedAnnotAPIKey || !userData.relayUrls || userData.relayUrls.length === 0;
+                        }  
+                        if (
+                            !userData.encryptedAnnotAPIAcct || 
+                            !userData.encryptedAnnotAPIKey || 
+                            !userData.relayUrls || 
+                            userData.relayUrls.length === 0
+                        ) {
+                            const missingOptionalCredentials = !userData.encryptedAnnotAPIAcct || 
+                                !userData.encryptedAnnotAPIKey 
+                                || !userData.relayUrls 
+                                || userData.relayUrls.length === 0;
+
                             if (missingOptionalCredentials) {
                                 this.missingOptionalCredentials = true;
                             }
