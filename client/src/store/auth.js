@@ -5,7 +5,7 @@ export const useAuthStore = defineStore("auth", {
         return {
             showModal: true,
             isLoggedIn: false,
-            loginMethod: null, // 'NIP07' or 'NIP46'
+            loginMethod: null, // https://github.com/nostrband/nostr-login
         };
     },
     actions: {

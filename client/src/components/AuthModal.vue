@@ -9,26 +9,14 @@
                 class="relative mx-auto mt-20 w-full max-w-lg h-96 shadow-lg rounded-sm bg-white"
             >
                 <div class="mt-3 text-center">
-                    <h3
-                        class="pt-10 text-lg leading-6 font-medium text-gray-900"
-                    >
-                        Login
-                    </h3>
                     <div class="mt-10 flex flex-col items-center">
                         <button
-                            class="btn btn-primary w-60 text-white hover:bg-purple-500 font-bold py-2 px-2 mx-2"
-                            @click="login('NIP46')"
-                        >
-                            NIP46 Login (nsecbunker)
-                            <!-- <br /> -->
-                            <!-- (Coming soon) -->
+                            class="btn btn-primary w-60 text-white hover:bg-purple-500 font-bold py-2 px-2 mx-2 mt-20"
+                            @click="login('nostr-login')"
+                        >LOGIN
                         </button>
-                        <button
-                            class="btn btn-primary w-60 text-white hover:bg-orange-500 font-bold py-2 px-4 mx-2 mt-10"
-                            @click="login('NIP07')"
-                        >
-                            NIP07 Login (browser extension)
-                        </button>
+                        <p class="mt-20">Only NIP-07 and NIP-46 logins are supported.</p>
+                        <p>Do not paste nsec key.</p>
                     </div>
                 </div>
             </div>

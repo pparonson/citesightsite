@@ -41,9 +41,10 @@ export const useNostrStore = defineStore("nostr", {
                 if (!ndk) {
                     ndk = new NDK();
                 }
-                if (loginMethod === "NIP07") {
-                    signer = new NDKNip07Signer();
-                } else if (loginMethod === "NIP46") {
+                // if (loginMethod === "NIP07") {
+                //     signer = new NDKNip07Signer();
+                // } else if 
+                if (loginMethod === "nostr-login") {
                     try {
                         await initNostrLogin({
                             bunkers: 'nsec.app',
