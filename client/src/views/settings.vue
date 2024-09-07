@@ -2,6 +2,13 @@
     <div class="my-1 mx-2">
         <MenuBar :menuTarget="'/'" />
         <div class="mt-2">
+            <div v-if="hasSettingsSaved" class="alert alert-success shadow-lg mb-4">
+                <span>Settings successfully updated!</span>
+            </div>
+            <div v-if="hasSettingsSaved === 'false'" class="alert alert-error shadow-lg mb-4">
+                <span>Failed to update settings!</span>
+            </div>
+        
             <form @submit.prevent="handleSave">
                 <h4 class="text-md ml-2">Annotation API</h4>
                 <div class="flex flex-col">
@@ -95,6 +102,7 @@ export default {
         let rawAnnotAPIKey = ref("");
         let rawEncryptionKey = ref("");
         let relayUrls = ref("");
+        let hasSettingsSaved = ref("");
 
         // TODO: remove key after testing
         // keyStore.setEncryptionKey("");
@@ -174,8 +182,17 @@ export default {
                     encryptionKey: encryptionKey,
                     relayUrls: relayUrlsArray,
                 });
+                hasSettingsSaved.value = true;
+                setTimeout(() => {
+                    hasSettingsSaved.value = "";
+                    // window.location.reload();
+                }, 3000);
             } catch (error) {
                 console.error("Failed to save settings to IndexedDB", error);
+                hasSettingsSaved.value = false;
+                setTimeout(() => {
+                    hasSettingsSaved.value = "";
+                }, 3000);
             }
         };
 
@@ -185,6 +202,7 @@ export default {
             rawEncryptionKey,
             relayUrls,
             handleSave,
+            hasSettingsSaved,
         };
     },
 };
