@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import NDK, { NDKNip07Signer, NDKNip46Signer, NDKEvent } from "@nostr-dev-kit/ndk";
+import NDK, { NDKNip46Signer, NDKEvent } from "@nostr-dev-kit/ndk";
 import { init as initNostrLogin, launch as launchNostrLoginDialog } from "nostr-login";
 import { nip44 } from "nostr-tools";
 import { useIndexedDB } from "@/utils/indexedDB";
@@ -20,6 +20,7 @@ export const useNostrStore = defineStore("nostr", {
     state: () => {
         return {
             user: null,
+            signer: null,
             noteEvents: [],
             note: {},
             selectedNote: null,
@@ -35,15 +36,12 @@ export const useNostrStore = defineStore("nostr", {
             localStorage.setItem("debug", "ndk:*"); // TODO: TESTING debug NDK internals
             const authStore = useAuthStore();
             let { loginMethod, toggleModal, setLoginStatus } = authStore;
-            let signer;
+            // let signer;
             let remoteNpub;
             try {
                 if (!ndk) {
                     ndk = new NDK();
                 }
-                // if (loginMethod === "NIP07") {
-                //     signer = new NDKNip07Signer();
-                // } else if 
                 if (loginMethod === "nostr-login") {
                     try {
                         await initNostrLogin({
@@ -69,7 +67,7 @@ export const useNostrStore = defineStore("nostr", {
                     });
 
                     if (window.nostr) {
-                        signer = new NDKNip46Signer(ndk, remoteNpub, window.nostr);
+                        this.signer = new NDKNip46Signer(ndk, remoteNpub, window.nostr);
                     } else {
                         throw new Error('Nostr Login not initialized');
                     }
@@ -78,7 +76,7 @@ export const useNostrStore = defineStore("nostr", {
                     throw new Error(`Unsupported login method: ${loginMethod}`);
                 }
 
-                const user = await signer.user();
+                const user = await this.signer.user();
                 if (user?.npub) {
                     const userData = await useIndexedDB().get(user.npub || "");
                     if (userData) {
@@ -106,7 +104,7 @@ export const useNostrStore = defineStore("nostr", {
 
                     const explicitRelayUrls = userData?.relayUrls?.length ? userData.relayUrls : [];
 
-                    ndk = new NDK({ signer, explicitRelayUrls });
+                    ndk = new NDK({ explicitRelayUrls, signer: this.signer });
                     await ndk.connect();
                     console.log("NDK Connected..");
 
@@ -221,20 +219,26 @@ export const useNostrStore = defineStore("nostr", {
                 encrypted = nip44.v2.encrypt(note.content, encryptionKey);
             } catch (error) {
                 console.error("Error: Failed to encrypt event content: ", error.message);
-            } finally {
-                this.isPublishingEvent = false;
-            }
+            } 
 
             const eventProperties = await this.handleCreateUpdate({ ...note, content: encrypted }, isUpdate);
             eventProperties.tags.push(["encrypted", "1"]);
 
-            let event = new NDKEvent(ndk, eventProperties);
+            // let ndkEvent = new NDKEvent(ndk, eventProperties);
+            let ndkEvent = new NDKEvent(ndk);
+            eventProperties.created_at = Math.floor(Date.now() / 1000);
+            ndkEvent = {...ndkEvent, ...eventProperties};
 
             try {
-                await ndk.publish(event);
+                // const signedEvent = await window.nostr.signEvent(event);
+                // const signedEvent = await ndk.publish(event);
+                const signedEvent = await ndkEvent.publish();
+                console.log("Signed Event: ", signedEvent);
             } catch (error) {
                 console.error("Error publishing event:", error);
                 throw error;
+            } finally {
+                this.isPublishingEvent = false;
             }
         },
         sortNoteEventsByDateTag() {
