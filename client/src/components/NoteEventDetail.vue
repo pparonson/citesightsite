@@ -1,10 +1,14 @@
 <template>
     <div class="flex flex-col h-[93vh] overflow-hidden px-2 py-1 space-y-2">
         <form class="flex flex-col flex-1" @submit.prevent="handleSave">
-            <textarea
-                v-model="localNote.content"
-                class="flex-1 overflow-auto mb-2 p-2 border border-gray-300 resize-none h-[80vh] max-h-[80vh]"
-            ></textarea>
+            <div 
+                ref="editorRef" 
+                class="flex-1 overflow-auto mb-2 border border-gray-300">
+            </div>
+            <!-- <textarea -->
+            <!--     v-model="localNote.content" -->
+            <!--     class="flex-1 overflow-auto mb-2 p-2 border border-gray-300 resize-none h-[80vh] max-h-[80vh]" -->
+            <!-- ></textarea> -->
             <div class="flex flex-wrap mb-1">
                 <Tags :tags="localNote?.tags || []" :editable="true" @remove="handleTagRemoval" />
             </div>
@@ -38,6 +42,10 @@
     import { useRouter } from "vue-router";
     import { useNostrStore } from "@/store/nostr";
     import config from "./../../config/config.js";
+    import { EditorState } from "@codemirror/state";
+    import {EditorView, keymap, drawSelection} from "@codemirror/view"
+    import {defaultKeymap} from "@codemirror/commands"
+    import { vim } from "@replit/codemirror-vim"
 
     export default {
         components: {
@@ -50,14 +58,40 @@
             const router = useRouter();
             const nostrStore = useNostrStore();
             let { note } = storeToRefs(nostrStore);
-            let localNote = ref({ tags: [] });
+            let localNote = ref({ content: '', tags: [] });
             let newTag = ref("");
+
+            const editorRef = ref(null);
+            let editorView = null;
+
+            const initializeEditor = () => {
+                if (editorRef.value) {
+                    let startState = EditorState.create({
+                        doc: localNote.value.content || '',
+                        extensions: [
+                            vim(),
+                            keymap.of(defaultKeymap),
+                            EditorView.lineWrapping,
+                            drawSelection(),
+                        ]
+                    })
+
+                    let view = new EditorView({
+                        state: startState,
+                        parent: editorRef.value,
+                    })
+                }
+            };
+
             const noteTitle = computed(() => {
                 const titleTag = localNote.value.tags?.find(([key]) => key === "title");
                 return titleTag ? titleTag[1] : "Unknown Title";
             });
 
             const handleSave = async () => {
+                if (editorView) {
+                    localNote.value.content = editorView.state.doc.toString();
+                }
                 const noteToSave = {
                     ...localNote.value,
                     content: localNote.value?.content,
@@ -92,8 +126,20 @@
 
             watch(
                 () => useNostrStore().note,
-                (newNote) => {
+                async (newNote) => {
                     localNote.value = JSON.parse(JSON.stringify(newNote));
+
+                    await nostrStore.getNoteEventFromState(newId);
+                    await nostrStore.fetchNoteEventById(newId);
+                    if (editorView && localNote.value && localNote.value.content) {
+                        editorView.dispatch({
+                            changes: {
+                                from: 0,
+                                to: editorView.state.doc.length,
+                                insert: localNote.value.content,
+                            },
+                        });
+                    }
                 },
                 { deep: true }
             );
@@ -107,6 +153,8 @@
                 } else {
                     localNote.value = { content: "", tags: ["client"] };
                 }
+
+                initializeEditor();
             });
 
             return {
@@ -117,6 +165,7 @@
                 noteTitle,
                 handleTagRemoval,
                 addTag,
+                editorRef,
             };
         },
     };
