@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import NDK, { NDKNip46Signer, NDKEvent } from "@nostr-dev-kit/ndk";
+import NDK, { NDKNip46Signer, NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
 import { init as initNostrLogin, launch as launchNostrLoginDialog } from "nostr-login";
 import { nip44 } from "nostr-tools";
 import { useIndexedDB } from "@/utils/indexedDB";
@@ -67,7 +67,8 @@ export const useNostrStore = defineStore("nostr", {
                     });
 
                     if (window.nostr) {
-                        this.signer = new NDKNip46Signer(ndk, remoteNpub, window.nostr);
+                        this.signer = new NDKNip07Signer();
+                        // this.signer = new NDKNip46Signer(ndk, remoteNpub, window.nostr);
                     } else {
                         throw new Error('Nostr Login not initialized');
                     }
@@ -223,15 +224,15 @@ export const useNostrStore = defineStore("nostr", {
 
             const eventProperties = await this.handleCreateUpdate({ ...note, content: encrypted }, isUpdate);
             eventProperties.tags.push(["encrypted", "1"]);
-            eventProperties.created_at = Math.floor(Date.now() / 1000);
+            // eventProperties.created_at = Math.floor(Date.now() / 1000);
             
             let ndkEvent = new NDKEvent(ndk, eventProperties);
             // ndkEvent = {...ndkEvent, ...eventProperties};
 
             try {
                 // const signedEvent = await window.nostr.signEvent(event);
-                // const signedEvent = await ndk.publish(event);
-                const signedEvent = await ndkEvent.publish();
+                const signedEvent = await ndk.publish(ndkEvent);
+                // const signedEvent = await ndkEvent.publish();
                 console.log("Signed Event: ", signedEvent);
             } catch (error) {
                 console.error("Error publishing event:", error);
