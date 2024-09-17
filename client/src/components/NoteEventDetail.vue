@@ -5,10 +5,6 @@
                 ref="editorRef" 
                 class="flex-1 overflow-auto mb-2 border border-gray-300">
             </div>
-            <!-- <textarea -->
-            <!--     v-model="localNote.content" -->
-            <!--     class="flex-1 overflow-auto mb-2 p-2 border border-gray-300 resize-none h-[80vh] max-h-[80vh]" -->
-            <!-- ></textarea> -->
             <div class="flex flex-wrap mb-1">
                 <Tags :tags="localNote?.tags || []" :editable="true" @remove="handleTagRemoval" />
             </div>
@@ -76,7 +72,7 @@
                         ]
                     })
 
-                    let view = new EditorView({
+                    editorView = new EditorView({
                         state: startState,
                         parent: editorRef.value,
                     })

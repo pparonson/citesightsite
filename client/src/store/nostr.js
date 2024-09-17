@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import NDK, { NDKNip46Signer, NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
+import NDK, { NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
 import { init as initNostrLogin, launch as launchNostrLoginDialog } from "nostr-login";
 import { nip44 } from "nostr-tools";
 import { useIndexedDB } from "@/utils/indexedDB";
@@ -224,16 +224,11 @@ export const useNostrStore = defineStore("nostr", {
 
             const eventProperties = await this.handleCreateUpdate({ ...note, content: encrypted }, isUpdate);
             eventProperties.tags.push(["encrypted", "1"]);
-            // eventProperties.created_at = Math.floor(Date.now() / 1000);
             
             let ndkEvent = new NDKEvent(ndk, eventProperties);
-            // ndkEvent = {...ndkEvent, ...eventProperties};
 
             try {
-                // const signedEvent = await window.nostr.signEvent(event);
-                const signedEvent = await ndk.publish(ndkEvent);
-                // const signedEvent = await ndkEvent.publish();
-                console.log("Signed Event: ", signedEvent);
+                await ndk.publish(ndkEvent);
             } catch (error) {
                 console.error("Error publishing event:", error);
                 throw error;
@@ -252,9 +247,6 @@ export const useNostrStore = defineStore("nostr", {
                 const dateBTag = b.tags.find((tag) => tag[0] === "d");
 
                 // Try parsing the dates, invalid dates will become 'Invalid Date'
-                // const dateA = new Date(dateATag ? dateATag[1] : NaN);
-                // const dateB = new Date(dateBTag ? dateBTag[1] : NaN);
-
                 const dateA = a.created_at ? a.created_at : NaN;
                 const dateB = b.created_at ? b.created_at : NaN;
 

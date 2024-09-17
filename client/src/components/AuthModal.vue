@@ -15,8 +15,6 @@
                             @click="login('nostr-login')"
                         >LOGIN
                         </button>
-                        <p class="mt-20">Only NIP-07 and NIP-46 logins are supported.</p>
-                        <p>Do not paste nsec key.</p>
                     </div>
                 </div>
             </div>
