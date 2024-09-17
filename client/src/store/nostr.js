@@ -223,11 +223,10 @@ export const useNostrStore = defineStore("nostr", {
 
             const eventProperties = await this.handleCreateUpdate({ ...note, content: encrypted }, isUpdate);
             eventProperties.tags.push(["encrypted", "1"]);
-
-            // let ndkEvent = new NDKEvent(ndk, eventProperties);
-            let ndkEvent = new NDKEvent(ndk);
             eventProperties.created_at = Math.floor(Date.now() / 1000);
-            ndkEvent = {...ndkEvent, ...eventProperties};
+            
+            let ndkEvent = new NDKEvent(ndk, eventProperties);
+            // ndkEvent = {...ndkEvent, ...eventProperties};
 
             try {
                 // const signedEvent = await window.nostr.signEvent(event);

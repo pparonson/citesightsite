@@ -129,8 +129,8 @@
                 async (newNote) => {
                     localNote.value = JSON.parse(JSON.stringify(newNote));
 
-                    await nostrStore.getNoteEventFromState(newId);
-                    await nostrStore.fetchNoteEventById(newId);
+                    // await nostrStore.getNoteEventFromState(newId);
+                    // await nostrStore.fetchNoteEventById(newId);
                     if (editorView && localNote.value && localNote.value.content) {
                         editorView.dispatch({
                             changes: {
