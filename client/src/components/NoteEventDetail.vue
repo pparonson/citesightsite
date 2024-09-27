@@ -3,8 +3,14 @@
         <form class="flex flex-col flex-1" @submit.prevent="handleSave">
             <div 
                 ref="editorRef" 
-                class="flex-1 overflow-auto mb-2 border border-gray-300">
+                class="flex-1 mb-2 border border-gray-300 overflow-y-scroll">
             </div>
+            <!-- <div> -->
+            <!--     <textarea -->
+            <!--         v-model="localNote.content" -->
+            <!--         class="flex-1 overflow-auto mb-2 p-2 border border-gray-300 resize-none h-[80vh] max-h-[80vh]" -->
+            <!--     ></textarea> -->
+            <!-- </div> -->
             <div class="flex flex-wrap mb-1">
                 <Tags :tags="localNote?.tags || []" :editable="true" @remove="handleTagRemoval" />
             </div>
@@ -39,8 +45,8 @@
     import { useNostrStore } from "@/store/nostr";
     import config from "./../../config/config.js";
     import { EditorState } from "@codemirror/state";
-    import {EditorView, keymap, drawSelection} from "@codemirror/view"
-    import {defaultKeymap} from "@codemirror/commands"
+    import { EditorView, keymap, drawSelection, lineNumbers } from "@codemirror/view"
+    import { defaultKeymap } from "@codemirror/commands"
     import { vim } from "@replit/codemirror-vim"
 
     export default {
@@ -69,6 +75,7 @@
                             keymap.of(defaultKeymap),
                             EditorView.lineWrapping,
                             drawSelection(),
+                            lineNumbers()
                         ]
                     })
 
