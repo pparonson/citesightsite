@@ -123,12 +123,12 @@ export default {
                 //     console.error("Error subscribing to events:", error);
                 // }
 
-                // try {
-                //     await annotationStore.fetchAllAnnotations();
-                //     console.log("Annotation store:", annotations.value);
-                // } catch (error) {
-                //     console.error(`Failed to fetch annotations: ${error}`);
-                // }
+                try {
+                    await annotationStore.fetchAllAnnotations();
+                    console.log("Annotation store:", annotations.value);
+                } catch (error) {
+                    console.error(`Failed to fetch annotations: ${error}`);
+                }
             }
         };
 

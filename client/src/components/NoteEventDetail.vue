@@ -71,23 +71,7 @@
             const Theme = EditorView.theme({
                 "&": {
                     fontSize: "110%",
-                },
-                ".cm-cursor, .cm-dropCursor": {
-                    borderLeftColor: "#3b39e5",
-                    backgroundColor: "#3b39e5",
-                },
-                ".cm-activeLineGutter .cm-gutterElement": {
-                    borderLeftColor: "#3b39e5",
-                },
-                ".cm-cursorLayer": {
-                    borderColor: "#3b39e5"
-                },
-                ".cm-fat-cursor, .cm-animate-fat-cursor": {
-                    backgroundColor: "#3b39e5",
-                },
-                ".cm-fat-cursor-mark, .cm-text": {
-                    borderColor: "#3b39e5",
-                },
+                }
             });
 
             const initializeEditor = () => {

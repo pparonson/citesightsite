@@ -1,9 +1,16 @@
 <template>
     <div class="h-full px-2">
-        <div class="mt-4 mb-1">
-            <router-link to="/" class="text-xl ml-2">
-                <font-awesome-icon icon="angles-left" aria-label="back" />
-            </router-link>
+        <div class="flex flex-row mt-4 mb-1">
+            <div>
+                <router-link to="/" class="text-xl ml-2 mr-20">
+                    <font-awesome-icon icon="angles-left" aria-label="back" />
+                </router-link>
+            </div>
+            <!-- <div> -->
+            <!--     <div> -->
+            <!--         TODO: NOTE DETAIL SETTINGS -->
+            <!--     </div> -->
+            <!-- </div> -->
         </div>
         <div>
             <!-- <teleport to="body"> -->
