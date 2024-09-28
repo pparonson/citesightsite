@@ -1,9 +1,9 @@
 <template>
     <div class="flex flex-col h-[93vh] overflow-hidden px-2 py-1 space-y-2">
-        <form class="flex flex-col flex-1" @submit.prevent="handleSave">
+        <form class="flex flex-col h-full" @submit.prevent="handleSave">
             <div 
                 ref="editorRef" 
-                class="flex-1 mb-2 border border-gray-300 overflow-y-scroll">
+                class="flex-1 mb-2 border border-gray-300 overflow-y-auto">
             </div>
             <!-- <div> -->
             <!--     <textarea -->
@@ -11,27 +11,29 @@
             <!--         class="flex-1 overflow-auto mb-2 p-2 border border-gray-300 resize-none h-[80vh] max-h-[80vh]" -->
             <!--     ></textarea> -->
             <!-- </div> -->
-            <div class="flex flex-wrap mb-1">
-                <Tags :tags="localNote?.tags || []" :editable="true" @remove="handleTagRemoval" />
-            </div>
+            <div class="flex flex-col space-y-2">
+                <div class="flex flex-wrap flex-1 mb-1">
+                    <Tags :tags="localNote?.tags || []" :editable="true" @remove="handleTagRemoval" />
+                </div>
 
-            <div class="flex items-center justify-between mt-4 mb-1">
-                <input
-                    type="text"
-                    v-model="newTag"
-                    @keydown.enter.prevent="addTag"
-                    placeholder="Enter new tag"
-                    class="w-1/10 p-2 border border-gray-300 rounded text-sm h-8"
-                />
-                <button type="button" @click="addTag" class="btn btn-secondary ml-2 text-sm">
-                    Tag it! <font-awesome-icon icon="tags" aria-label="tagIt" />
-                </button>
+                <div class="flex items-center justify-between mt-4 mb-1">
+                    <input
+                        type="text"
+                        v-model="newTag"
+                        @keydown.enter.prevent="addTag"
+                        placeholder="Enter new tag"
+                        class="w-1/10 p-2 border border-gray-300 rounded text-sm h-8"
+                    />
+                    <button type="button" @click="addTag" class="btn btn-secondary ml-2 text-sm">
+                        Tag it! <font-awesome-icon icon="tags" aria-label="tagIt" />
+                    </button>
 
-                <span class="flex-1"></span>
+                    <span class="flex-1"></span>
 
-                <button type="submit" class="btn btn-primary ml-auto mr-6 text-sm self-start">
-                    Pen it in! <font-awesome-icon icon="pen" aria-label="penItIn" />
-                </button>
+                    <button type="submit" class="btn btn-primary ml-auto mr-6 text-sm self-start">
+                        Pen it in! <font-awesome-icon icon="pen" aria-label="penItIn" />
+                    </button>
+                </div>
             </div>
         </form>
     </div>
@@ -46,7 +48,7 @@
     import config from "./../../config/config.js";
     import { EditorState } from "@codemirror/state";
     import { EditorView, keymap, drawSelection, lineNumbers } from "@codemirror/view"
-    import { defaultKeymap } from "@codemirror/commands"
+    import { defaultKeymap, history, undo, redo } from "@codemirror/commands"
     import { vim } from "@replit/codemirror-vim"
 
     export default {
@@ -66,16 +68,34 @@
             const editorRef = ref(null);
             let editorView = null;
 
+            const Theme = EditorView.theme({
+                "&": {
+                    fontSize: "110%",
+                },
+                // ".cm-content": {
+                //     fontSize: "110%", // Setting font at content level
+                // },
+                //     ".cm-cursor, .cm-dropCursor": {
+                //     borderLeftColor: "#3b39e5" // Set the cursor color
+                // }
+            });
+
             const initializeEditor = () => {
                 if (editorRef.value) {
                     let startState = EditorState.create({
                         doc: localNote.value.content || '',
                         extensions: [
                             vim(),
+                            keymap.of([
+                                { key: "u", run: undo },
+                                { key: "Ctrl-r", run: redo }
+                            ]),
                             keymap.of(defaultKeymap),
+                            history(),
                             EditorView.lineWrapping,
                             drawSelection(),
-                            lineNumbers()
+                            lineNumbers(),
+                            Theme
                         ]
                     })
 
