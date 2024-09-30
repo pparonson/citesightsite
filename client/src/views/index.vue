@@ -5,7 +5,8 @@
             <div class="flex flex-1 overflow-y-auto overflow-x-hidden">
                 <NoteEventList
                     :noteEvents="filteredNoteEvents"
-                    @noteSelected="handleNoteSelected"
+                    :annotations="annotations"
+                    @eventSelected="handleEventSelected"
                 />
             </div>
         </div>
@@ -125,7 +126,7 @@ export default {
 
                 try {
                     await annotationStore.fetchAllAnnotations();
-                    console.log("Annotation store:", annotations.value);
+                    // console.log("Annotation store:", annotations.value);
                 } catch (error) {
                     console.error(`Failed to fetch annotations: ${error}`);
                 }
@@ -161,14 +162,19 @@ export default {
             }
         });
 
-        const handleNoteSelected = (noteId) => {
-            nostrStore.setSelectedNoteById(noteId);
+        const handleEventSelected = ({id, type}) => {
+            if (type === 'noteEvent' ) {
+                nostrStore.setSelectedNoteById(id);
+            } else if (type === 'annotation') {
+                annotationStore.setSelectedAnnotationById(id);
+            }
         };
 
         return {
             filterNotes,
             filteredNoteEvents,
-            handleNoteSelected,
+            annotations,
+            handleEventSelected,
             isLoggedIn,
             isFetchingEvents,
             missingEncryptionKey,
