@@ -33,7 +33,7 @@ export const useNostrStore = defineStore("nostr", {
 
     actions: {
         async initializeNDK() {
-            localStorage.setItem("debug", "ndk:*"); // TODO: TESTING debug NDK internals
+            // localStorage.setItem("debug", "ndk:*"); // TODO: TESTING debug NDK internals
             const authStore = useAuthStore();
             let { loginMethod, toggleModal, setLoginStatus } = authStore;
             // let signer;
