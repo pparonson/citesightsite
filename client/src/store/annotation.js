@@ -12,7 +12,6 @@ export const useAnnotationStore = defineStore("annotation", {
         return {
             annotations: [],
             annotation: {},
-            selectedAnnotation: null,
         };
     },
     actions: {
@@ -73,10 +72,6 @@ export const useAnnotationStore = defineStore("annotation", {
 
                 return this.annotations;
             }
-        },
-        setSelectedAnnotationById(id) {
-            const annotation = this.annotations.find((n) => n.id === id);
-            this.selectedAnnotation = annotation ? { ...annotation } : null;
         },
     },
 });

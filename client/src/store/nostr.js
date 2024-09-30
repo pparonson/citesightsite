@@ -23,7 +23,7 @@ export const useNostrStore = defineStore("nostr", {
             signer: null,
             noteEvents: [],
             note: {},
-            selectedNote: null,
+            selectedEvent: null,
             isFetchingEvents: true,
             isPublishingEvent: false,
             missingEncryptionKey: false,
@@ -241,23 +241,23 @@ export const useNostrStore = defineStore("nostr", {
             for (const event of noteEventsCopy) {
                 this.filterToLatestNotes(event);
             }
-            this.noteEvents.sort((a, b) => {
-                // Extract date strings from tags
-                const dateATag = a.tags.find((tag) => tag[0] === "d");
-                const dateBTag = b.tags.find((tag) => tag[0] === "d");
-
-                // Try parsing the dates, invalid dates will become 'Invalid Date'
-                const dateA = a.created_at ? a.created_at : NaN;
-                const dateB = b.created_at ? b.created_at : NaN;
-
-                // Handle invalid dates by considering them as the largest possible date
-                // this ensures they are pushed to the end of the sorted array
-                if (isNaN(dateA)) return 1; // a goes after b
-                if (isNaN(dateB)) return -1; // a goes before b
-
-                // Compare valid dates in descending order
-                return dateB - dateA;
-            });
+            // this.noteEvents.sort((a, b) => {
+            //     // Extract date strings from tags
+            //     const dateATag = a.tags.find((tag) => tag[0] === "d");
+            //     const dateBTag = b.tags.find((tag) => tag[0] === "d");
+            //
+            //     // Try parsing the dates, invalid dates will become 'Invalid Date'
+            //     const dateA = a.created_at ? a.created_at : NaN;
+            //     const dateB = b.created_at ? b.created_at : NaN;
+            //
+            //     // Handle invalid dates by considering them as the largest possible date
+            //     // this ensures they are pushed to the end of the sorted array
+            //     if (isNaN(dateA)) return 1; // a goes after b
+            //     if (isNaN(dateB)) return -1; // a goes before b
+            //
+            //     // Compare valid dates in descending order
+            //     return dateB - dateA;
+            // });
         },
         async handleCreateUpdate(note, isUpdate) {
             // if update, get prevNote and if create, set as null
@@ -357,9 +357,8 @@ export const useNostrStore = defineStore("nostr", {
                 this.noteEvents = this.noteEvents.filter((e) => e.id !== previousId);
             }
         },
-        setSelectedNoteById(noteId) {
-            const note = this.noteEvents.find((n) => n.id === noteId);
-            this.selectedNote = note ? { ...note } : null;
-        },
+        setSelectedEvent(event) {
+            this.selectedEvent = event;
+        }
     },
 });

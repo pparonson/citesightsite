@@ -6,7 +6,6 @@
                 <NoteEventList
                     :noteEvents="filteredNoteEvents"
                     :annotations="annotations"
-                    @eventSelected="handleEventSelected"
                 />
             </div>
         </div>
@@ -76,7 +75,7 @@ export default {
         const nostrStore = useNostrStore();
         const annotationStore = useAnnotationStore();
         const authStore = useAuthStore();
-        const { user, noteEvents, selectedNote, isFetchingEvents, missingEncryptionKey, missingOptionalCredentials } =
+        const { user, noteEvents, isFetchingEvents, missingEncryptionKey, missingOptionalCredentials } =
             storeToRefs(nostrStore);
         const { annotations } = storeToRefs(annotationStore);
         const { isLoggedIn } = storeToRefs(authStore);
@@ -106,14 +105,13 @@ export default {
 
         const fetchAnnotationsAndEvents = async () => {
             if (isLoggedIn.value) {
-                // kind 30024: custom encrypted long-form note kind
                 const settings = { kinds: [1, customEventKind] };
 
                 try {
                     await nostrStore.fetchEvents(settings);
-                    if (!selectedNote.value) {
-                        nostrStore.setSelectedNoteById(noteEvents.value[0].id);
-                    }
+                    // if (!selectedNote.value) {
+                    //     nostrStore.setSelectedNoteById(noteEvents.value[0].id);
+                    // }
                 } catch (error) {
                     console.error("Error fetching events:", error);
                 }
@@ -126,7 +124,6 @@ export default {
 
                 try {
                     await annotationStore.fetchAllAnnotations();
-                    // console.log("Annotation store:", annotations.value);
                 } catch (error) {
                     console.error(`Failed to fetch annotations: ${error}`);
                 }
@@ -162,19 +159,10 @@ export default {
             }
         });
 
-        const handleEventSelected = ({id, type}) => {
-            if (type === 'noteEvent' ) {
-                nostrStore.setSelectedNoteById(id);
-            } else if (type === 'annotation') {
-                annotationStore.setSelectedAnnotationById(id);
-            }
-        };
-
         return {
             filterNotes,
             filteredNoteEvents,
             annotations,
-            handleEventSelected,
             isLoggedIn,
             isFetchingEvents,
             missingEncryptionKey,

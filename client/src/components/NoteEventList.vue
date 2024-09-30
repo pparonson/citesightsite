@@ -10,7 +10,9 @@
 </template>
 
 <script>
-    import { computed } from "vue";
+    import { computed, watch } from "vue";
+    import { storeToRefs } from "pinia";
+    import { useNostrStore } from "@/store/nostr";
     import EventItem from "@/components/EventItem.vue";
 
     export default {
@@ -38,8 +40,9 @@
                 },
             },
         },
-        emits: ["eventSelected"],
-        setup(props, { emit }) {
+        setup(props ) {
+            const nostrStore = useNostrStore();
+            const { selectedEvent } = storeToRefs(nostrStore);
             const combinedEvents = computed(() => {
                 const mappedAnnotations = props.annotations.map(annotation => ({
                     ...annotation,
@@ -53,19 +56,30 @@
                     type: 'noteEvent',
                 }));
 
+                // return [...mappedNoteEvents, ...mappedAnnotations];
 
-                return [...mappedNoteEvents, ...mappedAnnotations];
-
-                // return [...mappedNoteEvents, ...mappedAnnotations].sort((a, b) => {
-                //     const dateA = a.created_at || a.created;
-                //     const dateB = b.created_at || b.created;
-                //     return new Date(dateB) - new Date(dateA);
-                // });
+                return [...mappedNoteEvents, ...mappedAnnotations].sort((a, b) => {
+                    const dateA = a.created_at || a.created;
+                    const dateB = b.created_at || b.created;
+                    return new Date(dateB) - new Date(dateA);
+                });
             });
 
             const handleEventClick = (event) => {
-                emit("eventSelected", { id: event.id, type: event.type });
+                nostrStore.setSelectedEvent(event);
             };
+
+            // onMounted(async () => {
+            //     if (!selectedEvent.value) {
+            //         setSelectedEvent(this.combinedEvents[0]);
+            //     }
+            // });
+
+            watch(combinedEvents, (newEvents) => {
+                if (newEvents.length > 0 && !selectedEvent.value) {
+                    nostrStore.setSelectedEvent(newEvents[0]);
+                }
+            }, { immediate: true });
 
             return {
                 combinedEvents,

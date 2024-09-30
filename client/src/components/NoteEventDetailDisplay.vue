@@ -36,7 +36,7 @@ function updateLinksToOpenInNewTabs(htmlString) {
         setup(props) {
             const nostrStore = useNostrStore();
             const router = useRouter();
-            const { selectedNote } = storeToRefs(nostrStore);
+            const { selectedEvent } = storeToRefs(nostrStore);
             const md = new MarkdownIt();
             const noteTitle = ref("");
             const renderedContent = ref("");
@@ -48,9 +48,7 @@ function updateLinksToOpenInNewTabs(htmlString) {
                 }
             };
 
-            watch(selectedNote, (newValue) => {
-                // console.log("selectedNote changed: ", newValue);
-                // console.log("selectedNote changed: ", selectedNote.value);
+            watch(selectedEvent, (newValue) => {
                 noteEvent.value = newValue;
                 const titleTag = noteEvent?.value?.tags?.find(([key]) => key === "title");
                 noteTitle.value = titleTag ? titleTag[1] : "Unknown Title";

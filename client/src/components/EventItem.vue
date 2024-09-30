@@ -44,7 +44,7 @@
         setup(props) {
             const nostrStore = useNostrStore();
             const annotationStore = useAnnotationStore();
-            const { selectedNote } = storeToRefs(nostrStore);
+            const { selectedEvent } = storeToRefs(nostrStore);
             const { selectedAnnotation } = storeToRefs(annotationStore);
             const md = new MarkdownIt();
             const eventTitle = computed(() => {
@@ -62,15 +62,7 @@
                 html = disableLinks(html);
                 return DOMPurify.sanitize(html);
             });
-            // const isSelected = computed(() => {
-            //     if (props.event.type === 'noteEvent') {
-            //         return selectedNote.value?.id === props.event.id;
-            //     } else if (props.event.type === 'annotation') {
-            //         return selectedAnnotation.value?.id === props.event.id;
-            //     }
-            //     return false;
-            // });
-            let isSelected = computed(() => selectedNote?.value?.id === props.event.id || selectedAnnotation?.value?.id === props.event.id);
+            let isSelected = computed(() => selectedEvent?.value?.id === props.event.id);
             let eventClasses = computed(() => ({
                 "bg-orange-100": isSelected.value,
                 "bg-gray-100": !isSelected.value,
