@@ -20,7 +20,6 @@ export const useNostrStore = defineStore("nostr", {
     state: () => {
         return {
             user: null,
-            signer: null,
             noteEvents: [],
             note: {},
             selectedEvent: null,
@@ -36,7 +35,7 @@ export const useNostrStore = defineStore("nostr", {
             // localStorage.setItem("debug", "ndk:*"); // TODO: TESTING debug NDK internals
             const authStore = useAuthStore();
             let { loginMethod, toggleModal, setLoginStatus } = authStore;
-            // let signer;
+            let signer;
             let remoteNpub;
             try {
                 if (!ndk) {
@@ -67,8 +66,7 @@ export const useNostrStore = defineStore("nostr", {
                     });
 
                     if (window.nostr) {
-                        this.signer = new NDKNip07Signer();
-                        // this.signer = new NDKNip46Signer(ndk, remoteNpub, window.nostr);
+                        signer = new NDKNip07Signer();
                     } else {
                         throw new Error('Nostr Login not initialized');
                     }
@@ -77,7 +75,7 @@ export const useNostrStore = defineStore("nostr", {
                     throw new Error(`Unsupported login method: ${loginMethod}`);
                 }
 
-                const user = await this.signer.user();
+                const user = await signer.user();
                 if (user?.npub) {
                     const userData = await useIndexedDB().get(user.npub || "");
                     if (userData) {
@@ -105,7 +103,7 @@ export const useNostrStore = defineStore("nostr", {
 
                     const explicitRelayUrls = userData?.relayUrls?.length ? userData.relayUrls : [];
 
-                    ndk = new NDK({ explicitRelayUrls, signer: this.signer });
+                    ndk = new NDK({ explicitRelayUrls, signer });
                     await ndk.connect();
                     console.log("NDK Connected..");
 

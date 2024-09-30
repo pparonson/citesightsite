@@ -109,9 +109,6 @@ export default {
 
                 try {
                     await nostrStore.fetchEvents(settings);
-                    // if (!selectedNote.value) {
-                    //     nostrStore.setSelectedNoteById(noteEvents.value[0].id);
-                    // }
                 } catch (error) {
                     console.error("Error fetching events:", error);
                 }

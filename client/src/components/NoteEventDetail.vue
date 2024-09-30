@@ -116,7 +116,6 @@
                 };
                 try {
                     await nostrStore.publishEvent(noteToSave);
-                    nostrStore.setSelectedNoteById(null); // index.vue will reset selected note after re-fetch
                 } catch (error) {
                     console.error(`Error publishing note event detail: ${error}`);
                 } finally {
