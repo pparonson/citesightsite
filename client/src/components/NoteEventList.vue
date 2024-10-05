@@ -56,9 +56,17 @@
                     type: 'noteEvent',
                 }));
 
-                // return [...mappedNoteEvents, ...mappedAnnotations];
+                // Combine and remove duplicates based on id
+                const uniqueEvents = [...mappedNoteEvents, ...mappedAnnotations].reduce((acc, current) => {
+                    const x = acc.find(item => item.id === current.id);
+                    if (!x) {
+                        return acc.concat([current]);
+                    } else {
+                        return acc;
+                    }
+                }, []);
 
-                return [...mappedNoteEvents, ...mappedAnnotations].sort((a, b) => {
+                return uniqueEvents.sort((a, b) => {
                     const dateA = a.created_at || a.created;
                     const dateB = b.created_at || b.created;
                     return new Date(dateB) - new Date(dateA);
@@ -68,12 +76,6 @@
             const handleEventClick = (event) => {
                 nostrStore.setSelectedEvent(event);
             };
-
-            // onMounted(async () => {
-            //     if (!selectedEvent.value) {
-            //         setSelectedEvent(this.combinedEvents[0]);
-            //     }
-            // });
 
             watch(combinedEvents, (newEvents) => {
                 if (newEvents.length > 0 && !selectedEvent.value) {

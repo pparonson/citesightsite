@@ -60,7 +60,9 @@ export const useAnnotationStore = defineStore("annotation", {
 
                     const data = await response.json();
                     if (data.rows && data.rows.length > 0) {
-                        this.annotations = this.annotations.concat(data.rows);
+                        // this.annotations = this.annotations.concat(data.rows);
+                        const uniqueAnnotations = new Set([...this.annotations, ...data.rows]);
+                        this.annotations = Array.from(uniqueAnnotations);
                         searchAfter = data.rows[data.rows.length - 1].updated;
                     } else {
                         break;
