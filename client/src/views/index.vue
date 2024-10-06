@@ -60,7 +60,7 @@ import { useAnnotationStore } from "@/store/annotation";
 import { useAuthStore } from "@/store/auth";
 import { storeToRefs } from "pinia";
 import config from "./../../config/config";
-import version from "./../../../.version.json" with { type: 'json' };
+import version from "./../../version.json" with { type: 'json' };
 
 const kind = config.nostr.config.encryptedLongFormNoteKind;
 
