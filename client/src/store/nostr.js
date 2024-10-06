@@ -295,7 +295,7 @@ export const useNostrStore = defineStore("nostr", {
             }
 
             return {
-                kind: note.kind || 1,
+                kind: note.kind,
                 content: note.content,
                 tags: [...baseTags, ...specificTags, ...userTags],
             };

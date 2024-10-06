@@ -62,7 +62,7 @@ import { storeToRefs } from "pinia";
 import config from "./../../config/config";
 import version from "./../../../.version.json" with { type: 'json' };
 
-const customEventKind = config.nostr.config.encryptedLongFormNoteKind;
+const kind = config.nostr.config.encryptedLongFormNoteKind;
 
 export default {
     components: {
@@ -105,7 +105,7 @@ export default {
 
         const fetchAnnotationsAndEvents = async () => {
             if (isLoggedIn.value) {
-                const settings = { kinds: [1, customEventKind] };
+                const settings = { kinds: [kind] };
 
                 try {
                     await nostrStore.fetchEvents(settings);

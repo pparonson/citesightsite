@@ -32,7 +32,7 @@
             <p class="text-xs"><strong>Type:  </strong> {{ noteEvent?.type }}</p>
             <p class="text-xs">
                 <strong>Created:  </strong> 
-                {{ noteEvent.created ? formatDate(noteEvent.created) : noteEvent.created_at ? formatDate(noteEvent.created_at) : "Invalid date" }}
+                {{ noteEvent?.created ? formatDate(noteEvent.created) : noteEvent?.created_at ? formatDate(noteEvent.created_at) : "Invalid date" }}
             </p>
             <p v-if="isAnnotation" class="text-xs">
                 <strong>Updated:  </strong> {{ formatDate(noteEvent.updated) }}

@@ -45,11 +45,11 @@
     import { storeToRefs } from "pinia";
     import { useRouter } from "vue-router";
     import { useNostrStore } from "@/store/nostr";
-    import config from "./../../config/config.js";
     import { EditorState } from "@codemirror/state";
     import { EditorView, keymap, drawSelection, lineNumbers } from "@codemirror/view"
     import { defaultKeymap, history, undo, redo } from "@codemirror/commands"
     import { vim } from "@replit/codemirror-vim"
+    import config from "./../../config/config.js";
 
     export default {
         components: {
@@ -112,7 +112,7 @@
                 const noteToSave = {
                     ...localNote.value,
                     content: localNote.value?.content,
-                    kind: localNote.value.kind || 1,
+                    kind: localNote.value.kind || config.nostr.config.encryptedLongFormNoteKind,
                 };
                 try {
                     await nostrStore.publishEvent(noteToSave);
