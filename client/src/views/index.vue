@@ -1,11 +1,11 @@
 <template>
     <div class="flex h-screen">
         <div class="flex flex-col w-1/3 p-1 overflow-hidden">
-            <MenuBar :menuTarget="'/settings'" @search="filterNotes" />
+            <MenuBar :menuTarget="'/settings'" @search="filterEvents" />
             <div class="flex flex-1 overflow-y-auto overflow-x-hidden">
                 <NoteEventList
                     :noteEvents="filteredNoteEvents"
-                    :annotations="annotations"
+                    :annotations="filteredAnnotations"
                 />
             </div>
         </div>
@@ -80,7 +80,7 @@ export default {
         const { annotations } = storeToRefs(annotationStore);
         const { isLoggedIn } = storeToRefs(authStore);
         const searchParams = ref({ term: "", scope: "all" });
-        const filterNotes = (params) => {
+        const filterEvents = (params) => {
             searchParams.value = params;
         };
 
@@ -135,31 +135,63 @@ export default {
                 const lowercasedTerm = term.toLowerCase();
 
                 return noteEvents.value.filter((noteEvent) => {
+                    const contentMatch = noteEvent.content
+                        ?.toLowerCase()
+                        .includes(lowercasedTerm);
                     // Get tags of type 't' for this note event
-                    const userTags = (noteEvent.tags || [])
+                    const tags = (noteEvent.tags || [])
                         .filter((tag) => tag[0] === "t")
                         .map((tag) => tag[1].toLowerCase());
 
                     // Perform different comparisons based on search scope
                     switch (scope) {
                         case "all":
-                            return (
-                                noteEvent.content.includes(lowercasedTerm) ||
-                                userTags.includes(lowercasedTerm)
+                            return (contentMatch || tags.includes(lowercasedTerm)
+                                // noteEvent.content.includes(lowercasedTerm) ||
+                                // userTags.includes(lowercasedTerm)
                             );
-                        case "userTags":
-                            return userTags.includes(lowercasedTerm);
+                        case "onlyNotes":
+                            return contentMatch;
+                        case "tags":
+                            return tags.includes(lowercasedTerm);
                         default:
-                            return false;
+                            return contentMatch;
                     }
                 });
             }
         });
 
+        const filteredAnnotations = computed(() => {
+            const { term, scope } = searchParams.value;
+            if (!term) {
+                return annotations.value;
+            }
+            const lowercasedTerm = term.toLowerCase();
+            return annotations.value.filter((annotation) => {
+                // Filter logic based on term and scope
+                // const contentMatch = annotation.content?.toLowerCase().includes(lowercasedTerm);
+                const contentMatch = annotation.document?.title?.[0]?.toLowerCase().includes(lowercasedTerm);
+                // const tags = (annotation.tags || []).map(tag => tag.toLowerCase());
+                const tags = (annotation.tags || [])
+                    .filter((tag) => tag[0] === "t")
+                    .map((tag) => tag[1].toLowerCase());
+                switch (scope) {
+                    case "all":
+                        return contentMatch || tags.includes(lowercasedTerm);
+                    case "tags":
+                        return tags.includes(lowercasedTerm);
+                    case "onlyAnnotations":
+                        return contentMatch || tags.includes(lowercasedTerm);
+                    default:
+                        return contentMatch;
+                }
+            });
+        });
+
         return {
-            filterNotes,
+            filterEvents,
             filteredNoteEvents,
-            annotations,
+            filteredAnnotations,
             isLoggedIn,
             isFetchingEvents,
             missingEncryptionKey,

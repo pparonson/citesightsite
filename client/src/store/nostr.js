@@ -272,10 +272,10 @@ export const useNostrStore = defineStore("nostr", {
 
             let version = "1";
             let eventId = null;
-            let userTags = [];
+            let tags = [];
             note?.tags?.forEach((tag) => {
                 if (tag[0] === "t") {
-                    userTags.push([tag[0], tag[1]]);
+                    tags.push([tag[0], tag[1]]);
                 }
             });
 
@@ -297,7 +297,7 @@ export const useNostrStore = defineStore("nostr", {
             return {
                 kind: note.kind,
                 content: note.content,
-                tags: [...baseTags, ...specificTags, ...userTags],
+                tags: [...baseTags, ...specificTags, ...tags],
             };
         },
         createMappedEvent(event) {
