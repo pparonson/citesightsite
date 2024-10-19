@@ -146,16 +146,13 @@ export default {
                     // Perform different comparisons based on search scope
                     switch (scope) {
                         case "all":
-                            return (contentMatch || tags.includes(lowercasedTerm)
-                                // noteEvent.content.includes(lowercasedTerm) ||
-                                // userTags.includes(lowercasedTerm)
-                            );
+                            return (contentMatch || tags.includes(lowercasedTerm));
                         case "onlyNotes":
                             return contentMatch;
                         case "tags":
                             return tags.includes(lowercasedTerm);
                         default:
-                            return contentMatch;
+                            return false;
                     }
                 });
             }
@@ -169,12 +166,15 @@ export default {
             const lowercasedTerm = term.toLowerCase();
             return annotations.value.filter((annotation) => {
                 // Filter logic based on term and scope
-                // const contentMatch = annotation.content?.toLowerCase().includes(lowercasedTerm);
-                const contentMatch = annotation.document?.title?.[0]?.toLowerCase().includes(lowercasedTerm);
-                // const tags = (annotation.tags || []).map(tag => tag.toLowerCase());
-                const tags = (annotation.tags || [])
-                    .filter((tag) => tag[0] === "t")
-                    .map((tag) => tag[1].toLowerCase());
+                const contentMatch = annotation.document
+                    ?.title
+                    ?.[0]
+                    ?.toLowerCase()
+                    .includes(lowercasedTerm);
+                // const tags = (annotation.tags || [])
+                //     .filter((tag) => tag[0] === "t")
+                //     .map((tag) => tag[1].toLowerCase());
+                const tags = (annotation.tags || []).map(tag => tag.toLowerCase());
                 switch (scope) {
                     case "all":
                         return contentMatch || tags.includes(lowercasedTerm);

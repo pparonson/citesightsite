@@ -49,7 +49,7 @@
             const md = new MarkdownIt();
             const eventTitle = computed(() => {
                 if (props.event.type === 'annotation') {
-                    return props.event.document?.title[0] || props.event.uri;
+                    return props.event.document?.title?.[0] || props.event.uri;
                 } else {
                     const titleTag = props.event.tags?.find(([key]) => key === "title");
                     return titleTag ? titleTag[1] : "Unknown Title";
