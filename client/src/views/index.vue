@@ -171,9 +171,6 @@ export default {
                     ?.[0]
                     ?.toLowerCase()
                     .includes(lowercasedTerm);
-                // const tags = (annotation.tags || [])
-                //     .filter((tag) => tag[0] === "t")
-                //     .map((tag) => tag[1].toLowerCase());
                 const tags = (annotation.tags || []).map(tag => tag.toLowerCase());
                 switch (scope) {
                     case "all":

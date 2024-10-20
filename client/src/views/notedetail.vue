@@ -13,23 +13,23 @@
             <!-- </div> -->
         </div>
         <div>
-            <!-- <teleport to="body"> -->
-            <!--     <div -->
-            <!--         v-if="isPublishingEvent" -->
-            <!--         class="fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full" -->
-            <!--         id="spinnerModal" -->
-            <!--     > -->
-            <!--         <div class="relative mx-auto mt-20 w-full max-w-lg h-96"> -->
-            <!--             <div class="mt-3 text-center"> -->
-            <!--                 <span -->
-            <!--                     v-if="isPublishingEvent" -->
-            <!--                     class="loading loading-spinner loading-lg" -->
-            <!--                 ></span> -->
-            <!--                 <p>Saving...</p> -->
-            <!--             </div> -->
-            <!--         </div> -->
-            <!--     </div> -->
-            <!-- </teleport> -->
+            <teleport to="body">
+                <div
+                    v-if="isPublishingEvent"
+                    class="fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full"
+                    id="spinnerModal"
+                >
+                    <div class="relative mx-auto mt-20 w-full max-w-lg h-96">
+                        <div class="mt-3 text-center">
+                            <span
+                                v-if="isPublishingEvent"
+                                class="loading loading-spinner loading-lg"
+                            ></span>
+                            <p>Saving...</p>
+                        </div>
+                    </div>
+                </div>
+            </teleport>
             <NoteEventDetail :id="eventId" />
         </div>
     </div>

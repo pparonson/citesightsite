@@ -10,6 +10,9 @@
             class="select select-bordered select-sm w-3/12 h-10 rounded-md focus:outline-none focus:border-blue-300">
             <option value="all">All</option>
             <option value="tags">Tags</option>
+            <option value="onlyNotes">Notes</option>
+            <option value="onlyAnnotations">Annotations</option>
+
         </select>
 
         <input
