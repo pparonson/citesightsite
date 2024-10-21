@@ -188,8 +188,6 @@
                 if (props?.id) {
                     await nostrStore.getNoteEventFromState(props.id);
                     await nostrStore.fetchNoteEventById(props.id);
-                    console.log("Mounted note:", JSON.stringify(note));
-                    console.log("Mounted localNote:", JSON.stringify(localNote.value));
                 } else {
                     localNote.value = { content: "", tags: ["client"] };
                 }

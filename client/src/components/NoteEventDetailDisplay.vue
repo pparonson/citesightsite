@@ -49,20 +49,20 @@
     import { useNostrStore } from "@/store/nostr";
     import { useRoute, useRouter } from "vue-router";
     import { storeToRefs } from "pinia";
+    import { parseLinks, checkIfNoteExists } from '@/utils/linkParser.js';
 
-function updateLinksToOpenInNewTabs(htmlString) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlString, 'text/html');
-  const links = doc.querySelectorAll('a');
+    function updateLinksToOpenInNewTabs(htmlString) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlString, 'text/html');
+        const links = doc.querySelectorAll('a');
 
-  links.forEach(link => {
-    link.setAttribute('target', '_blank');
-    link.setAttribute('rel', 'noopener noreferrer');
-    link.classList.add('text-blue-500', 'hover:text-blue-700');
-  });
-
-  return doc.body.innerHTML;
-}
+        links.forEach(link => {
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+            link.classList.add('text-blue-500', 'hover:text-blue-700');
+        });
+        return doc.body.innerHTML;
+    }
     export default {
         components: {
             Tags,
@@ -108,11 +108,11 @@ function updateLinksToOpenInNewTabs(htmlString) {
                 noteTitle.value = titleTag ? titleTag[1] : "Unknown Title";
 
                 // Markdown update
-                // const content = noteEvent?.value?.content || "";
                 const content = isAnnotation.value ? noteEvent.value.text : (noteEvent.value?.content || "");
                 let markdownOutput = md.render(content);
                 // Update hyperlinks to open in new tabs
                 markdownOutput = updateLinksToOpenInNewTabs(markdownOutput);
+                markdownOutput = parseLinks(markdownOutput, checkIfNoteExists);
                 renderedContent.value = DOMPurify.sanitize(markdownOutput, {
                     ADD_ATTR: ['target', 'rel'] // Allow "target" and "rel" attributes
                 });
@@ -133,5 +133,11 @@ function updateLinksToOpenInNewTabs(htmlString) {
 </script>
 
 <style>
-    /* Custom styles for the NoteEvent component */
+    /* Custom styles for the NoteEventDetailDisplay component */
+    .existing-note-link {
+        @apply text-blue-600 hover:text-blue-800 underline;
+    }
+    .new-note-link {
+        @apply text-gray-600 hover:text-gray-800 underline italic;
+    }
 </style>
