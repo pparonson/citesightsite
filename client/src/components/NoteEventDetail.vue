@@ -105,7 +105,16 @@
                             //     }
                             // }),
                             keymap.of([
-                                { key: "u", run: undo },
+                                {
+                                    key: "u",
+                                    run: (view) => {
+                                        if (view.state.facet(EditorState).vimMode === "normal") {
+                                            return undo(view);
+                                        }
+                                        return false;
+                                    }
+                                },
+                                // { key: "u", run: undo },
                                 { key: "Ctrl-r", run: redo }
                             ]),
                             keymap.of(defaultKeymap),
