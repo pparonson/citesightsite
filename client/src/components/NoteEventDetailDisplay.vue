@@ -2,8 +2,6 @@
     <div class="h-full p-2 my-1 bg-gray-100 rounded-md overflow-y-auto" @dblclick="handleDoubleClick">
         <Tags :tags="displayedTags" />
         <div class="text-xl font-bold mb-2">{{ displayedTitle }}</div>
-        <!-- <p class="text-base text-xs overflow-hidden">ID: {{ noteEvent?.id }}</p> -->
-        <!-- <p class="text-xs mb-2">Type: {{ noteEvent?.type }}</p> -->
         
         <p v-if="isAnnotation" class="text-sm mb-2">
             <strong>URI:  </strong> 
@@ -135,9 +133,9 @@
 <style>
     /* Custom styles for the NoteEventDetailDisplay component */
     .existing-note-link {
-        @apply text-blue-600 hover:text-blue-800 underline;
+        @apply text-blue-600 hover:text-purple-700 underline;
     }
     .new-note-link {
-        @apply text-gray-600 hover:text-gray-800 underline italic;
+        @apply text-gray-600 hover:text-orange-700 underline italic;
     }
 </style>

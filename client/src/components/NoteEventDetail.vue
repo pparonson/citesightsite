@@ -80,30 +80,6 @@
                         doc: localNote.value.content || '',
                         extensions: [
                             vim(),
-                            // vim({
-                            //     exCommands: {
-                            //         write: () => {
-                            //             console.log('Write command called');
-                            //             handleSave();
-                            //         },
-                            //         w: () => {
-                            //             console.log('Write command called (short)');
-                            //             handleSave();
-                            //         },
-                            //         quit: () => {
-                            //             console.log('Quit command called'); 
-                            //             router.push('/');
-                            //         },
-                            //         q: () => {
-                            //             console.log('Quit command called (short)');
-                            //             router.push('/');
-                            //         },
-                            //         wq: () => {
-                            //             console.log('Write and quit command called');
-                            //             handleSave().then(() => router.push('/'));
-                            //         }
-                            //     }
-                            // }),
                             keymap.of([
                                 {
                                     key: "u",
@@ -114,7 +90,6 @@
                                         return false;
                                     }
                                 },
-                                // { key: "u", run: undo },
                                 { key: "Ctrl-r", run: redo }
                             ]),
                             keymap.of(defaultKeymap),
