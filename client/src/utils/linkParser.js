@@ -1,22 +1,23 @@
-import DOMPurify from 'dompurify';
-
 // Function to parse and replace `[[...]]` links in the provided content
-export function parseLinks(content, checkIfNoteExists) {
-    const linkPattern = /\[\[([^[\]]+)\]\]/g;
+export function parseLinks(content, checkIfEventExists) {
+    // const internalLinkPattern = /\[\[([^[\]]+)\]\]/g;
+    const internalLinkPattern = /\[\[([^[\]]+?)(?:,\s*([a-f0-9]+))?\]\]/g;
 
     // Replace detected links with anchor tags
-    let html = content.replace(linkPattern, (match, p1) => {
-        const noteTitle = p1.trim();
-        const existingNote = checkIfNoteExists(noteTitle);
-        let linkClass = existingNote ? "existing-note-link" : "new-note-link";
-        return `<a class="${linkClass}" href="#" data-note-title="${noteTitle}">${noteTitle}</a>`;
+    let html = content.replace(internalLinkPattern, (match, p1, p2) => {
+        const eventTitle = p1.trim();
+        const eventId = p2 ? p2.trim() : "";
+        const existingEvent = checkIfEventExists(eventId);
+        const eventType = existingEvent?.type ? existingEvent.type : "";
+        let linkClass = existingEvent?.type === "noteEvent" ? 
+            "note-event-link" : 
+            existingEvent?.type === "annotation" ? 
+            "annotation-event-link" : 
+            "broken-event-link";
+        return `<a class="${linkClass} internal-link" href="#" data-event-id="${eventId}" data-event-type="${eventType}" data-event-title="${eventTitle}">
+            ${eventTitle}</a>`;
     });
 
-    return DOMPurify.sanitize(html);
+    return html;
 }
 
-export function checkIfNoteExists(noteTitle) {
-    // TODO: Your logic to check if the note exists.
-    // Implement this using logic to fetch or check from your application's state or data.
-    return false; 
-}

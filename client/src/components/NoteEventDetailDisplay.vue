@@ -1,5 +1,8 @@
 <template>
-    <div class="h-full p-2 my-1 bg-gray-100 rounded-md overflow-y-auto" @dblclick="handleDoubleClick">
+    <div class="h-full p-2 my-1 bg-gray-100 rounded-md overflow-y-auto" 
+        @dblclick="handleDoubleClick" 
+        @click="handleClick"
+        >
         <Tags :tags="displayedTags" />
         <div class="text-xl font-bold mb-2">{{ displayedTitle }}</div>
         
@@ -44,10 +47,11 @@
     import DOMPurify from "dompurify";
     import Tags from "@/components/Tags.vue";
     import { ref, watch, computed } from "vue";
+    import { useAnnotationStore } from "@/store/annotation";
     import { useNostrStore } from "@/store/nostr";
     import { useRoute, useRouter } from "vue-router";
     import { storeToRefs } from "pinia";
-    import { parseLinks, checkIfNoteExists } from '@/utils/linkParser.js';
+    import { parseLinks } from '@/utils/linkParser.js';
 
     function updateLinksToOpenInNewTabs(htmlString) {
         const parser = new DOMParser();
@@ -57,7 +61,7 @@
         links.forEach(link => {
             link.setAttribute('target', '_blank');
             link.setAttribute('rel', 'noopener noreferrer');
-            link.classList.add('text-blue-500', 'hover:text-blue-700');
+            link.classList.add('text-blue-700', 'hover:text-blue-300', 'external-link');
         });
         return doc.body.innerHTML;
     }
@@ -66,9 +70,11 @@
             Tags,
         },
         setup(props) {
+            const annotationStore = useAnnotationStore();
             const nostrStore = useNostrStore();
             const router = useRouter();
-            const { selectedEvent } = storeToRefs(nostrStore);
+            const { annotations } = storeToRefs(annotationStore);
+            const { selectedEvent, noteEvents } = storeToRefs(nostrStore);
             const md = new MarkdownIt();
             const noteTitle = ref("");
             const renderedContent = ref("");
@@ -76,10 +82,43 @@
             const formatDate = (dateString) => {
                 return new Date(dateString).toLocaleString();
             };
+            const checkIfEventExists = (eventId) => {
+                let result;
+                result = noteEvents.value.find(event => {
+                    return event.id === eventId;
+                });
 
+                if (!result) {
+                    result = annotations.value.find(event => {
+                        return event.id === eventId;
+                    });
+                }
+                return result;
+            };
+            const handleDoubleClick = () => {
+                if (noteEvent.value?.id) {
+                    router.push(`/note/${noteEvent.value.id}`);
+                }
+            };
+            const handleClick = (event) => {
+                console.log(event);
+                if (event.target.matches('.internal-link')) {
+                    event.preventDefault();
+                    // const noteTitle = event.target.dataset.noteTitle;
+                    // const linkedEvent = noteEvents.value.find(event => {
+                    //     const titleTag = event.tags.find(tag => tag[0] === 'title');
+                    //     return titleTag && titleTag[1].toLowerCase() === noteTitle.toLowerCase();
+                    // });
+                    // if (linkedEvent) {
+                    //     nostrStore.setSelectedEvent(linkedEvent);
+                    //     router.push(`/note/${linkedEvent.id}`);
+                    // }
+                }
+            };
             const isAnnotation = computed(() => noteEvent.value?.type === "annotation");
             const displayedTitle = computed(() => {
                 if (isAnnotation.value) {
+                    // TODO: noteEvent may not be correct for annotation type here
                     return noteEvent.value.document?.title[0] || "Untitled Annotation";
                 } else {
                     const titleTag = noteEvent.value?.tags?.find(([key]) => key === "title");
@@ -93,34 +132,27 @@
                     return noteEvent.value?.tags || [];
                 }
             });
-
-            const handleDoubleClick = () => {
-                if (noteEvent.value?.id) {
-                    router.push(`/note/${noteEvent.value.id}`);
-                }
-            };
-
             watch(selectedEvent, (newValue) => {
+                console.log("Selected event changed", newValue);
                 noteEvent.value = newValue;
                 const titleTag = noteEvent?.value?.tags?.find(([key]) => key === "title");
                 noteTitle.value = titleTag ? titleTag[1] : "Unknown Title";
 
-                // Markdown update
                 const content = isAnnotation.value ? noteEvent.value.text : (noteEvent.value?.content || "");
                 let markdownOutput = md.render(content);
-                // Update hyperlinks to open in new tabs
                 markdownOutput = updateLinksToOpenInNewTabs(markdownOutput);
-                markdownOutput = parseLinks(markdownOutput, checkIfNoteExists);
+                markdownOutput = parseLinks(markdownOutput, checkIfEventExists);
                 renderedContent.value = DOMPurify.sanitize(markdownOutput, {
-                    ADD_ATTR: ['target', 'rel'] // Allow "target" and "rel" attributes
+                    ADD_ATTR: ['target', 'rel'] 
                 });
-            });
+            }, { immediate: true });
 
             return {
                 noteTitle,
                 renderedContent,
                 noteEvent,
                 handleDoubleClick,
+                handleClick,
                 isAnnotation,
                 displayedTags,
                 displayedTags,
@@ -132,10 +164,13 @@
 
 <style>
     /* Custom styles for the NoteEventDetailDisplay component */
-    .existing-note-link {
-        @apply text-blue-600 hover:text-purple-700 underline;
+    .annotation-event-link {
+        @apply text-orange-700 hover:text-orange-300 italic;
     }
-    .new-note-link {
-        @apply text-gray-600 hover:text-orange-700 underline italic;
+    .note-event-link {
+        @apply text-purple-700 hover:text-purple-300 italic;
+    }
+    .broken-event-link {
+        @apply text-red-700 hover:text-red-300 italic line-through;
     }
 </style>

@@ -356,6 +356,7 @@ export const useNostrStore = defineStore("nostr", {
             }
         },
         setSelectedEvent(event) {
+            console.log("Selected event:", event);
             this.selectedEvent = event;
         }
     },
