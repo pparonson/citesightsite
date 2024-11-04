@@ -61,7 +61,7 @@
         links.forEach(link => {
             link.setAttribute('target', '_blank');
             link.setAttribute('rel', 'noopener noreferrer');
-            link.classList.add('text-blue-700', 'hover:text-blue-300', 'external-link');
+            link.classList.add('text-blue-500', 'hover:text-blue-300', 'external-link');
         });
         return doc.body.innerHTML;
     }
@@ -145,7 +145,7 @@
                 renderedContent.value = DOMPurify.sanitize(markdownOutput, {
                     ADD_ATTR: ['target', 'rel'] 
                 });
-            }, { immediate: true });
+            });
 
             return {
                 noteTitle,
@@ -165,12 +165,12 @@
 <style>
     /* Custom styles for the NoteEventDetailDisplay component */
     .annotation-event-link {
-        @apply text-orange-700 hover:text-orange-300 italic;
+        @apply text-orange-500 hover:text-orange-300 italic;
     }
     .note-event-link {
-        @apply text-purple-700 hover:text-purple-300 italic;
+        @apply text-purple-500 hover:text-purple-300 italic;
     }
     .broken-event-link {
-        @apply text-red-700 hover:text-red-300 italic line-through;
+        @apply text-red-600 hover:text-red-300 italic line-through;
     }
 </style>
