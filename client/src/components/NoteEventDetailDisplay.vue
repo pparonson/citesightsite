@@ -126,12 +126,8 @@
                     return event.value?.tags || [];
                 }
             });
-            watch(selectedEvent, (newValue) => {
-                console.log("Selected event changed", newValue);
-                event.value = newValue;
-                const titleTag = event?.value?.tags?.find(([key]) => key === "title");
-                noteTitle.value = titleTag ? titleTag[1] : "Unknown Title";
 
+            const updateRenderedContent = () => {
                 const content = isAnnotation.value ? event.value.text : (event.value?.content || "");
                 let markdownOutput = md.render(content);
                 markdownOutput = updateLinksToOpenInNewTabs(markdownOutput);
@@ -139,7 +135,14 @@
                 renderedContent.value = DOMPurify.sanitize(markdownOutput, {
                     ADD_ATTR: ['target', 'rel'] 
                 });
-            });
+            };
+
+            watch([selectedEvent, noteEvents, annotations], () => {
+                event.value = selectedEvent.value;
+                const titleTag = event?.value?.tags?.find(([key]) => key === "title");
+                noteTitle.value = titleTag ? titleTag[1] : "Unknown Title";
+                updateRenderedContent();
+            }, { immediate: true, deep: true });
 
             return {
                 noteTitle,
