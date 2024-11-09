@@ -8,16 +8,16 @@
         
         <p v-if="isAnnotation" class="text-sm mb-2">
             <strong>URI:  </strong> 
-            <a :href="noteEvent.uri" 
+            <a :href="event.uri" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                class="text-blue-500 hover:text-blue-700 underline"
-                >{{ noteEvent.uri }}</a>
+                class="text-blue-500 hover:text-blue-700 italic underline"
+                >{{ event.uri }}</a>
         </p>
-        <div v-if="isAnnotation && noteEvent.links && noteEvent.links.length > 0" class="mb-2">
+        <div v-if="isAnnotation && event.links && event.links.length > 0" class="mb-2">
             <strong>Links:  </strong>
             <ul>
-                <li v-for="link in noteEvent.links" :key="link.href">
+                <li v-for="link in event.links" :key="link.href">
                     <a :href="link.href" 
                         target="_blank" 
                         rel="noopener noreferrer"
@@ -29,14 +29,14 @@
         <div class="mb-4" v-html="renderedContent"></div>
        
         <div class="mb-2">
-            <p class="text-base text-xs overflow-hidden"><strong>ID:  </strong> {{ noteEvent?.id }}</p>
-            <p class="text-xs"><strong>Type:  </strong> {{ noteEvent?.type }}</p>
+            <p class="text-base text-xs overflow-hidden"><strong>ID:  </strong> {{ event?.id }}</p>
+            <p class="text-xs"><strong>Type:  </strong> {{ event?.type }}</p>
             <p class="text-xs">
                 <strong>Created:  </strong> 
-                {{ noteEvent?.created ? formatDate(noteEvent.created) : noteEvent?.created_at ? formatDate(noteEvent.created_at) : "Invalid date" }}
+                {{ event?.created ? formatDate(event.created) : event?.created_at ? formatDate(event.created_at) : "Invalid date" }}
             </p>
             <p v-if="isAnnotation" class="text-xs">
-                <strong>Updated:  </strong> {{ formatDate(noteEvent.updated) }}
+                <strong>Updated:  </strong> {{ formatDate(event.updated) }}
             </p>
         </div>
     </div>
@@ -61,7 +61,7 @@
         links.forEach(link => {
             link.setAttribute('target', '_blank');
             link.setAttribute('rel', 'noopener noreferrer');
-            link.classList.add('text-blue-500', 'hover:text-blue-300', 'external-link');
+            link.classList.add('text-blue-500', 'italic', 'underline', 'hover:text-blue-300', 'external-link');
         });
         return doc.body.innerHTML;
     }
@@ -78,7 +78,7 @@
             const md = new MarkdownIt();
             const noteTitle = ref("");
             const renderedContent = ref("");
-            const noteEvent = ref(null);
+            const event = ref(null);
             const formatDate = (dateString) => {
                 return new Date(dateString).toLocaleString();
             };
@@ -96,49 +96,43 @@
                 return result;
             };
             const handleDoubleClick = () => {
-                if (noteEvent.value?.id) {
-                    router.push(`/note/${noteEvent.value.id}`);
+                if (event.value?.id) {
+                    router.push(`/note/${event.value.id}`);
                 }
             };
             const handleClick = (event) => {
-                console.log(event);
                 if (event.target.matches('.internal-link')) {
                     event.preventDefault();
-                    // const noteTitle = event.target.dataset.noteTitle;
-                    // const linkedEvent = noteEvents.value.find(event => {
-                    //     const titleTag = event.tags.find(tag => tag[0] === 'title');
-                    //     return titleTag && titleTag[1].toLowerCase() === noteTitle.toLowerCase();
-                    // });
-                    // if (linkedEvent) {
-                    //     nostrStore.setSelectedEvent(linkedEvent);
-                    //     router.push(`/note/${linkedEvent.id}`);
-                    // }
+                    const eventId = event.target.dataset.eventId;
+                    const linkedEvent = checkIfEventExists(eventId);
+                    if (linkedEvent) {
+                        nostrStore.setSelectedEvent(linkedEvent);
+                    }
                 }
             };
-            const isAnnotation = computed(() => noteEvent.value?.type === "annotation");
+            const isAnnotation = computed(() => event.value?.type === "annotation");
             const displayedTitle = computed(() => {
                 if (isAnnotation.value) {
-                    // TODO: noteEvent may not be correct for annotation type here
-                    return noteEvent.value.document?.title[0] || "Untitled Annotation";
+                    return event.value.document?.title[0] || "Untitled Annotation";
                 } else {
-                    const titleTag = noteEvent.value?.tags?.find(([key]) => key === "title");
+                    const titleTag = event.value?.tags?.find(([key]) => key === "title");
                     return titleTag ? titleTag[1] : "Unknown Title";
                 }
             });
             const displayedTags = computed(() => {
                 if (isAnnotation.value) {
-                    return noteEvent.value.tags || [];
+                    return event.value.tags || [];
                 } else {
-                    return noteEvent.value?.tags || [];
+                    return event.value?.tags || [];
                 }
             });
             watch(selectedEvent, (newValue) => {
                 console.log("Selected event changed", newValue);
-                noteEvent.value = newValue;
-                const titleTag = noteEvent?.value?.tags?.find(([key]) => key === "title");
+                event.value = newValue;
+                const titleTag = event?.value?.tags?.find(([key]) => key === "title");
                 noteTitle.value = titleTag ? titleTag[1] : "Unknown Title";
 
-                const content = isAnnotation.value ? noteEvent.value.text : (noteEvent.value?.content || "");
+                const content = isAnnotation.value ? event.value.text : (event.value?.content || "");
                 let markdownOutput = md.render(content);
                 markdownOutput = updateLinksToOpenInNewTabs(markdownOutput);
                 markdownOutput = parseLinks(markdownOutput, checkIfEventExists);
@@ -150,7 +144,7 @@
             return {
                 noteTitle,
                 renderedContent,
-                noteEvent,
+                event,
                 handleDoubleClick,
                 handleClick,
                 isAnnotation,
@@ -165,12 +159,12 @@
 <style>
     /* Custom styles for the NoteEventDetailDisplay component */
     .annotation-event-link {
-        @apply text-orange-500 hover:text-orange-300 italic;
+        @apply text-orange-500 hover:text-orange-300 italic underline;
     }
     .note-event-link {
-        @apply text-purple-500 hover:text-purple-300 italic;
+        @apply text-green-500 hover:text-green-300 italic underline;
     }
     .broken-event-link {
-        @apply text-red-600 hover:text-red-300 italic line-through;
+        @apply text-red-600 hover:text-red-300 italic underline line-through;
     }
 </style>
