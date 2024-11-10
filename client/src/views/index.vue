@@ -1,6 +1,6 @@
 <template>
     <div class="flex h-screen">
-        <div class="flex flex-col w-1/3 p-1 overflow-hidden">
+        <div class="flex flex-col w-1/4 p-1 overflow-hidden">
             <MenuBar :menuTarget="'/settings'" @search="filterEvents" />
             <div class="flex flex-1 overflow-y-auto overflow-x-hidden">
                 <NoteEventList
@@ -10,7 +10,7 @@
             </div>
         </div>
         <div
-            class="flex flex-col h-full w-2/3 overflow-y-auto overflow-x-hidden"
+            class="flex flex-col h-full w-3/4 overflow-y-auto overflow-x-hidden"
         >
 
         <div v-if="missingEncryptionKey"

@@ -139,7 +139,10 @@ export const useNostrStore = defineStore("nostr", {
                     const mappedEvent = this.createMappedEvent(event);
                     await this.processNoteEvent(mappedEvent);
                 }
-                this.sortNoteEventsByDateTag();
+                // this.sortNoteEventsByDateTag();
+                for (const event of noteEventsCopy) {
+                    this.filterToLatestNotes(event);
+                }
             } catch (error) {
                 console.error("Error fetching events:", error);
                 throw error;
@@ -158,7 +161,10 @@ export const useNostrStore = defineStore("nostr", {
                     if (this.isFetchingEvents) return;
                     const mappedEvent = this.createMappedEvent(e);
                     await this.processNoteEvent(mappedEvent);
-                    this.sortNoteEventsByDateTag();
+                    // this.sortNoteEventsByDateTag();
+                    for (const event of noteEventsCopy) {
+                        this.filterToLatestNotes(event);
+                    }
                 });
 
                 subscription.on("error", (error) => {

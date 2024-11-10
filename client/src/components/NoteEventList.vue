@@ -66,10 +66,20 @@
                     }
                 }, []);
 
+                // Sort by datetime, prioritizing updated if available
                 return uniqueEvents.sort((a, b) => {
-                    const dateA = a.created_at || a.created;
-                    const dateB = b.created_at || b.created;
-                    return new Date(dateB) - new Date(dateA);
+                    const getTime = (date) => {
+                        if (typeof date === 'string') {
+                            return new Date(date).getTime();
+                        } else if (typeof date === 'number') {
+                            return new Date(date * 1000).getTime();
+                        }
+                        return 0;
+                    };
+
+                    const dateA = getTime(a.updated || a.created || a['created_at']);
+                    const dateB = getTime(b.updated || b.created || b['created_at']);
+                    return dateB - dateA;
                 });
             });
 
