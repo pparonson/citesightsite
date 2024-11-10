@@ -33,10 +33,11 @@
             <p class="text-xs"><strong>Type:  </strong> {{ event?.type }}</p>
             <p class="text-xs">
                 <strong>Created:  </strong> 
-                {{ event?.created ? formatDate(event.created) : event?.created_at ? formatDate(event.created_at) : "Invalid date" }}
+                <!-- {{ event?.created ? formatDate(event.created) : event?.created_at ? formatDate(event.created_at) : "Invalid date" }} -->
+                {{ formatDate(event) }}
             </p>
             <p v-if="isAnnotation" class="text-xs">
-                <strong>Updated:  </strong> {{ formatDate(event.updated) }}
+                <strong>Updated:  </strong> {{ formatDate(event) }}
             </p>
         </div>
     </div>
@@ -79,8 +80,18 @@
             const noteTitle = ref("");
             const renderedContent = ref("");
             const event = ref(null);
-            const formatDate = (dateString) => {
-                return new Date(dateString).toLocaleString();
+            const formatDate = (event) => {
+                let datetime = "Invalid date";
+                if (event.created_at) {
+                    datetime = new Date(event.created_at * 1000).toLocaleString();
+                }  
+                if (event.created) {
+                    datetime = new Date(event.created).toLocaleString(); 
+                } 
+                if (event.updated) {
+                    datetime = new Date(event.updated).toLocaleString(); 
+                } 
+                return datetime;
             };
             const checkIfEventExists = (eventId) => {
                 let result;
