@@ -113,6 +113,13 @@ export default {
                     console.error("Error fetching events:", error);
                 }
 
+                try {
+                    await nostrStore.fetchFollowsEvents();
+                } catch (error) {
+                    console.error("Error fetching events:", error);
+                }
+
+
                 // try {
                 //     await nostrStore.subscribeToEvents(settings);
                 // } catch (error) {

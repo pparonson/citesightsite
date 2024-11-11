@@ -20,6 +20,8 @@ export const useNostrStore = defineStore("nostr", {
     state: () => {
         return {
             user: null,
+            follows: [],
+            followsEvents: [],
             noteEvents: [],
             note: {},
             selectedEvent: null,
@@ -107,8 +109,8 @@ export const useNostrStore = defineStore("nostr", {
                     await ndk.connect();
                     console.log("NDK Connected..");
 
-                    const resp = await this.fetchUser(user.npub);
-                    if (resp) {
+                    await this.fetchUser(user.npub);
+                    if (this.user) {
                         setLoginStatus(true);
                         toggleModal(false);
                     }
@@ -121,12 +123,35 @@ export const useNostrStore = defineStore("nostr", {
         async fetchUser(npub) {
             try {
                 const user = ndk.getUser({ npub });
-                // let profile = await user.fetchProfile();
                 return (this.user = user);
             } catch (error) {
                 console.error("Error fetching user:", error);
                 throw error;
             }
+        },
+        async fetchUserFollows() {
+            const filter = {
+                kinds: [3], // Kind 3 represents follows
+                authors: [this.user?.hexpubkey]
+            };
+            const events = await ndk.fetchEvents(filter);
+            const eventsArray = Array.from(events);
+            this.follows = eventsArray.map(event => event.tags?.map(tag => tag[1]))?.flat();
+        },
+        async fetchFollowsEvents() {
+            await this.fetchUserFollows();
+            for (const author of this.follows) {
+                const filter = { kinds: [30023], authors: [author] }; // Kind 30023 is a public long-form note
+                const events = await ndk.fetchEvents(filter);
+                const eventsArray = Array.from(events);
+
+                for (const event of eventsArray) {
+                    const mappedEvent = this.createMappedEvent(event);
+                    this.followsEvents.push(mappedEvent);
+                }
+            }
+            console.log(this.followsEvents);
+
         },
         async fetchEvents(settings) {
             this.isFetchingEvents = true;
@@ -139,7 +164,6 @@ export const useNostrStore = defineStore("nostr", {
                     const mappedEvent = this.createMappedEvent(event);
                     await this.processNoteEvent(mappedEvent);
                 }
-                // this.sortNoteEventsByDateTag();
                 for (const event of noteEventsCopy) {
                     this.filterToLatestNotes(event);
                 }
@@ -161,7 +185,6 @@ export const useNostrStore = defineStore("nostr", {
                     if (this.isFetchingEvents) return;
                     const mappedEvent = this.createMappedEvent(e);
                     await this.processNoteEvent(mappedEvent);
-                    // this.sortNoteEventsByDateTag();
                     for (const event of noteEventsCopy) {
                         this.filterToLatestNotes(event);
                     }
@@ -239,29 +262,6 @@ export const useNostrStore = defineStore("nostr", {
             } finally {
                 this.isPublishingEvent = false;
             }
-        },
-        sortNoteEventsByDateTag() {
-            const noteEventsCopy = JSON.parse(JSON.stringify(this.noteEvents));
-            for (const event of noteEventsCopy) {
-                this.filterToLatestNotes(event);
-            }
-            // this.noteEvents.sort((a, b) => {
-            //     // Extract date strings from tags
-            //     const dateATag = a.tags.find((tag) => tag[0] === "d");
-            //     const dateBTag = b.tags.find((tag) => tag[0] === "d");
-            //
-            //     // Try parsing the dates, invalid dates will become 'Invalid Date'
-            //     const dateA = a.created_at ? a.created_at : NaN;
-            //     const dateB = b.created_at ? b.created_at : NaN;
-            //
-            //     // Handle invalid dates by considering them as the largest possible date
-            //     // this ensures they are pushed to the end of the sorted array
-            //     if (isNaN(dateA)) return 1; // a goes after b
-            //     if (isNaN(dateB)) return -1; // a goes before b
-            //
-            //     // Compare valid dates in descending order
-            //     return dateB - dateA;
-            // });
         },
         async handleCreateUpdate(note, isUpdate) {
             // if update, get prevNote and if create, set as null
