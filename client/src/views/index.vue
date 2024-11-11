@@ -116,9 +116,8 @@ export default {
                 try {
                     await nostrStore.fetchFollowsEvents();
                 } catch (error) {
-                    console.error("Error fetching events:", error);
+                    console.error("Error fetching follows events:", error);
                 }
-
 
                 // try {
                 //     await nostrStore.subscribeToEvents(settings);
