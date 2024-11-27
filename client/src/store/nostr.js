@@ -136,10 +136,10 @@ export const useNostrStore = defineStore("nostr", {
             };
             const events = await ndk.fetchEvents(filter);
             const eventsArray = Array.from(events);
-            this.follows = eventsArray.map(event => event.tags?.map(tag => tag[1]))?.flat();
+            return eventsArray.map(event => event.tags?.map(tag => tag[1]))?.flat();
         },
         async fetchFollowsEvents() {
-            await this.fetchUserFollows();
+            this.follows = await this.fetchUserFollows();
             for (const author of this.follows) {
                 const filter = { kinds: [30023], authors: [author] }; // Kind 30023 is a public long-form note
                 const events = await ndk.fetchEvents(filter);
@@ -147,11 +147,12 @@ export const useNostrStore = defineStore("nostr", {
 
                 for (const event of eventsArray) {
                     const mappedEvent = this.createMappedEvent(event);
-                    this.followsEvents.push(mappedEvent);
+                    const existingEventIndex = this.followsEvents.findIndex((e) => e.id === mappedEvent.id);
+                    if (existingEventIndex === -1) {
+                        this.followsEvents.push(mappedEvent);
+                    } 
                 }
             }
-            console.log(this.followsEvents);
-
         },
         async fetchEvents(settings) {
             this.isFetchingEvents = true;
@@ -164,7 +165,7 @@ export const useNostrStore = defineStore("nostr", {
                     const mappedEvent = this.createMappedEvent(event);
                     await this.processNoteEvent(mappedEvent);
                 }
-                for (const event of noteEventsCopy) {
+                for (const event of this.noteEvents) {
                     this.filterToLatestNotes(event);
                 }
             } catch (error) {
@@ -185,7 +186,7 @@ export const useNostrStore = defineStore("nostr", {
                     if (this.isFetchingEvents) return;
                     const mappedEvent = this.createMappedEvent(e);
                     await this.processNoteEvent(mappedEvent);
-                    for (const event of noteEventsCopy) {
+                    for (const event of this.noteEvents) {
                         this.filterToLatestNotes(event);
                     }
                 });

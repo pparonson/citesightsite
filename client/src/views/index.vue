@@ -75,7 +75,7 @@ export default {
         const nostrStore = useNostrStore();
         const annotationStore = useAnnotationStore();
         const authStore = useAuthStore();
-        const { user, noteEvents, isFetchingEvents, missingEncryptionKey, missingOptionalCredentials } =
+        const { user, noteEvents, followsEvents, isFetchingEvents, missingEncryptionKey, missingOptionalCredentials } =
             storeToRefs(nostrStore);
         const { annotations } = storeToRefs(annotationStore);
         const { isLoggedIn } = storeToRefs(authStore);
