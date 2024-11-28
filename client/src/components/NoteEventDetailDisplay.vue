@@ -81,13 +81,13 @@
             const event = ref(null);
             const formatDate = (event) => {
                 let datetime = "Invalid date";
-                if (event['created_at']) {
+                if (event?.['created_at']) {
                     datetime = new Date(event.created_at * 1000).toLocaleString();
                 }  
-                if (event.created) {
+                if (event?.created) {
                     datetime = new Date(event.created).toLocaleString(); 
                 } 
-                if (event.updated) {
+                if (event?.updated) {
                     datetime = new Date(event.updated).toLocaleString(); 
                 } 
                 return datetime;

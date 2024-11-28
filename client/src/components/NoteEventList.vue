@@ -26,7 +26,16 @@
                 default: () => [],
                 validator(value) {
                     return value.every(
-                        (noteEvent) => noteEvent.hasOwnProperty("id") && noteEvent.hasOwnProperty("content")
+                        (event) => event.hasOwnProperty("id") && event.hasOwnProperty("content")
+                    );
+                },
+            },
+            followsEvents: {
+                type: Array,
+                default: () => [],
+                validator(value) {
+                    return value.every(
+                        (event) => event.hasOwnProperty("id") && event.hasOwnProperty("content")
                     );
                 },
             },
@@ -44,6 +53,9 @@
             const nostrStore = useNostrStore();
             const { selectedEvent } = storeToRefs(nostrStore);
             const combinedEvents = computed(() => {
+                // props.followsEvents.forEach(event => {
+                //     console.log(`follows event: ${JSON.stringify(event, null, 2)}`);
+                // });
                 const mappedAnnotations = props.annotations.map(annotation => ({
                     ...annotation,
                     type: 'annotation',
@@ -55,9 +67,14 @@
                     ...noteEvent,
                     type: 'noteEvent',
                 }));
+                
+                const mappedFollowsEvents = props.followsEvents.map(event => ({
+                    ...event,
+                    type: 'followsEvent',
+                }));
 
                 // Combine and remove duplicates based on id
-                const uniqueEvents = [...mappedNoteEvents, ...mappedAnnotations].reduce((acc, current) => {
+                const uniqueEvents = [...mappedNoteEvents, ...mappedAnnotations, ...mappedFollowsEvents].reduce((acc, current) => {
                     const x = acc.find(item => item.id === current.id);
                     if (!x) {
                         return acc.concat([current]);

@@ -6,6 +6,7 @@
                 <NoteEventList
                     :noteEvents="filteredNoteEvents"
                     :annotations="filteredAnnotations"
+                    :followsEvents="filteredFollowsEvents"
                 />
             </div>
         </div>
@@ -113,6 +114,12 @@ export default {
                     console.error("Error fetching events:", error);
                 }
 
+                // try {
+                //     await annotationStore.fetchAllAnnotations();
+                // } catch (error) {
+                //     console.error(`Failed to fetch annotations: ${error}`);
+                // }
+                
                 try {
                     await nostrStore.fetchFollowsEvents();
                 } catch (error) {
@@ -124,12 +131,6 @@ export default {
                 // } catch (error) {
                 //     console.error("Error subscribing to events:", error);
                 // }
-
-                try {
-                    await annotationStore.fetchAllAnnotations();
-                } catch (error) {
-                    console.error(`Failed to fetch annotations: ${error}`);
-                }
             }
         };
 
@@ -163,7 +164,7 @@ export default {
                 });
             }
         });
-
+        
         const filteredAnnotations = computed(() => {
             const { term, scope } = searchParams.value;
             if (!term) {
@@ -191,9 +192,41 @@ export default {
             });
         });
 
+        const filteredFollowsEvents = computed(() => {
+            const { term, scope } = searchParams.value;
+            if (!term) {
+                return followsEvents.value;
+            } else {
+                const lowercasedTerm = term.toLowerCase();
+
+                return followsEvents.value.filter((event) => {
+                    const contentMatch = event.content
+                        ?.toLowerCase()
+                        .includes(lowercasedTerm);
+                    // Get tags of type 't' for this note event
+                    const tags = (event.tags || [])
+                        .filter((tag) => tag[0] === "t")
+                        .map((tag) => tag[1].toLowerCase());
+
+                    // Perform different comparisons based on search scope
+                    switch (scope) {
+                        case "all":
+                            return (contentMatch || tags.includes(lowercasedTerm));
+                        case "onlyNotes":
+                            return contentMatch;
+                        case "tags":
+                            return tags.includes(lowercasedTerm);
+                        default:
+                            return false;
+                    }
+                });
+            }
+        });
+
         return {
             filterEvents,
             filteredNoteEvents,
+            filteredFollowsEvents,
             filteredAnnotations,
             isLoggedIn,
             isFetchingEvents,

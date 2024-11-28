@@ -68,6 +68,7 @@
                 "bg-gray-100": !isSelected.value,
                 "border-l-4": true,
                 "border-green-500": props.event.type === 'noteEvent',
+                "border-purple-500": props.event.type === 'followsEvent',
                 "border-orange-500": props.event.type === 'annotation',
             }));
 
