@@ -112,7 +112,7 @@
                 return result;
             };
             const handleDoubleClick = () => {
-                if (event.value?.id) {
+                if (event.value?.id && event.value?.kind === 30024) {
                     router.push(`/note/${event.value.id}`);
                 }
             };
