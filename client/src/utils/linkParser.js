@@ -9,12 +9,18 @@ export function parseLinks(content, checkIfEventExists) {
         const existingEvent = checkIfEventExists(eventId);
         const eventType = (existingEvent?.id && existingEvent?.group) ? 
             'annotation' : 
-            (existingEvent?.id && existingEvent?.kind) ? 
-            'noteEvent' : '';
+            (existingEvent?.id && existingEvent?.kind === 30024) ? 
+            'noteEvent' : 
+            (existingEvent?.id && existingEvent?.kind === 30023) ? 
+            'followsEvent' : 
+            '';
         const linkClass = (existingEvent?.id && existingEvent?.group) ? 
             'annotation-event-link' : 
-            (existingEvent?.id && existingEvent?.kind) ? 
-            'note-event-link' : 'broken-event-link';
+            (existingEvent?.id && existingEvent?.kind === 30024) ? 
+            'note-event-link' : 
+            (existingEvent?.id && existingEvent?.kind === 30023) ?
+            'follows-event-link' :
+            'broken-event-link';
         return `<a class="${linkClass} internal-link" href="#" data-event-id="${eventId}" data-event-type="${eventType}" data-event-title="${eventTitle}">
             ${eventTitle}</a>`;
     });

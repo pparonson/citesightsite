@@ -74,7 +74,7 @@
             const nostrStore = useNostrStore();
             const router = useRouter();
             const { annotations } = storeToRefs(annotationStore);
-            const { selectedEvent, noteEvents } = storeToRefs(nostrStore);
+            const { selectedEvent, noteEvents, followsEvents } = storeToRefs(nostrStore);
             const md = new MarkdownIt();
             const noteTitle = ref("");
             const renderedContent = ref("");
@@ -97,6 +97,12 @@
                 result = noteEvents.value.find(event => {
                     return event.id === eventId;
                 });
+
+                if (!result) {
+                    result = followsEvents.value.find(event => {
+                        return event.id === eventId;
+                    });
+                }
 
                 if (!result) {
                     result = annotations.value.find(event => {
@@ -176,6 +182,9 @@
     }
     .note-event-link {
         @apply text-green-500 hover:text-green-300 italic underline;
+    }
+    .follows-event-link {
+        @apply text-purple-500 hover:text-purple-300 italic underline;
     }
     .broken-event-link {
         @apply text-red-600 hover:text-red-300 italic underline line-through;
