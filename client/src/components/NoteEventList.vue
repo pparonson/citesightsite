@@ -53,22 +53,19 @@
             const nostrStore = useNostrStore();
             const { selectedEvent } = storeToRefs(nostrStore);
             const combinedEvents = computed(() => {
-                // props.followsEvents.forEach(event => {
-                //     console.log(`follows event: ${JSON.stringify(event, null, 2)}`);
-                // });
-                const mappedAnnotations = props.annotations.map(annotation => ({
+                const mappedAnnotations = props?.annotations?.map(annotation => ({
                     ...annotation,
                     type: 'annotation',
-                    content: annotation.text,
-                    tags: annotation.tags.map(tag => ['t', tag]),
+                    content: annotation?.text,
+                    tags: annotation?.tags?.map(tag => ['t', tag]),
                 }));
 
-                const mappedNoteEvents = props.noteEvents.map(noteEvent => ({
+                const mappedNoteEvents = props?.noteEvents?.map(noteEvent => ({
                     ...noteEvent,
                     type: 'noteEvent',
                 }));
                 
-                const mappedFollowsEvents = props.followsEvents.map(event => ({
+                const mappedFollowsEvents = props?.followsEvents?.map(event => ({
                     ...event,
                     type: 'followsEvent',
                 }));

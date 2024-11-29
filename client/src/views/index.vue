@@ -155,7 +155,7 @@ export default {
                             return tags.length > 0;
                         });
                     default:
-                        return noteEvents.value;
+                        return [];
                 }
             } else {
                 const lowercasedTerm = term.toLowerCase();
@@ -178,7 +178,7 @@ export default {
                         case "tags":
                             return tags.includes(lowercasedTerm);
                         default:
-                            return false;
+                            return [];
                     }
                 });
             }
@@ -198,7 +198,7 @@ export default {
                     case "onlyAnnotations":
                         return annotations.value;
                     default:
-                        return annotations.value;
+                        return [];
                 }
             }
             const lowercasedTerm = term.toLowerCase();
@@ -218,7 +218,7 @@ export default {
                     case "onlyAnnotations":
                         return contentMatch || tags.includes(lowercasedTerm);
                     default:
-                        return contentMatch;
+                        return [];
                 }
             });
         });
@@ -239,7 +239,7 @@ export default {
                             return tags.length > 0;
                         });
                     default:
-                        return followsEvents.value;
+                        return [];
                 }
             } else {
                 const lowercasedTerm = term.toLowerCase();
@@ -262,7 +262,7 @@ export default {
                         case "tags":
                             return tags.includes(lowercasedTerm);
                         default:
-                            return false;
+                            return [];
                     }
                 });
             }
