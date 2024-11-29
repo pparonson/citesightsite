@@ -108,29 +108,34 @@ export default {
             if (isLoggedIn.value) {
                 const settings = { kinds: [kind] };
 
-                try {
-                    await nostrStore.fetchEvents(settings);
-                } catch (error) {
-                    console.error("Error fetching events:", error);
-                }
-                
-                try {
-                    await nostrStore.fetchFollowsEvents();
-                } catch (error) {
-                    console.error("Error fetching follows events:", error);
-                }
+                // Wrapper function to log errors separately
+                const safeFetch = (promise) => 
+                    promise.catch(error => ({ error }));
 
-                try {
-                    await annotationStore.fetchAllAnnotations();
-                } catch (error) {
-                    console.error(`Failed to fetch annotations: ${error}`);
+                const fetchResults = await Promise.allSettled([
+                    safeFetch(nostrStore.fetchEvents(settings)),
+                    safeFetch(nostrStore.fetchFollowsEvents()),
+                    safeFetch(annotationStore.fetchAllAnnotations()),
+                ]);
+
+                // Handle individual results
+                fetchResults.forEach((result, index) => {
+                    if (result.status === 'rejected') {
+                        const errorMessages = [
+                            "Error fetching note events",
+                            "Error fetching follows events",
+                            "Error fetching annotations",
+                        ];
+                        console.error(`${errorMessages[index]}:`, result.reason ? result.reason : result.error);
+                    }
+                });
+
+                const allFulfilled = fetchResults.every(result => result.status === 'fulfilled');
+                if (allFulfilled) {
+                    console.log("All fetch operations completed successfully.");
+                } else {
+                    console.log("One or more fetch operations encountered errors, handled individually.");
                 }
-                
-                // try {
-                //     await nostrStore.subscribeToEvents(settings);
-                // } catch (error) {
-                //     console.error("Error subscribing to events:", error);
-                // }
             }
         };
 
