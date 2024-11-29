@@ -1,5 +1,5 @@
 <template>
-    <div class="h-full p-2 my-1 bg-gray-100 rounded-md overflow-y-auto" 
+    <div :class="eventClasses" class="h-full p-2 my-1 bg-gray-100 rounded-md overflow-y-auto" 
         @dblclick="handleDoubleClick" 
         @click="handleClick"
         >
@@ -69,7 +69,7 @@
         components: {
             Tags,
         },
-        setup(props) {
+        setup() {
             const annotationStore = useAnnotationStore();
             const nostrStore = useNostrStore();
             const router = useRouter();
@@ -92,6 +92,7 @@
                 } 
                 return datetime;
             };
+
             const checkIfEventExists = (eventId) => {
                 let result;
                 result = noteEvents.value.find(event => {
@@ -111,11 +112,13 @@
                 }
                 return result;
             };
+
             const handleDoubleClick = () => {
                 if (event.value?.id && event.value?.kind === 30024) {
                     router.push(`/note/${event.value.id}`);
                 }
             };
+
             const handleClick = (event) => {
                 if (event.target.matches('.internal-link')) {
                     event.preventDefault();
@@ -126,7 +129,9 @@
                     }
                 }
             };
+
             const isAnnotation = computed(() => event.value?.type === "annotation");
+
             const displayedTitle = computed(() => {
                 if (isAnnotation.value) {
                     return event.value.document?.title[0] || "Untitled Annotation";
@@ -135,6 +140,7 @@
                     return titleTag ? titleTag[1] : "Unknown Title";
                 }
             });
+
             const displayedTags = computed(() => {
                 if (isAnnotation.value) {
                     return event.value.tags || [];
@@ -142,6 +148,13 @@
                     return event.value?.tags || [];
                 }
             });
+
+            let eventClasses = computed(() => ({
+                "border-l-4": true,
+                "border-green-500": event?.value?.type === 'noteEvent',
+                "border-purple-500": event?.value?.type === 'followsEvent',
+                "border-orange-500": event?.value?.type === 'annotation',
+            }));
 
             const updateRenderedContent = () => {
                 const content = isAnnotation.value ? event.value.text : (event.value?.content || "");
@@ -164,6 +177,7 @@
                 noteTitle,
                 renderedContent,
                 event,
+                eventClasses,
                 handleDoubleClick,
                 handleClick,
                 isAnnotation,

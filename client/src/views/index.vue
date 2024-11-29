@@ -113,12 +113,6 @@ export default {
                 } catch (error) {
                     console.error("Error fetching events:", error);
                 }
-
-                // try {
-                //     await annotationStore.fetchAllAnnotations();
-                // } catch (error) {
-                //     console.error(`Failed to fetch annotations: ${error}`);
-                // }
                 
                 try {
                     await nostrStore.fetchFollowsEvents();
@@ -126,6 +120,12 @@ export default {
                     console.error("Error fetching follows events:", error);
                 }
 
+                try {
+                    await annotationStore.fetchAllAnnotations();
+                } catch (error) {
+                    console.error(`Failed to fetch annotations: ${error}`);
+                }
+                
                 // try {
                 //     await nostrStore.subscribeToEvents(settings);
                 // } catch (error) {
@@ -136,8 +136,22 @@ export default {
 
         const filteredNoteEvents = computed(() => {
             const { term, scope } = searchParams.value;
-            if (!term) {
-                return noteEvents.value;
+            if (!term && scope) {
+                switch (scope) {
+                    case "all":
+                        return noteEvents.value;
+                    case "onlyNotes":
+                        return noteEvents.value;
+                    case "tags":
+                        return noteEvents.value.filter((noteEvent) => {
+                            const tags = (noteEvent.tags || [])
+                                .filter((tag) => tag[0] === "t")
+                                .map((tag) => tag[1].toLowerCase());
+                            return tags.length > 0;
+                        });
+                    default:
+                        return noteEvents.value;
+                }
             } else {
                 const lowercasedTerm = term.toLowerCase();
 
@@ -167,8 +181,20 @@ export default {
         
         const filteredAnnotations = computed(() => {
             const { term, scope } = searchParams.value;
-            if (!term) {
-                return annotations.value;
+            if (!term && scope) {
+                switch (scope) {
+                    case "all":
+                        return annotations.value;
+                    case "tags":
+                        return annotations.value.filter((annotation) => {
+                            const tags = (annotation.tags || []).map(tag => tag.toLowerCase());
+                            return tags.length > 0;
+                        });
+                    case "onlyAnnotations":
+                        return annotations.value;
+                    default:
+                        return annotations.value;
+                }
             }
             const lowercasedTerm = term.toLowerCase();
             return annotations.value.filter((annotation) => {
@@ -194,8 +220,22 @@ export default {
 
         const filteredFollowsEvents = computed(() => {
             const { term, scope } = searchParams.value;
-            if (!term) {
-                return followsEvents.value;
+            if (!term && scope) {
+                switch (scope) {
+                    case "all":
+                        return followsEvents.value;
+                    case "onlyFollows":
+                        return followsEvents.value;
+                    case "tags":
+                        return followsEvents.value.filter((event) => {
+                            const tags = (event.tags || [])
+                                .filter((tag) => tag[0] === "t")
+                                .map((tag) => tag[1].toLowerCase());
+                            return tags.length > 0;
+                        });
+                    default:
+                        return followsEvents.value;
+                }
             } else {
                 const lowercasedTerm = term.toLowerCase();
 
@@ -212,7 +252,7 @@ export default {
                     switch (scope) {
                         case "all":
                             return (contentMatch || tags.includes(lowercasedTerm));
-                        case "onlyNotes":
+                        case "onlyFollows":
                             return contentMatch;
                         case "tags":
                             return tags.includes(lowercasedTerm);

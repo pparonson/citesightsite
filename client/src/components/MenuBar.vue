@@ -7,10 +7,12 @@
         <select 
             v-if="!isSettingsRoute"
             v-model="searchScope" 
+            @change="onChange"
             class="select select-bordered select-sm w-3/12 h-10 rounded-md focus:outline-none focus:border-blue-300">
             <option value="all">All</option>
             <option value="tags">Tags</option>
             <option value="onlyNotes">Notes</option>
+            <option value="onlyFollows">Follows</option>
             <option value="onlyAnnotations">Annotations</option>
 
         </select>
@@ -53,8 +55,11 @@
                 return router.currentRoute.value.name.toLowerCase() === 'settings';
             });
 
+            const onChange = () => {
+                emit("search", { term: searchTerm.value, scope: searchScope.value });
+            };
+
             const onInput = debounce(() => {
-                // emit("search", searchTerm.value);
                 emit("search", { term: searchTerm.value, scope: searchScope.value });
             }, 300);
 
@@ -67,6 +72,7 @@
                 searchScope,
                 isSettingsRoute,
                 onInput,
+                onChange,
                 createNewNote,
             };
         },
