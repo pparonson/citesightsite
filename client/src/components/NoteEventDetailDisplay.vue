@@ -4,7 +4,7 @@
         @click="handleClick"
         >
         <Tags :tags="displayedTags" />
-        <div class="text-xl font-bold mb-2">{{ displayedTitle }}</div>
+        <!-- <div class="text-xl font-bold mb-2">{{ displayedTitle ? displayedTitle : "No title" }}</div> -->
         
         <p v-if="isAnnotation" class="text-sm mb-2">
             <strong>URI:  </strong> 
@@ -134,10 +134,12 @@
 
             const displayedTitle = computed(() => {
                 if (isAnnotation.value) {
-                    return event.value.document?.title[0] || "Untitled Annotation";
+                    // return event.value.document?.title[0] || "Untitled Annotation";
+                    return event?.value?.document?.title[0];
                 } else {
                     const titleTag = event.value?.tags?.find(([key]) => key === "title");
-                    return titleTag ? titleTag[1] : "Unknown Title";
+                    // return titleTag ? titleTag?.[1] : "Unknown Title";
+                    return titleTag?.[1];
                 }
             });
 
