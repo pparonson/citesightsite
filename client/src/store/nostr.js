@@ -193,7 +193,7 @@ export const useNostrStore = defineStore("nostr", {
 
                 subscription.on("error", (error) => {
                     console.error("Error: Subscription to note events failed:", error);
-                    this.fetchEvents(settings);
+                    // this.fetchEvents(settings);
                 });
             } catch (error) {
                 console.error("Error subscribing to events:", error);

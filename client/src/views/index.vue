@@ -85,97 +85,69 @@ export default {
             searchParams.value = params;
         };
 
-        // onMounted(async () => {
-        //     try {
-        //         await fetchAnnotationsAndEvents();
-        //     } catch (error) {
-        //         console.error(
-        //             `Error: Failed to fetch annotations and events on mount: ${error}`
-        //         );
-        //     }
-        // });
+        onMounted(async () => {
+            try {
+                await fetchAnnotationsAndEvents();
+            } catch (error) {
+                console.error(
+                    `Error: Failed to fetch annotations and events on mount: ${error}`
+                );
+            }
+        });
 
-        watch(
-            () => isLoggedIn.value,
-            async () => {
-                if (isLoggedIn.value) {
-                    try {
-                        await fetchAnnotationsAndEvents();
-                    } catch (error) {
-                        console.error(
-                            `Error: Failed to fetch annotations and events on login: ${error}`
-                        );
-                    }
-                }
-            },
-            { immediate: true }
-
-        );
+        // watch(
+        //     () => isLoggedIn.value,
+        //     async () => {
+        //         if (isLoggedIn.value) {
+        //             try {
+        //                 await fetchAnnotationsAndEvents();
+        //             } catch (error) {
+        //                 console.error(
+        //                     `Error: Failed to fetch annotations and events on login: ${error}`
+        //                 );
+        //             }
+        //         }
+        //     },
+        //     { immediate: true }
+        //
+        // );
 
         const fetchAnnotationsAndEvents = async () => {
             if (isLoggedIn.value) {
                 const settings = { kinds: [kind] };
 
-                try {
-                    await nostrStore.fetchEvents(settings);
-                } catch (error) {
-                    console.error("Error fetching events:", error);
-                }
-                
-                // try {
-                //     await nostrStore.fetchFollowsEvents();
-                // } catch (error) {
-                //     console.error("Error fetching follows events:", error);
-                // }
+                // Wrapper function to log errors separately
+                const safeFetch = (promise) => 
+                    promise.catch(error => ({ error }));
 
-                // try {
-                //     await annotationStore.fetchAllAnnotations();
-                // } catch (error) {
-                //     console.error(`Failed to fetch annotations: ${error}`);
-                // }
-                
-                // try {
-                //     await nostrStore.subscribeToEvents(settings);
-                // } catch (error) {
-                //     console.error("Error subscribing to events:", error);
-                // }
+                const fetchResults = await Promise.allSettled([
+                    safeFetch(nostrStore.fetchEvents(settings)),
+                    safeFetch(nostrStore.fetchFollowsEvents()),
+                    safeFetch(annotationStore.fetchAllAnnotations()),
+                    safeFetch(nostrStore.subscribeToEvents(settings)),
+                ]);
+
+                // Handle individual results
+                fetchResults.forEach((result, index) => {
+                    if (result.status === 'rejected') {
+                        const errorMessages = [
+                            "Error fetching note events",
+                            "Error fetching follows events",
+                            "Error fetching annotations",
+                            "Error subscribing to note events",
+                        ];
+                        console.error(`${errorMessages[index]}:`, result.reason ? result.reason : result.error);
+                    }
+                });
+
+                const allFulfilled = fetchResults.every(result => result.status === 'fulfilled');
+                if (allFulfilled) {
+                    console.log("All fetch and subscriber operations completed successfully.");
+                } else {
+                    console.log("One or more fetch/subscriber operations encountered errors, handled individually.");
+                }
             }
         };
-
-        // const fetchAnnotationsAndEvents = async () => {
-        //     if (isLoggedIn.value) {
-        //         const settings = { kinds: [kind] };
-        //
-        //         // Wrapper function to log errors separately
-        //         const safeFetch = (promise) => 
-        //             promise.catch(error => ({ error }));
-        //
-        //         const fetchResults = await Promise.allSettled([
-        //             safeFetch(nostrStore.fetchEvents(settings)),
-        //             safeFetch(nostrStore.fetchFollowsEvents()),
-        //             safeFetch(annotationStore.fetchAllAnnotations()),
-        //         ]);
-        //
-        //         // Handle individual results
-        //         fetchResults.forEach((result, index) => {
-        //             if (result.status === 'rejected') {
-        //                 const errorMessages = [
-        //                     "Error fetching note events",
-        //                     "Error fetching follows events",
-        //                     "Error fetching annotations",
-        //                 ];
-        //                 console.error(`${errorMessages[index]}:`, result.reason ? result.reason : result.error);
-        //             }
-        //         });
-        //
-        //         const allFulfilled = fetchResults.every(result => result.status === 'fulfilled');
-        //         if (allFulfilled) {
-        //             console.log("All fetch operations completed successfully.");
-        //         } else {
-        //             console.log("One or more fetch operations encountered errors, handled individually.");
-        //         }
-        //     }
-        // };
 
         const filteredNoteEvents = computed(() => {
             const { term, scope } = searchParams.value;
