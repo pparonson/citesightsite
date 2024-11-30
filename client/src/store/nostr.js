@@ -348,9 +348,11 @@ export const useNostrStore = defineStore("nostr", {
                 if (existingVersionTag && incomingVersionTag && existingVersionTag[1] < incomingVersionTag[1]) {
                     // Incoming event is newer. Update the existing event with new data.
                     this.noteEvents[existingEventIndex] = event;
+                    this.setSelectedEvent(event);
                 }
             } else {
                 this.noteEvents.push(event);
+                this.setSelectedEvent(event);
             }
 
             return event;

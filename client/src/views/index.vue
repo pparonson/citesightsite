@@ -95,22 +95,22 @@ export default {
             }
         });
 
-        // watch(
-        //     () => isLoggedIn.value,
-        //     async () => {
-        //         if (isLoggedIn.value) {
-        //             try {
-        //                 await fetchAnnotationsAndEvents();
-        //             } catch (error) {
-        //                 console.error(
-        //                     `Error: Failed to fetch annotations and events on login: ${error}`
-        //                 );
-        //             }
-        //         }
-        //     },
-        //     { immediate: true }
-        //
-        // );
+        watch(
+            () => isLoggedIn.value,
+            async () => {
+                if (isLoggedIn.value) {
+                    try {
+                        await fetchAnnotationsAndEvents();
+                    } catch (error) {
+                        console.error(
+                            `Error: Failed to fetch annotations and events on login: ${error}`
+                        );
+                    }
+                }
+            },
+            { immediate: true }
+
+        );
 
         const fetchAnnotationsAndEvents = async () => {
             if (isLoggedIn.value) {
