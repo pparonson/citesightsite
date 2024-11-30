@@ -48,7 +48,7 @@
     import { EditorState } from "@codemirror/state";
     import { EditorView, keymap, drawSelection, lineNumbers } from "@codemirror/view"
     import { defaultKeymap, history, undo, redo } from "@codemirror/commands"
-    import { vim } from "@replit/codemirror-vim"
+    import { vim, Vim } from "@replit/codemirror-vim";
     import config from "./../../config/config.js";
 
     export default {
@@ -104,6 +104,11 @@
                     editorView = new EditorView({
                         state: startState,
                         parent: editorRef.value,
+                    });
+
+                    // Define custom Vim commands
+                    Vim.defineEx('write', 'w', () => {
+                      handleSave();
                     });
                 }
             };
