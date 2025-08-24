@@ -5,24 +5,44 @@
         <!-- <link rel="icon" href="/favicon.ico" /> -->
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>PenItIn</title>
-        <!-- Add window.nostr.js for NIP-46 support -->
-        <script src="https://cdn.jsdelivr.net/npm/window.nostr.js/dist/window.nostr.min.js"></script>
         <!-- Configure window.nostr.js -->
         <script>
             window.wnParams = {
-                position: 'bottom',
-                accent: 'green',
-                startHidden: false,  // Make it visible by default
-                compactMode: false   // Use full mode for better visibility
-            }
-            
-            // Check if window.nostr.js is loaded correctly
+                position: 'top',
+                accent: 'purple',
+                startHidden: false,
+                compactMode: false
+            };
+        </script>
+        
+        <!-- Add window.nostr.js for NIP-46 support -->
+        <script src="https://cdn.jsdelivr.net/npm/window.nostr.js/dist/window.nostr.min.js"></script>
+        
+        <script>
+            // Verify params after script loads
             window.addEventListener('DOMContentLoaded', () => {
                 console.log('Checking window.nostr availability:', window.nostr ? 'Available' : 'Not available');
-                if (!window.nostr) {
-                    console.warn('window.nostr is not available. Attempting to initialize manually...');
-                    // Try to initialize manually if needed
-                }
+                console.log('Current wnParams after script load:', window.wnParams);
+                
+                // Try to manually update the UI if the widget exists
+                setTimeout(() => {
+                    const widgetElement = document.querySelector('.window-nostr-widget');
+                    if (widgetElement) {
+                        console.log('Found widget element, attempting to apply styles');
+                        // Try to force the position and color
+                        if (window.wnParams.position === 'top') {
+                            widgetElement.style.top = '0';
+                            widgetElement.style.bottom = 'auto';
+                        }
+                        // Try to apply the accent color
+                        const buttons = widgetElement.querySelectorAll('button');
+                        buttons.forEach(button => {
+                            button.style.backgroundColor = 'purple';
+                        });
+                    } else {
+                        console.warn('Widget element not found');
+                    }
+                }, 1000);
             });
         </script>
     </head>
