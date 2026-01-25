@@ -356,21 +356,35 @@ export const useNostrStore = defineStore("nostr", {
         async processNoteEvent(event) {
             let encryptionKey = ""; 
             const userData = await useIndexedDB().get(this.user.npub);
-            if (!userData) {
-                console.warn("No user data found in IndexedDB. Cannot decrypt event.");
-                return;
+            if (!userData || !userData.encryptionKey) {
+                console.warn("No user data or encryption key found in IndexedDB. Skipping decryption.");
+                // Still process the event, but without decryption
+                // If it's encrypted, we'll show a warning message
             } else {
                 encryptionKey = userData.encryptionKey;
             }
 
             const isEncrypted = event.tags.some((tag) => tag[0] === "encrypted" && tag[1] === "1");
             if (isEncrypted) {
-                try {
-                    // Decrypt the event using NIP-44
-                    const decrypted = nip44?.v2?.decrypt(event.content, encryptionKey);
-                    event = { ...event, content: decrypted };
-                } catch (error) {
-                    console.error("Error: Failed to decrypt event content: ", error);
+                if (!encryptionKey) {
+                    // No encryption key available
+                    event = { 
+                        ...event, 
+                        content: '[Encrypted - No encryption key configured. Please set up your encryption key in settings.]'
+                    };
+                } else {
+                    try {
+                        // Decrypt the event using NIP-44
+                        const decrypted = nip44?.v2?.decrypt(event.content, encryptionKey);
+                        event = { ...event, content: decrypted };
+                    } catch (error) {
+                        console.error("Error: Failed to decrypt event content: ", error);
+                        // Decryption failed - wrong key or corrupted data
+                        event = { 
+                            ...event, 
+                            content: '[Encrypted - Unable to decrypt. Encryption key mismatch or corrupted data.]'
+                        };
+                    }
                 }
             }
 
