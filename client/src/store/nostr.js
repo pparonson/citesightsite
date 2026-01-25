@@ -119,13 +119,13 @@ export const useNostrStore = defineStore("nostr", {
             }
         },
         async fetchUserFollows() {
-            if (!this.user?.hexpubkey) {
-                console.warn("fetchUserFollows: user.hexpubkey is undefined, skipping fetch");
+            if (!this.user?.pubkey) {
+                console.warn("fetchUserFollows: user.pubkey is undefined, skipping fetch");
                 return [];
             }
             const filter = {
                 kinds: [3], // Kind 3 represents follows
-                authors: [this.user.hexpubkey]
+                authors: [this.user.pubkey]
             };
             const events = await ndk.fetchEvents(filter);
             const eventsArray = Array.from(events);
@@ -150,11 +150,11 @@ export const useNostrStore = defineStore("nostr", {
         async fetchEvents(settings) {
             this.isFetchingEvents = true;
             try {
-                if (!this.user?.hexpubkey) {
-                    console.warn("fetchEvents: user.hexpubkey is undefined, skipping fetch");
+                if (!this.user?.pubkey) {
+                    console.warn("fetchEvents: user.pubkey is undefined, skipping fetch");
                     return [];
                 }
-                const filter = { kinds: [...settings?.kinds], authors: [this.user.hexpubkey] };
+                const filter = { kinds: [...settings?.kinds], authors: [this.user.pubkey] };
                 const events = await ndk.fetchEvents(filter);
                 const eventsArray = Array.from(events);
 
@@ -175,11 +175,11 @@ export const useNostrStore = defineStore("nostr", {
         },
         async subscribeToEvents(settings) {
             try {
-                if (!this.user?.hexpubkey) {
-                    console.warn("subscribeToEvents: user.hexpubkey is undefined, skipping subscription");
+                if (!this.user?.pubkey) {
+                    console.warn("subscribeToEvents: user.pubkey is undefined, skipping subscription");
                     return;
                 }
-                const filter = { kinds: [...settings?.kinds], authors: [this.user.hexpubkey] };
+                const filter = { kinds: [...settings?.kinds], authors: [this.user.pubkey] };
                 const subscription = await ndk.subscribe(filter);
 
                 subscription.on("event", async (e) => {
@@ -257,8 +257,8 @@ export const useNostrStore = defineStore("nostr", {
             let ndkEvent = new NDKEvent(ndk, eventProperties);
             
             // Ensure the event has a valid pubkey before publishing
-            if (!ndkEvent.pubkey && this.user && this.user.hexpubkey) {
-                ndkEvent.pubkey = this.user.hexpubkey;
+            if (!ndkEvent.pubkey && this.user && this.user.pubkey) {
+                ndkEvent.pubkey = this.user.pubkey;
             }
             
             // Check if event is valid before attempting to publish
