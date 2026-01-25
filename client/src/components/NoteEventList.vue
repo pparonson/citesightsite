@@ -119,13 +119,11 @@
             });
 
             const handleEventClick = (event) => {
-                console.log("Setting selected event to", event);
                 nostrStore.setSelectedEvent(event);
             };
 
             watch(combinedEvents, (newEvents) => {
                 if (newEvents.length > 0 && !selectedEvent.value) {
-                    console.log("Setting selected event to first event in list");
                     nostrStore.setSelectedEvent(newEvents[0]);
                 }
             }, { immediate: true });

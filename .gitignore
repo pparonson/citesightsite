@@ -54,7 +54,7 @@ client/.env
 client/.cache
 client/static/sw.*
 
-// opencode
+# opencode
 AGENTS.md
 docs/
 opencode.json

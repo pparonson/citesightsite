@@ -5,7 +5,8 @@ export const useAuthStore = defineStore("auth", {
         return {
             showModal: true,
             isLoggedIn: false,
-            loginMethod: null, // https://github.com/nostrband/nostr-login
+            loginMethod: 'nostr-login', // https://github.com/nostrband/nostr-login
+            userNpub: null,
         };
     },
     actions: {
@@ -21,6 +22,15 @@ export const useAuthStore = defineStore("auth", {
         },
         setLoginStatus(status) {
             this.isLoggedIn = status;
+        },
+        setUserNpub(npub) {
+            this.userNpub = npub;
+        },
+        logout() {
+            // Dispatch nlLogout event to nostr-login
+            document.dispatchEvent(new Event("nlLogout"));
+            this.isLoggedIn = false;
+            this.userNpub = null;
         }
     },
 });

@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import NDK, { NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
+import { launch } from "nostr-login";
 import { nip44 } from "nostr-tools";
 import { useIndexedDB } from "@/utils/indexedDB";
 import { useAuthStore } from "@/store/auth";
@@ -32,75 +33,30 @@ export const useNostrStore = defineStore("nostr", {
     },
 
     actions: {
-        async initializeNDK() {
-            // localStorage.setItem("debug", "ndk:*"); // TODO: TESTING debug NDK internals
+        async initializeNDK(skipLaunch = false) {
             const authStore = useAuthStore();
             let { loginMethod, toggleModal, setLoginStatus } = authStore;
             let signer;
-            let remoteNpub;
+            
             try {
                 if (!ndk) {
                     ndk = new NDK();
                 }
+                
                 if (loginMethod === "nostr-login") {
-                    // Wait for window.nostr to be available (with timeout)
-                    const waitForNostr = async (maxWaitTime = 5000) => {
-                        console.log("Waiting for window.nostr to be available...");
-                        
-                        if (window.nostr) {
-                            console.log("window.nostr is already available");
-                            return true;
-                        }
-                        
-                        return new Promise((resolve) => {
-                            const checkInterval = 100; // Check every 100ms
-                            let elapsedTime = 0;
-                            
-                            const intervalId = setInterval(() => {
-                                elapsedTime += checkInterval;
-                                
-                                if (window.nostr) {
-                                    console.log("window.nostr became available");
-                                    clearInterval(intervalId);
-                                    resolve(true);
-                                } else if (elapsedTime >= maxWaitTime) {
-                                    console.error(`Timed out after ${maxWaitTime}ms waiting for window.nostr`);
-                                    clearInterval(intervalId);
-                                    resolve(false);
-                                }
-                            }, checkInterval);
+                    // If not skipping launch (e.g., called from LOGIN button), show the dialog
+                    // If skipLaunch is true (called from nlAuth event), user is already authenticated
+                    if (!skipLaunch) {
+                        await launch({ 
+                            startScreen: 'login-bunker-url'
                         });
-                    };
-                    
-                    // Wait for window.nostr to be available
-                    const nostrAvailable = await waitForNostr();
-                    
-                    if (nostrAvailable) {
-                        console.log("Using window.nostr for authentication");
+                    }
+
+                    // nostr-login provides window.nostr, use NDKNip07Signer
+                    if (window.nostr) {
                         signer = new NDKNip07Signer();
                     } else {
-                        console.error("No Nostr provider found. Please install a Nostr extension or enable window.nostr.js");
-                        
-                        // Try to manually trigger window.nostr.js if it's not already initialized
-                        if (typeof window.wnParams !== 'undefined') {
-                            console.log("window.wnParams is defined, attempting to manually initialize window.nostr.js");
-                            // This might help trigger window.nostr.js initialization
-                            const scriptEl = document.createElement('script');
-                            scriptEl.src = 'https://cdn.jsdelivr.net/npm/window.nostr.js/dist/window.nostr.min.js';
-                            document.head.appendChild(scriptEl);
-                            
-                            // Wait again after attempting to reinitialize
-                            const retryNostrAvailable = await waitForNostr(3000);
-                            
-                            if (retryNostrAvailable) {
-                                console.log("window.nostr became available after retry");
-                                signer = new NDKNip07Signer();
-                            } else {
-                                throw new Error('No Nostr provider found after retry');
-                            }
-                        } else {
-                            throw new Error('No Nostr provider found');
-                        }
+                        throw new Error('Nostr Login not initialized - window.nostr not available');
                     }
                 } else {
                     throw new Error(`Unsupported login method: ${loginMethod}`);
@@ -134,28 +90,21 @@ export const useNostrStore = defineStore("nostr", {
 
                     const explicitRelayUrls = userData?.relayUrls?.length ? userData.relayUrls : [];
 
-                    // Create a new NDK instance with the signer
-                    ndk = new NDK({
-                        explicitRelayUrls,
-                        signer,
+                    ndk = new NDK({ signer, explicitRelayUrls });
+                    
+                    // Don't block on connect - let it happen in background
+                    // NDK will automatically retry failed connections
+                    ndk.connect().catch((err) => {
+                        console.error("NDK connect error:", err);
                     });
-                    
-                    // Ensure the signer is properly set
-                    if (!ndk.signer) {
-                        console.error("NDK signer not properly set");
-                        ndk.signer = signer;
-                    }
-                    
-                    await ndk.connect();
-                    console.log("NDK Connected..", ndk);
 
-                    await this.fetchUser(user.npub);
-                    if (this.user) {
+                    const resp = await this.fetchUser(user.npub);
+                    if (resp) {
                         setLoginStatus(true);
                         toggleModal(false);
                     }
                 }
-            }catch (error) {
+            } catch (error) {
                 console.error("Error connecting to NDK:", error);
                 throw error;
             }
@@ -170,9 +119,13 @@ export const useNostrStore = defineStore("nostr", {
             }
         },
         async fetchUserFollows() {
+            if (!this.user?.hexpubkey) {
+                console.warn("fetchUserFollows: user.hexpubkey is undefined, skipping fetch");
+                return [];
+            }
             const filter = {
                 kinds: [3], // Kind 3 represents follows
-                authors: [this.user?.hexpubkey]
+                authors: [this.user.hexpubkey]
             };
             const events = await ndk.fetchEvents(filter);
             const eventsArray = Array.from(events);
@@ -197,7 +150,11 @@ export const useNostrStore = defineStore("nostr", {
         async fetchEvents(settings) {
             this.isFetchingEvents = true;
             try {
-                const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
+                if (!this.user?.hexpubkey) {
+                    console.warn("fetchEvents: user.hexpubkey is undefined, skipping fetch");
+                    return [];
+                }
+                const filter = { kinds: [...settings?.kinds], authors: [this.user.hexpubkey] };
                 const events = await ndk.fetchEvents(filter);
                 const eventsArray = Array.from(events);
 
@@ -218,7 +175,11 @@ export const useNostrStore = defineStore("nostr", {
         },
         async subscribeToEvents(settings) {
             try {
-                const filter = { kinds: [...settings?.kinds], authors: [this.user?.hexpubkey] };
+                if (!this.user?.hexpubkey) {
+                    console.warn("subscribeToEvents: user.hexpubkey is undefined, skipping subscription");
+                    return;
+                }
+                const filter = { kinds: [...settings?.kinds], authors: [this.user.hexpubkey] };
                 const subscription = await ndk.subscribe(filter);
 
                 subscription.on("event", async (e) => {
@@ -248,15 +209,11 @@ export const useNostrStore = defineStore("nostr", {
         },
         async fetchNoteEventById(eventId) {
             try {
-                console.log(`Attempting to fetch event with ID: ${eventId}`);
                 const event = await ndk.fetchEvent(eventId);
                 
                 if (!event) {
-                    console.error("Event not found:", eventId);
                     throw new Error(`Event not found: ${eventId}`);
                 }
-
-                console.log(`Successfully fetched event:`, event);
                 
                 let mappedEvent = {
                     id: event.id,
@@ -271,14 +228,6 @@ export const useNostrStore = defineStore("nostr", {
                 return (this.note = await this.processNoteEvent(mappedEvent));
             } catch (error) {
                 console.error("Error fetching event detail:", error);
-                
-                // More detailed error logging
-                if (error.message && error.message.includes("not found")) {
-                    console.error(`The event with ID ${eventId} could not be found. This may happen if the event was recently created and hasn't propagated to the relays yet.`);
-                } else if (error.message) {
-                    console.error(`Specific error message: ${error.message}`);
-                }
-                
                 throw error;
             }
         },
@@ -288,7 +237,7 @@ export const useNostrStore = defineStore("nostr", {
             let encryptionKey = ""; 
             const userData = await useIndexedDB().get(this.user.npub);
             if (!userData) {
-                console.log("No user data found in IndexedDB. Cannot encrypt event.");
+                console.warn("No user data found in IndexedDB. Cannot encrypt event.");
                 return;
             } else {
                 encryptionKey = userData.encryptionKey;
@@ -309,13 +258,11 @@ export const useNostrStore = defineStore("nostr", {
             
             // Ensure the event has a valid pubkey before publishing
             if (!ndkEvent.pubkey && this.user && this.user.hexpubkey) {
-                console.log("Setting pubkey on event:", this.user.hexpubkey);
                 ndkEvent.pubkey = this.user.hexpubkey;
             }
             
             // Check if event is valid before attempting to publish
             if (!ndkEvent.pubkey) {
-                console.error("Cannot publish event: Missing pubkey");
                 throw new Error("Cannot publish event: Missing pubkey. User may not be properly authenticated.");
             }
 
@@ -323,21 +270,12 @@ export const useNostrStore = defineStore("nostr", {
                 // Add timeout to prevent hanging
                 const publishPromise = ndk.publish(ndkEvent);
                 const timeoutPromise = new Promise((_, reject) => {
-                    setTimeout(() => reject(new Error("Publish operation timed out after 10 seconds")), 20000);
+                    setTimeout(() => reject(new Error("Publish operation timed out after 20 seconds")), 20000);
                 });
                 
                 await Promise.race([publishPromise, timeoutPromise]);
             } catch (error) {
                 console.error("Error publishing event:", error);
-                
-                // More detailed error logging
-                if (error.message && error.message.includes("Keys not responding")) {
-                    console.error("Nostr signer error: Keys not responding. This may be due to nsec.app not responding to signing requests.");
-                    console.error("Check if nsec.app is accessible and that you have granted the necessary permissions.");
-                } else if (error.message) {
-                    console.error(`Specific error message: ${error.message}`);
-                }
-                
                 throw error;
             } finally {
                 this.isPublishingEvent = false;
@@ -419,7 +357,7 @@ export const useNostrStore = defineStore("nostr", {
             let encryptionKey = ""; 
             const userData = await useIndexedDB().get(this.user.npub);
             if (!userData) {
-                console.log("No user data found in IndexedDB. Cannot encrypt event.");
+                console.warn("No user data found in IndexedDB. Cannot decrypt event.");
                 return;
             } else {
                 encryptionKey = userData.encryptionKey;
@@ -461,7 +399,6 @@ export const useNostrStore = defineStore("nostr", {
             }
         },
         setSelectedEvent(event) {
-            console.log("Selected event:", event);
             this.selectedEvent = event;
         }
     },
