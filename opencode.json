@@ -1,0 +1,28 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  
+  // === PROJECT-SPECIFIC INSTRUCTIONS ===
+  "instructions": [
+    "docs/project-standards.md"
+  ],
+  
+  // === PROJECT-SPECIFIC PERMISSIONS ===
+  "permission": {
+    "bash": {
+      "npm *": "allow",
+      "git *": "allow",
+      "*": "ask"
+    }
+  },
+  
+  // === PROJECT FORMATTERS ===
+  "formatter": {
+    "prettier": {
+      "options": {
+        "semi": true,
+        "singleQuote": true,
+        "tabWidth": 2
+      }
+    }
+  }
+}
