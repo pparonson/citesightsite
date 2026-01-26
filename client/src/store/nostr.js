@@ -39,10 +39,6 @@ export const useNostrStore = defineStore("nostr", {
             let signer;
             
             try {
-                if (!ndk) {
-                    ndk = new NDK();
-                }
-                
                 if (loginMethod === "nostr-login") {
                     // If not skipping launch (e.g., called from LOGIN button), show the dialog
                     // If skipLaunch is true (called from nlAuth event), user is already authenticated
@@ -254,27 +250,75 @@ export const useNostrStore = defineStore("nostr", {
             const eventProperties = await this.handleCreateUpdate({ ...note, content: encrypted }, isUpdate);
             eventProperties.tags.push(["encrypted", "1"]);
             
+            console.log("[DEBUG] Event properties:", {
+                kind: eventProperties.kind,
+                tagsCount: eventProperties.tags.length,
+                contentLength: eventProperties.content?.length,
+                hasContent: !!eventProperties.content
+            });
+            
+            console.log("[DEBUG] NDK instance check:", {
+                ndkExists: !!ndk,
+                hasSigner: !!ndk?.signer,
+                signerType: ndk?.signer?.constructor?.name,
+                signerMethods: ndk?.signer ? Object.getOwnPropertyNames(Object.getPrototypeOf(ndk.signer)) : []
+            });
+            
             let ndkEvent = new NDKEvent(ndk, eventProperties);
+            
+            console.log("[DEBUG] NDKEvent created:", {
+                hasId: !!ndkEvent.id,
+                hasSig: !!ndkEvent.sig,
+                hasPubkey: !!ndkEvent.pubkey,
+                kind: ndkEvent.kind,
+                ndkHasSigner: !!ndkEvent.ndk?.signer
+            });
             
             // Ensure the event has a valid pubkey before publishing
             if (!ndkEvent.pubkey && this.user && this.user.pubkey) {
                 ndkEvent.pubkey = this.user.pubkey;
+                console.log("[DEBUG] Set pubkey from user:", this.user.pubkey);
             }
             
             // Check if event is valid before attempting to publish
             if (!ndkEvent.pubkey) {
                 throw new Error("Cannot publish event: Missing pubkey. User may not be properly authenticated.");
             }
+            
+            console.log("[DEBUG] About to publish event:", {
+                kind: ndkEvent.kind,
+                pubkey: ndkEvent.pubkey?.substring(0, 16) + "...",
+                tagsCount: ndkEvent.tags.length,
+                hasNdk: !!ndkEvent.ndk,
+                ndkHasSigner: !!ndkEvent.ndk?.signer
+            });
+            
+            console.log("[DEBUG] Full event object being published:", {
+                kind: ndkEvent.kind,
+                created_at: ndkEvent.created_at,
+                pubkey: ndkEvent.pubkey,
+                tags: ndkEvent.tags,
+                content: ndkEvent.content?.substring(0, 50) + "...",
+                id: ndkEvent.id,
+                sig: ndkEvent.sig
+            });
 
             try {
-                // Add timeout to prevent hanging
-                const publishPromise = ndk.publish(ndkEvent);
+                // NDKEvent.publish() handles signing internally
+                // No need to call sign() separately - it causes "no permission" error
+                console.log("[DEBUG] Calling ndkEvent.publish()...");
+                const publishPromise = ndkEvent.publish();
                 const timeoutPromise = new Promise((_, reject) => {
                     setTimeout(() => reject(new Error("Publish operation timed out after 20 seconds")), 20000);
                 });
                 
                 await Promise.race([publishPromise, timeoutPromise]);
+                console.log("[DEBUG] Publish successful!");
             } catch (error) {
+                console.error("[DEBUG] Publish failed with error:", error);
+                console.error("[DEBUG] Error type:", typeof error);
+                console.error("[DEBUG] Error message:", error?.message || error);
+                console.error("[DEBUG] Error stack:", error?.stack);
                 console.error("Error publishing event:", error);
                 throw error;
             } finally {
@@ -339,6 +383,7 @@ export const useNostrStore = defineStore("nostr", {
                 kind: note.kind,
                 content: note.content,
                 tags: [...baseTags, ...specificTags, ...tags],
+                created_at: Math.floor(Date.now() / 1000),
             };
         },
         createMappedEvent(event) {
