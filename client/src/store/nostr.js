@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import NDK, { NDKNip07Signer, NDKEvent } from "@nostr-dev-kit/ndk";
 import { launch } from "nostr-login";
-import { nip44 } from "nostr-tools";
 import { useIndexedDB } from "@/utils/indexedDB";
 import { useAuthStore } from "@/store/auth";
 
@@ -230,25 +229,35 @@ export const useNostrStore = defineStore("nostr", {
         async publishEvent(note) {
             this.isPublishingEvent = true;
             let isUpdate = note.id ? true : false;
-            let encryptionKey = ""; 
-            const userData = await useIndexedDB().get(this.user.npub);
-            if (!userData) {
-                console.warn("No user data found in IndexedDB. Cannot encrypt event.");
-                return;
+
+            let content = note.content;
+            let shouldEncrypt = false;
+            
+            // Try to encrypt if NIP-44 is available
+            // This will work if the bunker has granted nip44_encrypt permission
+            if (window.nostr && window.nostr.nip44 && window.nostr.nip44.encrypt) {
+                try {
+                    console.log("[DEBUG] Attempting to encrypt content...");
+                    content = await window.nostr.nip44.encrypt(this.user.pubkey, note.content);
+                    shouldEncrypt = true;
+                    console.log("[DEBUG] Content encrypted successfully");
+                } catch (error) {
+                    console.warn("[DEBUG] Encryption failed, publishing in plaintext:", error?.message || error);
+                    console.warn("[DEBUG] To enable encryption, reconnect your bunker and grant nip44_encrypt permission");
+                    // Fall back to plaintext
+                    content = note.content;
+                    shouldEncrypt = false;
+                }
             } else {
-                encryptionKey = userData.encryptionKey;
+                console.warn("[DEBUG] NIP-44 not available, publishing in plaintext");
             }
 
-            let encrypted;
-            try {
-                // Encrypt the event using NIP-44
-                encrypted = nip44.v2.encrypt(note.content, encryptionKey);
-            } catch (error) {
-                console.error("Error: Failed to encrypt event content: ", error.message);
-            } 
-
-            const eventProperties = await this.handleCreateUpdate({ ...note, content: encrypted }, isUpdate);
-            eventProperties.tags.push(["encrypted", "1"]);
+            const eventProperties = await this.handleCreateUpdate({ ...note, content: content }, isUpdate);
+            
+            // Only add encrypted tag if we actually encrypted
+            if (shouldEncrypt) {
+                eventProperties.tags.push(["encrypted", "1"]);
+            }
             
             console.log("[DEBUG] Event properties:", {
                 kind: eventProperties.kind,
@@ -304,10 +313,11 @@ export const useNostrStore = defineStore("nostr", {
             });
 
             try {
-                // NDKEvent.publish() handles signing internally
-                // No need to call sign() separately - it causes "no permission" error
-                console.log("[DEBUG] Calling ndkEvent.publish()...");
-                const publishPromise = ndkEvent.publish();
+                // Kind 30024 is a parameterized replaceable event (range 30000-39999)
+                // According to NDK docs, replaceable events MUST use publishReplaceable()
+                // This method resets id, sig, and created_at to allow for replacement
+                console.log("[DEBUG] Calling ndkEvent.publishReplaceable() for kind 30024...");
+                const publishPromise = ndkEvent.publishReplaceable();
                 const timeoutPromise = new Promise((_, reject) => {
                     setTimeout(() => reject(new Error("Publish operation timed out after 20 seconds")), 20000);
                 });
@@ -399,37 +409,31 @@ export const useNostrStore = defineStore("nostr", {
             };
         },
         async processNoteEvent(event) {
-            let encryptionKey = ""; 
-            const userData = await useIndexedDB().get(this.user.npub);
-            if (!userData || !userData.encryptionKey) {
-                console.warn("No user data or encryption key found in IndexedDB. Skipping decryption.");
-                // Still process the event, but without decryption
-                // If it's encrypted, we'll show a warning message
-            } else {
-                encryptionKey = userData.encryptionKey;
-            }
-
             const isEncrypted = event.tags.some((tag) => tag[0] === "encrypted" && tag[1] === "1");
             if (isEncrypted) {
-                if (!encryptionKey) {
-                    // No encryption key available
-                    event = { 
-                        ...event, 
-                        content: '[Encrypted - No encryption key configured. Please set up your encryption key in settings.]'
-                    };
-                } else {
-                    try {
-                        // Decrypt the event using NIP-44
-                        const decrypted = nip44?.v2?.decrypt(event.content, encryptionKey);
+                try {
+                    // Decrypt the event using NIP-44 via the signer
+                    // This ensures we decrypt using the same method we encrypted with
+                    if (window.nostr && window.nostr.nip44 && window.nostr.nip44.decrypt) {
+                        // Decrypt from our own pubkey (we encrypted to ourselves)
+                        const decrypted = await window.nostr.nip44.decrypt(event.pubkey, event.content);
                         event = { ...event, content: decrypted };
-                    } catch (error) {
-                        console.error("Error: Failed to decrypt event content: ", error);
-                        // Decryption failed - wrong key or corrupted data
+                        console.log("[DEBUG] Content decrypted via window.nostr.nip44.decrypt");
+                    } else {
+                        console.warn("NIP-44 decryption not available via window.nostr");
                         event = { 
                             ...event, 
-                            content: '[Encrypted - Unable to decrypt. Encryption key mismatch or corrupted data.]'
+                            content: '[Encrypted - Decryption not available. Please log in with Nostr.]'
                         };
                     }
+                } catch (error) {
+                    console.error("Error: Failed to decrypt event content: ", error);
+                    // Decryption failed - this could be an old event encrypted with the previous method
+                    // or corrupted data
+                    event = { 
+                        ...event, 
+                        content: '[Encrypted with old method - Cannot decrypt. This event was encrypted before the encryption method changed. Content is unrecoverable.]'
+                    };
                 }
             }
 

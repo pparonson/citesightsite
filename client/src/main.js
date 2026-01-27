@@ -62,6 +62,12 @@ async function init() {
             bunkers: 'nsec.app',
             theme: 'ocean',
             darkMode: true,
+            // Request permissions for signing events and NIP-44 encryption/decryption
+            // - sign_event:1 - Short text notes
+            // - sign_event:30023 - Long-form content (published articles)
+            // - sign_event:30024 - Draft long-form content (private drafts)
+            // - nip44_encrypt - Encrypt content to ourselves for private notes
+            // - nip44_decrypt - Decrypt our own encrypted notes
             perms: 'sign_event:1,sign_event:30023,sign_event:30024,nip44_encrypt,nip44_decrypt',
             noBanner: true,
             startScreen: 'login-bunker-url', // Default screen when auth flow launches
